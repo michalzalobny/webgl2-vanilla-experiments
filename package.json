@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "",
   "scripts": {
-    "build": "npm run build:pre-eleventy && eleventy && cp _redirects dist/ && cp robots.txt dist/",
+    "build": "npm run build:pre-eleventy && eleventy && cp robots.txt dist/",
     "build:pre-eleventy": "npm run scss && rollup -c",
     "scss": "node scss.js",
     "watch:scss": "nodemon -e scss -x \"npm run scss\"",
