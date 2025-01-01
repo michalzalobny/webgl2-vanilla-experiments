@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {# Meta Tags #}
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#000000"/>
+        <meta name="description" content="{{ description | default('Vanilla WebGL2 Experiments by Michal Zalobny.') }}"/>
+
+        {# Title #}
+        <title>{{ title | default('Vanilla WebGL2 Experiments') }}</title>
+
+        {# Favicon and Apple Touch Icons #}
+        <link rel="icon" sizes="192x192" href="{{ faviconPath | default('https://res.cloudinary.com/dpv0ukspz/image/upload/v1735729828/gl-ico_s2bnkv.ico') }}">
+        {# <link rel="apple-touch-icon" sizes="180x180" href="{{ appleTouchIconPath | default('https://res.cloudinary.com/dpv0ukspz/image/upload/v1705874625/zaqijo0q4sxhoatkqbtg.ico') }}"> #}
+
+        {# Canonical Tag #}
+        {# <link rel="canonical" href="{{ canonicalUrl | default('https://www.michalzalobny.com') }}"> #}
+
+        {# Open Graph Tags #}
+        <meta property="og:title" content="{{ title | default('Vanilla WebGL2 Experiments') }}">
+        <meta property="og:description" content="{{ description | default('Vanilla WebGL2 Experiments by Michal Zalobny.') }}">
+        <meta property="og:image" content="{{ ogImage | default('https://res.cloudinary.com/dpv0ukspz/image/upload/v1735729512/og-ex_dv6h7e.jpg') }}">
+        <meta property="og:url" content="{{ ogUrl | default('https://tranquil-pixie-7ecd9c.netlify.app/') }}">
+
+        {# Twitter Card Tags #}
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="{{ title | default('Vanilla WebGL2 Experiments') }}">
+        <meta name="twitter:description" content="{{ description | default('Vanilla WebGL2 Experiments by Michal Zalobny.') }}">
+        <meta name="twitter:image" content="{{ ogImage | default('https://res.cloudinary.com/dpv0ukspz/image/upload/v1735729512/og-ex_dv6h7e.jpg') }}">
+
+        {# Stylesheet with Preload #}
+        <link rel="preload" href="/css/index.css" as="style">
+        <link rel="stylesheet" href="/css/index.css">
+
+    </head>
+
+    <body>
+        {# Main Content #}
+        <main>
+            <div>
+                <article>
+                    {{content | safe}}
+                </article>
+            </div>
+        </main>
+
+        <div class="debug-holder">debug</div>
+        <div class="fps">fps: <span id="fps"></span></div>
+        <canvas id="canvas"></canvas>
+
+        {# Scripts #}
+        <script type="module" defer src="/js/main.js"></script>
+
+    </body>
+</html>

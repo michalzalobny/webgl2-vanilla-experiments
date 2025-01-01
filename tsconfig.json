@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/js-manager/**/*"],
+  "exclude": ["node_modules"]
+}
