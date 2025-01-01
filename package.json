@@ -1,6 +1,6 @@
 {
-  "name": "webgl-3d-engine",
-  "version": "1.0.1",
+  "name": "webgl2-vanilla-experiments",
+  "version": "1.0.0",
   "description": "",
   "scripts": {
     "build": "npm run build:pre-eleventy && eleventy && cp robots.txt dist/",
