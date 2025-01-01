@@ -8,7 +8,17 @@ const isProduction = process.env.NODE_ENV === 'production';
 // DEFINE FILE NAMES FROM /src/js-pages TO BE BUILD HERE:
 const FILE_NAMES = ['debug', 'initial-test'];
 
-const commonPlugins = [
+const inputFiles = FILE_NAMES.map((fileName) => `src/js-pages/${fileName}/App.ts`);
+const outputs = FILE_NAMES.map((fileName) => {
+  return {
+    file: `dist/js/${fileName}.js`,
+    format: 'esm',
+    sourcemap: !isProduction,
+  };
+});
+
+// Common plugins for all files
+const plugins = [
   resolve({ extensions: ['.js', '.ts'] }),
   commonjs(),
   glslify({
@@ -28,14 +38,11 @@ const commonPlugins = [
   }),
 ];
 
-const configs = FILE_NAMES.map((fileName) => ({
-  input: `src/js-pages/${fileName}/App.ts`,
-  output: {
-    dir: `dist/js/${fileName}`,
-    format: 'esm',
-    sourcemap: !isProduction,
-  },
-  plugins: commonPlugins,
+// Create a configuration for each input file
+const configs = inputFiles.map((input) => ({
+  input,
+  output: outputs, // Same outputs for each input
+  plugins, // Shared plugins for all files
 }));
 
 module.exports = configs;

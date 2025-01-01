@@ -61,7 +61,7 @@ export class Objects3D {
         u_time: globalState.uTime,
       },
     });
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       const mediaPlane = new Mesh({
         gl: this.gl,
         shaderProgram: this.mediaPlaneProgram,

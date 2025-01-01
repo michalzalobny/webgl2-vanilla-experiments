@@ -6,6 +6,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["src/js-manager/**/*"],
+  "include": ["src/js-pages/**/*"],
   "exclude": ["node_modules"]
 }

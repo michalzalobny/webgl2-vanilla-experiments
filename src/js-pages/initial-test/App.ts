@@ -132,3 +132,5 @@ export class App {
     this.scene?.destroy();
   }
 }
+
+new App();
