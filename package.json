@@ -1,6 +1,6 @@
 {
   "name": "webgl2-vanilla-experiments",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "scripts": {
     "build": "npm run build:pre-eleventy && eleventy && cp robots.txt dist/",
