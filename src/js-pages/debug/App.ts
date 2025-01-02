@@ -11,10 +11,6 @@ export class App {
   private scene: Scene | null = null;
 
   constructor() {
-    this.init();
-  }
-
-  private init() {
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
@@ -22,17 +18,21 @@ export class App {
     this.onResize();
   }
 
-  private onResizeDebounced = debounce(() => this.onResize(), 300);
-
   private onResize() {
-    if (!globalState.canvasEl) return;
+    if (!globalState.canvasEl) {
+      return;
+    }
+
     const bounds = globalState.canvasEl.getBoundingClientRect();
     const stageX = bounds.width;
     const stageY = bounds.height;
     globalState.stageSize.value = [stageX, stageY];
-
     this.scene?.onResize();
   }
+
+  private onResizeDebounced = debounce(() => {
+    this.onResize();
+  }, 150);
 
   private setPixelRatio(pixelRatio: number) {
     globalState.pixelRatio.value = pixelRatio;
@@ -126,12 +126,11 @@ const onMouseMove = (e: any) => {
   globalState.mouse2DTarget.value = [(mouseX / stageX) * 2 - 1, -(mouseY / stageY) * 2 + 1];
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-  globalState.debugHolderEl = document.querySelector('.debug-holder') as HTMLDivElement;
-  globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
+globalState.debugHolderEl = document.querySelector('.debug-holder') as HTMLDivElement;
+globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
+globalState.appLoadTime = window.performance.now();
 
-  new App();
+const mouseMove = MouseMove.getInstance();
+mouseMove.addEventListener('mousemove', onMouseMove);
 
-  const mouseMove = MouseMove.getInstance();
-  mouseMove.addEventListener('mousemove', onMouseMove);
-});
+new App();

@@ -20,6 +20,13 @@ interface Constructor {
   camera: Camera;
 }
 
+const randomFromSeed = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+const num = 3;
+const randomSeedsArray = new Array(num * 2).fill(0).map((_, i) => randomFromSeed(i));
+
 export class Objects3D {
   private gl: WebGL2RenderingContext;
 
@@ -61,7 +68,7 @@ export class Objects3D {
         u_time: globalState.uTime,
       },
     });
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < num; i++) {
       const mediaPlane = new Mesh({
         gl: this.gl,
         shaderProgram: this.mediaPlaneProgram,
@@ -93,11 +100,6 @@ export class Objects3D {
     });
   }
 
-  private randomFromSeed = (seed: number) => {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  };
-
   public update() {
     const mouse2DCurrent = globalState.mouse2DCurrent.value;
 
@@ -109,12 +111,10 @@ export class Objects3D {
     }
 
     this.mediaPlanes.forEach((mediaPlane, key) => {
-      const seed = this.randomFromSeed(key);
-
       mediaPlane.position = vec3.fromValues(
-        mouse2DCurrent[0] * seed + (this.randomFromSeed(key + 0.3) - 0.5) * 0.25,
-        (this.randomFromSeed(key + 0.5) - 0.5) * 0.25,
-        seed * 0.1
+        mouse2DCurrent[0] * randomSeedsArray[key + 3] + (randomSeedsArray[key + 1] - 0.5) * 0.25,
+        (randomSeedsArray[key + 2] - 0.5) * 0.25,
+        randomSeedsArray[key + 3] * 0.1
       );
 
       mediaPlane.render({ camera: this.camera, instanceNumber: key + 1 });
