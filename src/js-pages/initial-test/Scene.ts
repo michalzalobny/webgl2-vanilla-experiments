@@ -3,7 +3,6 @@ import { vec3 } from 'gl-matrix';
 import { globalState } from './utils/globalState';
 import { Camera } from './lib/Camera';
 import { lerp } from './utils/lerp';
-import { updateDebug } from './utils/updateDebug';
 import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 
@@ -29,10 +28,8 @@ export class Scene {
     this.gl = ctx;
     this.texturesManager = new TexturesManager({ gl: this.gl });
     this.geometriesManager = new GeometriesManager();
-    globalState.appLoadTime = window.performance.now();
+
     this.init();
-    globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
-    updateDebug(`App load time: ${globalState.appLoadTime.toFixed(2)}ms`);
   }
 
   private async init() {
@@ -53,6 +50,8 @@ export class Scene {
       camera: this.camera,
       geometriesManager: this.geometriesManager,
     });
+
+    globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
   }
 
   private render() {

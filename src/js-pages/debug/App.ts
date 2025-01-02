@@ -11,55 +11,14 @@ export class App {
   private scene: Scene | null = null;
 
   constructor() {
-    // Don't allow to zoom
-    document.addEventListener(
-      'touchstart',
-      (event) => {
-        if (event.touches.length > 1) {
-          event.preventDefault();
-        }
-      },
-      { passive: false }
-    );
-
-    // https://webglfundamentals.org/webgl/lessons/webgl-qna-recording-fps-in-webgl.html
-    const fpsElem = document.querySelector('#fps');
-    let then = 0;
-    function render(now: number) {
-      now *= 0.001; // convert to seconds
-      const deltaTime = now - then; // compute time since last frame
-      then = now; // remember time for next frame
-      const fps = 1 / deltaTime; // compute frames per second
-      if (fpsElem) fpsElem.textContent = fps.toFixed(1); // update fps display
-      requestAnimationFrame(render);
-    }
-    requestAnimationFrame(render);
-
-    const onMouseMove = (e: any) => {
-      const mouseX = (e.target as MouseMove).mouse.x;
-      const mouseY = (e.target as MouseMove).mouse.y;
-
-      const stageX = globalState.stageSize.value[0];
-      const stageY = globalState.stageSize.value[1];
-
-      globalState.mouse2DTarget.value = [(mouseX / stageX) * 2 - 1, -(mouseY / stageY) * 2 + 1];
-    };
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      globalState.debugHolderEl = document.querySelector('.debug-holder') as HTMLDivElement;
-      globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
-      const mouseMove = MouseMove.getInstance();
-      mouseMove.addEventListener('mousemove', onMouseMove);
-
-      this.init();
-    });
+    this.init();
   }
 
   private init() {
-    this.scene = new Scene();
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
+    this.scene = new Scene();
     this.onResize();
   }
 
@@ -133,4 +92,46 @@ export class App {
   }
 }
 
-new App();
+// Don't allow to zoom
+document.addEventListener(
+  'touchstart',
+  (event) => {
+    if (event.touches.length > 1) {
+      event.preventDefault();
+    }
+  },
+  { passive: false }
+);
+
+// https://webglfundamentals.org/webgl/lessons/webgl-qna-recording-fps-in-webgl.html
+const fpsElem = document.querySelector('#fps');
+let then = 0;
+function render(now: number) {
+  now *= 0.001; // convert to seconds
+  const deltaTime = now - then; // compute time since last frame
+  then = now; // remember time for next frame
+  const fps = 1 / deltaTime; // compute frames per second
+  if (fpsElem) fpsElem.textContent = fps.toFixed(1); // update fps display
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+const onMouseMove = (e: any) => {
+  const mouseX = (e.target as MouseMove).mouse.x;
+  const mouseY = (e.target as MouseMove).mouse.y;
+
+  const stageX = globalState.stageSize.value[0];
+  const stageY = globalState.stageSize.value[1];
+
+  globalState.mouse2DTarget.value = [(mouseX / stageX) * 2 - 1, -(mouseY / stageY) * 2 + 1];
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  globalState.debugHolderEl = document.querySelector('.debug-holder') as HTMLDivElement;
+  globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
+
+  new App();
+
+  const mouseMove = MouseMove.getInstance();
+  mouseMove.addEventListener('mousemove', onMouseMove);
+});

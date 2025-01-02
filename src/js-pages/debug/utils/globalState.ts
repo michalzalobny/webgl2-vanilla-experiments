@@ -1,6 +1,6 @@
 export const globalState = {
   stageSize: {
-    value: [0, 0],
+    value: [100, 100],
   },
   pixelRatio: {
     value: 1,
