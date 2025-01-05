@@ -39,11 +39,14 @@
     <body>
         {# Main Content #}
         <main>
-            <div>
-                <article>
-                    {{content | safe}}
-                </article>
+            <div class="c-large links-container">
+                <a  href="/">Index</a>
+                <a  href="/debug">Debug</a>
+                <a  href="/particle-physics">Particle Physics</a>
             </div>
+
+            {{content | safe}}
+            {% include "components/footer.njk" %}
         </main>
     </body>
 </html>

@@ -97,3 +97,16 @@
     }
   }
 }
+
+.links-container {
+  display: flex;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 5px;
+  color: white;
+}
+
+.links-container > *:not(:last-child) {
+  margin-right: 10px;
+}
