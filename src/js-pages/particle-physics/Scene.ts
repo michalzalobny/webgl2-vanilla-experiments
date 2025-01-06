@@ -26,6 +26,9 @@ export class Scene {
       throw new Error('WebGL2 not supported');
     }
     this.gl = ctx;
+
+    this.gl.enable(this.gl.DEPTH_TEST);
+
     this.texturesManager = new TexturesManager({ gl: this.gl });
     this.geometriesManager = new GeometriesManager();
 
@@ -41,8 +44,6 @@ export class Scene {
       geometryUrl: 'plane',
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
-
-    await this.texturesManager.loadTexture(`/public/assets/generated_images/1.jpg`);
 
     this.particle = new Particle({
       x: 0,
@@ -73,13 +74,11 @@ export class Scene {
   }
 
   private render() {
-    const gl = this.gl;
+    //Clear depth buffer
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-    // Clear the canvas and depth buffer from previous frame
-    gl.enable(gl.DEPTH_TEST);
-
-    this.background?.update();
     this.particle?.update();
+    this.background?.update();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -112,8 +111,8 @@ export class Scene {
 
     this.texturesManager.resize();
 
-    this.particle?.onResize();
     this.background?.onResize();
+    this.particle?.onResize();
   }
 
   public destroy() {

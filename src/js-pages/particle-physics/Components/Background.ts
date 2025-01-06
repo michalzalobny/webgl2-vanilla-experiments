@@ -6,6 +6,7 @@ import { Camera } from '../lib/Camera';
 
 import fragmentShader from '../shaders/background/fragment.glsl';
 import vertexShader from '../shaders/background/vertex.glsl';
+import { vec3 } from 'gl-matrix';
 
 interface Constructor {
   gl: WebGL2RenderingContext;
@@ -53,15 +54,16 @@ export class Background {
   }
 
   public update() {
-    if (this.mesh) {
-      // Disable depth test when rendering the background - it will be behind everything
-      this.gl.disable(this.gl.DEPTH_TEST);
-      this.mesh.render({ camera: this.camera });
-      this.gl.enable(this.gl.DEPTH_TEST);
-    }
+    this.mesh?.render({ camera: this.camera });
   }
 
-  public onResize() {}
+  public onResize() {
+    const w = globalState.stageSize.value[0];
+    const h = globalState.stageSize.value[1];
+    if (this.mesh) {
+      this.mesh.scale = vec3.fromValues(w, h, 1);
+    }
+  }
 
   public destroy() {
     if (this.mesh) this.mesh.destroy();

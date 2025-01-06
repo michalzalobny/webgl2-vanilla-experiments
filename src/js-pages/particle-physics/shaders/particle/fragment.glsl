@@ -14,7 +14,10 @@ uniform mat4 u_viewMatrix;
 out vec4 outColor;
 
 void main() {
-  vec4 color = vec4(v_uv,0.0,1.0);
+  float circle = distance(v_uv, vec2(0.5, 0.5));
+  circle = 1.0 - step(0.5, circle);
+
+  vec4 color = vec4(v_uv,0.0, circle);
 
   outColor = color;
 }

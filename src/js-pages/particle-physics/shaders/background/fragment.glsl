@@ -50,7 +50,7 @@ void main() {
 
   //fix uv aspect ratio
   float aspect = u_resolution.x / u_resolution.y;
-  uv.x *= aspect * 0.7;
+  uv.x *= aspect * 0.74;
 
   float t = u_time * 0.03;
 

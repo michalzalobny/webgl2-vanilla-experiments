@@ -9,16 +9,15 @@ uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
 
 out vec2 v_uv;
+out vec3 v_fragNormal;
+out vec3 v_fragPosition;
 
 void main() {
-    vec3 pos = a_position;
-    // Clip space (GL_Position) is from -1 to 1.  
-    // Your square is a 1x1, so it doesn't fill the complete space. 
-    // Multiplying it by 2 makes it fill the whole range from -1 to 1
-    // ~ Daniel Velasquez
-    pos.xy *= 2.0;
+    vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0);
+    vec4 viewPosition = u_viewMatrix * worldPosition;
 
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = u_projectionMatrix * viewPosition;
 
+    v_fragPosition = vec3(viewPosition);
     v_uv = a_uv; 
 }
