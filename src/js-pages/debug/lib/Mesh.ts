@@ -13,7 +13,6 @@ interface Constructor {
 
 interface Render {
   camera: Camera;
-  instanceNumber?: number;
 }
 
 export class Mesh {
