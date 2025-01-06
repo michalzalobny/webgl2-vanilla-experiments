@@ -7,6 +7,7 @@ import { ShaderProgram } from '../lib/ShaderProgram';
 import { globalState } from '../utils/globalState';
 import { Mesh } from '../lib/Mesh';
 import { Camera } from '../lib/Camera';
+import { updateDebug } from '../utils/updateDebug';
 
 type Props = {
   x: number;
@@ -58,6 +59,9 @@ export class Particle {
   }
 
   public update() {
+    // Add velocity to position
+    vec2.add(this.position, this.position, this.velocity);
+
     this.mesh.position = vec3.fromValues(this.position[0], this.position[1], 0);
     this.mesh.scale = vec3.fromValues(this.mass * 50, this.mass * 50, 1);
     this.mesh.render({ camera: this.camera });

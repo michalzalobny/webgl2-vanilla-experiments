@@ -52,6 +52,7 @@ export class Scene {
       gl: this.gl,
       camera: this.camera,
     });
+    this.particle.velocity = vec2.fromValues(2 * globalState.slowDownFactor.value, 0);
 
     this.background = new Background({
       camera: this.camera,
@@ -68,13 +69,6 @@ export class Scene {
     const mouse2DCurrent = globalState.mouse2DCurrent.value;
     mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.35 * globalState.slowDownFactor.value);
     mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.35 * globalState.slowDownFactor.value);
-
-    if (this.particle) {
-      this.particle.position = vec2.fromValues(
-        mouse2DCurrent[0] * globalState.stageSize.value[0] * 0.5,
-        mouse2DCurrent[1] * globalState.stageSize.value[1] * 0.5
-      );
-    }
 
     this.render();
   }
