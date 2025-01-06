@@ -5,6 +5,7 @@ import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
+import { Background } from './Components/Background';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -14,6 +15,7 @@ export class Scene {
   private geometriesManager;
 
   private particle: Particle | null = null;
+  private background: Background | null = null;
 
   constructor() {
     if (!globalState.canvasEl) {
@@ -51,6 +53,12 @@ export class Scene {
       camera: this.camera,
     });
 
+    this.background = new Background({
+      camera: this.camera,
+      geometriesManager: this.geometriesManager,
+      gl: this.gl,
+    });
+
     globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
   }
 
@@ -70,6 +78,7 @@ export class Scene {
     // Clear the canvas and depth buffer from previous frame
     gl.enable(gl.DEPTH_TEST);
 
+    this.background?.update();
     this.particle?.update();
   }
 
@@ -102,6 +111,9 @@ export class Scene {
     });
 
     this.texturesManager.resize();
+
+    this.particle?.onResize();
+    this.background?.onResize();
   }
 
   public destroy() {
@@ -109,5 +121,6 @@ export class Scene {
     this.texturesManager?.destroy();
 
     this.particle?.destroy();
+    this.background?.destroy();
   }
 }

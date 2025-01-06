@@ -56,12 +56,14 @@ export class Particle {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.scale = vec3.fromValues(200, 200, 1);
+    this.mesh.scale = vec3.fromValues(100, 100, 1);
   }
 
   public update() {
     this.mesh.render({ camera: this.camera });
   }
+
+  public onResize() {}
 
   public destroy() {
     this.program.destroy();
