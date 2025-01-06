@@ -55,13 +55,11 @@ export class Particle {
       shaderProgram: this.program,
       geometry: this.geometriesManager.getGeometry('plane'),
     });
-
-    this.mesh.scale = vec3.fromValues(50, 50, 1);
-    this.mesh.position = vec3.fromValues(this.position[0], this.position[1], 0);
-    this.mesh.rotation = vec3.fromValues(0, 0, 0);
   }
 
   public update() {
+    this.mesh.position = vec3.fromValues(this.position[0], this.position[1], 0);
+    this.mesh.scale = vec3.fromValues(this.mass * 50, this.mass * 50, 1);
     this.mesh.render({ camera: this.camera });
   }
 
