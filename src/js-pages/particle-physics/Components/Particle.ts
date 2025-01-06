@@ -56,7 +56,7 @@ export class Particle {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.scale = vec3.fromValues(100, 100, 1);
+    this.mesh.scale = vec3.fromValues(50, 50, 1);
     this.mesh.position = vec3.fromValues(this.position[0], this.position[1], 0);
     this.mesh.rotation = vec3.fromValues(0, 0, 0);
   }
