@@ -27,8 +27,6 @@ export class Scene {
     }
     this.gl = ctx;
 
-    this.gl.enable(this.gl.DEPTH_TEST);
-
     this.texturesManager = new TexturesManager({ gl: this.gl });
     this.geometriesManager = new GeometriesManager();
 
@@ -74,11 +72,25 @@ export class Scene {
   }
 
   private render() {
-    //Clear depth buffer
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    const gl = this.gl;
+
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.depthMask(true);
+
+    // Clear the canvas AND the depth buffer.
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Render opaque objects first
+    this.background?.update();
+
+    // Render transparent objects below
+    gl.depthMask(false);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     this.particle?.update();
-    this.background?.update();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html

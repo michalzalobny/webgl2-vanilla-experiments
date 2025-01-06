@@ -51,6 +51,8 @@ export class Background {
       shaderProgram: this.program,
       geometry: this.geometriesManager.getGeometry('plane'),
     });
+
+    this.mesh.position = vec3.fromValues(0, 0, -10); // Put the background behind everything
   }
 
   public update() {
@@ -61,7 +63,7 @@ export class Background {
     const w = globalState.stageSize.value[0];
     const h = globalState.stageSize.value[1];
     if (this.mesh) {
-      this.mesh.scale = vec3.fromValues(w, h, 1);
+      this.mesh.scale = vec3.fromValues(w * 1.1, h * 1.1, 1);
     }
   }
 
