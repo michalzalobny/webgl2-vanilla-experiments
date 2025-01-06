@@ -117,7 +117,7 @@ export class Objects3D {
         randomSeedsArray[key + 3] * 0.1
       );
 
-      mediaPlane.render({ camera: this.camera, instanceNumber: key + 1 });
+      mediaPlane.render({ camera: this.camera });
     });
   }
 

@@ -18,7 +18,7 @@ export class Camera {
   public orthoProjectionMatrix = mat4.create();
   public viewMatrix = mat4.create();
 
-  public position = vec3.fromValues(0, 0, 1000);
+  public position = vec3.fromValues(0, 0, 0.36);
   private target = vec3.fromValues(0, 0, -1);
   private up = vec3.fromValues(0, 1, 0);
 

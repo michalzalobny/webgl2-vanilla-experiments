@@ -1,12 +1,10 @@
-import { vec3 } from 'gl-matrix';
-
 import { globalState } from './utils/globalState';
 import { Camera } from './lib/Camera';
 import { lerp } from './utils/lerp';
 import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 
-import { Objects3D } from './Components/Objects3D';
+import { Particle } from './Components/Particle';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -15,7 +13,7 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private objects3D: Objects3D | null = null;
+  private particle: Particle | null = null;
 
   constructor() {
     if (!globalState.canvasEl) {
@@ -44,23 +42,16 @@ export class Scene {
 
     await this.texturesManager.loadTexture(`/public/assets/generated_images/1.jpg`);
 
-    this.objects3D = new Objects3D({
-      gl: this.gl,
-      texturesManager: this.texturesManager,
-      camera: this.camera,
+    this.particle = new Particle({
+      x: 0,
+      y: 0,
+      mass: 1,
       geometriesManager: this.geometriesManager,
+      gl: this.gl,
+      camera: this.camera,
     });
 
     globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
-  }
-
-  private render() {
-    const gl = this.gl;
-
-    // Clear the canvas and depth buffer from previous frame
-    gl.enable(gl.DEPTH_TEST);
-
-    this.objects3D?.update();
   }
 
   public update() {
@@ -70,12 +61,16 @@ export class Scene {
     mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.053 * globalState.slowDownFactor.value);
     mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.053 * globalState.slowDownFactor.value);
 
-    // Update camera
-    this.camera.updateViewMatrix({
-      target: vec3.fromValues(mouse2DCurrent[0] * -0.25, mouse2DCurrent[1] * 0.05, -1),
-    });
-
     this.render();
+  }
+
+  private render() {
+    const gl = this.gl;
+
+    // Clear the canvas and depth buffer from previous frame
+    gl.enable(gl.DEPTH_TEST);
+
+    this.particle?.update();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -85,7 +80,6 @@ export class Scene {
 
     const ratio = globalState.pixelRatio.value;
 
-    // Possibly need to Math.round() w and h here, but will leave for now
     w = Math.round(w * ratio);
     h = Math.round(h * ratio);
 
@@ -95,11 +89,16 @@ export class Scene {
     this.gl.canvas.width = w;
     this.gl.canvas.height = h;
 
+    // 1 screen pixel = 1 CSS pixel
+    const windowHeight = globalState.stageSize.value[1];
+    const cameraPositionZ = this.camera.position[2];
+    const fov = 2 * Math.atan(windowHeight / 2 / cameraPositionZ);
+
     this.camera.updateProjectionMatrix({
-      fov: Math.PI / 3,
+      fov: fov,
       aspect_ratio: w / h,
       near: 0.1,
-      far: 20,
+      far: 2000,
     });
 
     this.texturesManager.resize();
@@ -109,6 +108,6 @@ export class Scene {
     this.geometriesManager?.destroy();
     this.texturesManager?.destroy();
 
-    this.objects3D?.destroy();
+    this.particle?.destroy();
   }
 }

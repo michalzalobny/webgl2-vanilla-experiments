@@ -17,7 +17,7 @@ interface Props {
   gl: WebGL2RenderingContext;
   texturesToUse?: TextureToUse[];
   uniforms?: Uniforms;
-  texturesManager: TexturesManager;
+  texturesManager: TexturesManager | null;
 }
 
 export class ShaderProgram {
@@ -152,6 +152,7 @@ export class ShaderProgram {
     // Bind textures to texture units, it stats every time from 0 (below), since we don't know how many textures will be used
     let textureUnit = -1;
     this.texturesToUse.forEach((el) => {
+      if (!this.texturesManager) return;
       textureUnit += 1;
       const textureObj = this.texturesManager.getTextureObj(el.textureSrc);
       if (!textureObj) return;

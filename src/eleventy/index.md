@@ -6,4 +6,4 @@ layout: 'layouts/base.njk'
 <div class="fps">fps: <span id="fps"></span></div>
 <canvas id="canvas"></canvas>
 <!-- Scripts -->
-<script type="module" defer src="/js/initial-test/App.js"></script>
+<script type="module" defer src="/js/debug/App.js"></script>
