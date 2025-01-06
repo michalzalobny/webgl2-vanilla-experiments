@@ -1,6 +1,5 @@
 import { globalState } from './utils/globalState';
 import { constants } from './utils/constants';
-import { debounce } from './utils/debounce';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
 
@@ -18,7 +17,7 @@ export class App {
     this.onResize();
   }
 
-  private onResize() {
+  private onResize = () => {
     if (!globalState.canvasEl) {
       return;
     }
@@ -28,11 +27,7 @@ export class App {
     const stageY = bounds.height;
     globalState.stageSize.value = [stageX, stageY];
     this.scene?.onResize();
-  }
-
-  private onResizeDebounced = debounce(() => {
-    this.onResize();
-  }, 150);
+  };
 
   private setPixelRatio(pixelRatio: number) {
     globalState.pixelRatio.value = pixelRatio;
@@ -47,7 +42,7 @@ export class App {
   };
 
   private addListeners() {
-    window.addEventListener('resize', this.onResizeDebounced);
+    window.addEventListener('resize', this.onResize);
     window.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
@@ -86,7 +81,7 @@ export class App {
 
   public destroy() {
     this.stopAppFrame();
-    window.removeEventListener('resize', this.onResizeDebounced);
+    window.removeEventListener('resize', this.onResize);
     window.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.scene?.destroy();
   }
