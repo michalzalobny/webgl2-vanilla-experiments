@@ -20,6 +20,7 @@ export class App {
 
   private onResize = () => {
     if (!globalState.canvasEl) {
+      throw new Error('Canvas element not found');
       return;
     }
 
