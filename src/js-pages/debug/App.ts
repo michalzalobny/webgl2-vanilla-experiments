@@ -3,6 +3,7 @@ import { constants } from './utils/constants';
 import { debounce } from './utils/debounce';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
+import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;
@@ -15,7 +16,10 @@ export class App {
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
-    this.onResize();
+    updateDebug('started 1.5s timeout');
+    setTimeout(() => {
+      this.onResize();
+    }, 1500);
   }
 
   private onResize = () => {
