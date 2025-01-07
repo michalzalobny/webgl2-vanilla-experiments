@@ -20,13 +20,13 @@ export class App {
 
     const currentStageX = globalState.stageSize.value[0];
     const currentStageY = globalState.stageSize.value[1];
-
+    updateDebug(`50`);
     setTimeout(() => {
       this.onResize();
       const currentStageXNew = globalState.stageSize.value[0];
       const currentStageYNew = globalState.stageSize.value[1];
       updateDebug(`Stage size: ${currentStageXNew}x${currentStageYNew}, previous: ${currentStageX}x${currentStageY}`);
-    }, 250);
+    }, 50);
   }
 
   private onResize = () => {
