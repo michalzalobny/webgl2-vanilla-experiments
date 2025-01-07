@@ -19,10 +19,10 @@ export class App {
     // updateDebug('resized and started 1.5s timeout');
     this.onResize();
 
-    // setTimeout(() => {
-    //   this.onResize();
-    //   updateDebug('resized with timeout');
-    // }, 1500);
+    setTimeout(() => {
+      this.onResize();
+      updateDebug('resized with timeout');
+    }, 1);
   }
 
   private onResize = () => {
