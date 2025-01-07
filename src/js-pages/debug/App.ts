@@ -3,6 +3,7 @@ import { constants } from './utils/constants';
 import { debounce } from './utils/debounce';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
+import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;
@@ -17,9 +18,13 @@ export class App {
     this.resumeAppFrame();
     this.onResize();
 
+    const currentStageX = globalState.stageSize.value[0];
+    const currentStageY = globalState.stageSize.value[1];
+
     setTimeout(() => {
       this.onResize();
-    }, 4000);
+      updateDebug(`Stage size: ${currentStageX}x${currentStageY}, previous: ${currentStageX}x${currentStageY}`);
+    }, 2000);
   }
 
   private onResize = () => {
