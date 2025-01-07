@@ -7,6 +7,9 @@ import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Objects3D } from './Components/Objects3D';
+import { updateDebug } from './utils/updateDebug';
+
+const fakeAwait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -42,6 +45,8 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
+    updateDebug('started loading textures...');
+    await fakeAwait(3000);
     await this.texturesManager.loadTexture(`/public/assets/generated_images/1.jpg`);
 
     this.objects3D = new Objects3D({
@@ -50,6 +55,8 @@ export class Scene {
       camera: this.camera,
       geometriesManager: this.geometriesManager,
     });
+
+    updateDebug('finished loading textures');
 
     globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
   }

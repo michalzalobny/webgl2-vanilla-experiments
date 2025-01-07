@@ -16,13 +16,13 @@ export class App {
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
-    updateDebug('resized and started 1.5s timeout');
+    // updateDebug('resized and started 1.5s timeout');
     this.onResize();
 
-    setTimeout(() => {
-      this.onResize();
-      updateDebug('resized with timeout');
-    }, 1500);
+    // setTimeout(() => {
+    //   this.onResize();
+    //   updateDebug('resized with timeout');
+    // }, 1500);
   }
 
   private onResize = () => {
