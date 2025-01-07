@@ -24,7 +24,7 @@ const randomFromSeed = (seed: number) => {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 };
-const num = 5;
+const num = 15;
 const randomSeedsArray = new Array(num * 2).fill(0).map((_, i) => randomFromSeed(i));
 
 export class Objects3D {

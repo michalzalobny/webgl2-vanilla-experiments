@@ -8,13 +8,13 @@ export class App {
   private rafId: number | null = null;
   private isResumed = true;
   private lastFrameTime: number | null = null;
-  private scene: Scene | null = null;
+  private scene: Scene;
 
   constructor() {
+    this.scene = new Scene();
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
-    this.scene = new Scene();
     this.onResize();
   }
 
@@ -23,15 +23,11 @@ export class App {
       return;
     }
 
-    if (!this.scene) {
-      throw new Error('Scene is not initialized');
-    }
-
     const bounds = globalState.canvasEl.getBoundingClientRect();
     const stageX = bounds.width;
     const stageY = bounds.height;
     globalState.stageSize.value = [stageX, stageY];
-    this.scene?.onResize();
+    this.scene.onResize();
   };
 
   private setPixelRatio(pixelRatio: number) {
@@ -74,7 +70,7 @@ export class App {
 
     this.lastFrameTime = time;
 
-    this.scene?.update();
+    this.scene.update();
   };
 
   private stopAppFrame() {
@@ -88,7 +84,7 @@ export class App {
     this.stopAppFrame();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('visibilitychange', this.onVisibilityChange);
-    this.scene?.destroy();
+    this.scene.destroy();
   }
 }
 
