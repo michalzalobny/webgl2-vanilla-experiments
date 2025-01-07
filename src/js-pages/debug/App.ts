@@ -26,7 +26,7 @@ export class App {
       const currentStageXNew = globalState.stageSize.value[0];
       const currentStageYNew = globalState.stageSize.value[1];
       updateDebug(`Stage size: ${currentStageXNew}x${currentStageYNew}, previous: ${currentStageX}x${currentStageY}`);
-    }, 1000);
+    }, 500);
   }
 
   private onResize = () => {
