@@ -20,8 +20,11 @@ export class App {
 
   private onResize = () => {
     if (!globalState.canvasEl) {
-      throw new Error('Canvas element not found');
       return;
+    }
+
+    if (!this.scene) {
+      throw new Error('Scene is not initialized');
     }
 
     const bounds = globalState.canvasEl.getBoundingClientRect();
