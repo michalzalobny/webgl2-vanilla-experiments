@@ -1,20 +1,36 @@
 import { globalState } from './utils/globalState';
 import { constants } from './utils/constants';
+import { debounce } from './utils/debounce';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
+import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;
   private isResumed = true;
   private lastFrameTime: number | null = null;
-  private scene: Scene | null = null;
+  private scene: Scene;
+
+  private resizeBackupTimeout: NodeJS.Timeout; // Used for backup resize event, when the initial resize event is not triggered
 
   constructor() {
+    this.scene = new Scene();
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
-    this.scene = new Scene();
     this.onResize();
+
+    const measuredStageX = globalState.stageSize.value[0];
+    const measuredStageY = globalState.stageSize.value[1];
+    this.resizeBackupTimeout = setTimeout(() => {
+      const stageX = globalState.canvasEl?.clientWidth;
+      const stageY = globalState.canvasEl?.clientHeight;
+      if (stageX !== measuredStageX || stageY !== measuredStageY) {
+        this.onResize();
+        updateDebug(`Stage size changed to ${stageX}x${stageY} from ${measuredStageX}x${measuredStageY}`);
+      }
+      clearTimeout(this.resizeBackupTimeout);
+    }, 300);
   }
 
   private onResize = () => {
@@ -26,7 +42,7 @@ export class App {
     const stageX = bounds.width;
     const stageY = bounds.height;
     globalState.stageSize.value = [stageX, stageY];
-    this.scene?.onResize();
+    this.scene.onResize();
   };
 
   private setPixelRatio(pixelRatio: number) {
@@ -69,7 +85,7 @@ export class App {
 
     this.lastFrameTime = time;
 
-    this.scene?.update();
+    this.scene.update();
   };
 
   private stopAppFrame() {
@@ -83,7 +99,10 @@ export class App {
     this.stopAppFrame();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('visibilitychange', this.onVisibilityChange);
-    this.scene?.destroy();
+    this.scene.destroy();
+    if (this.resizeBackupTimeout) {
+      clearTimeout(this.resizeBackupTimeout);
+    }
   }
 }
 

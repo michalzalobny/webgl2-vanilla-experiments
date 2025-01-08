@@ -11,6 +11,8 @@ export class App {
   private lastFrameTime: number | null = null;
   private scene: Scene;
 
+  private resizeBackupTimeout: NodeJS.Timeout; // Used for backup resize event, when the initial resize event is not triggered
+
   constructor() {
     this.scene = new Scene();
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -18,15 +20,17 @@ export class App {
     this.resumeAppFrame();
     this.onResize();
 
-    const currentStageX = globalState.stageSize.value[0];
-    const currentStageY = globalState.stageSize.value[1];
-    updateDebug(`50`);
-    setTimeout(() => {
-      this.onResize();
-      const currentStageXNew = globalState.stageSize.value[0];
-      const currentStageYNew = globalState.stageSize.value[1];
-      updateDebug(`Stage size: ${currentStageXNew}x${currentStageYNew}, previous: ${currentStageX}x${currentStageY}`);
-    }, 50);
+    const measuredStageX = globalState.stageSize.value[0];
+    const measuredStageY = globalState.stageSize.value[1];
+    this.resizeBackupTimeout = setTimeout(() => {
+      const stageX = globalState.canvasEl?.clientWidth;
+      const stageY = globalState.canvasEl?.clientHeight;
+      if (stageX !== measuredStageX || stageY !== measuredStageY) {
+        this.onResize();
+        updateDebug(`Stage size changed to ${stageX}x${stageY} from ${measuredStageX}x${measuredStageY}`);
+      }
+      clearTimeout(this.resizeBackupTimeout);
+    }, 300);
   }
 
   private onResize = () => {
@@ -96,6 +100,9 @@ export class App {
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.scene.destroy();
+    if (this.resizeBackupTimeout) {
+      clearTimeout(this.resizeBackupTimeout);
+    }
   }
 }
 
