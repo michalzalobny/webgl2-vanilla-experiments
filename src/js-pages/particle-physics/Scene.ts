@@ -59,8 +59,6 @@ export class Scene {
       geometriesManager: this.geometriesManager,
       gl: this.gl,
     });
-
-    globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
   }
 
   public update() {

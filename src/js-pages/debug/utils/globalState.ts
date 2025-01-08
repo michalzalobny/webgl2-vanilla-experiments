@@ -17,7 +17,6 @@ export const globalState = {
   mouse2DCurrent: {
     value: [0, 0],
   },
-  appLoadTime: 0,
   debugHolderEl: null as HTMLDivElement | null,
   canvasEl: null as HTMLCanvasElement | null,
 };

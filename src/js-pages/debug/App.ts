@@ -27,7 +27,6 @@ export class App {
       const stageY = globalState.canvasEl?.clientHeight;
       if (stageX !== measuredStageX || stageY !== measuredStageY) {
         this.onResize();
-        updateDebug(`Stage size changed to ${stageX}x${stageY} from ${measuredStageX}x${measuredStageY}`);
       }
       clearTimeout(this.resizeBackupTimeout);
     }, 300);
@@ -142,7 +141,6 @@ const onMouseMove = (e: any) => {
 
 globalState.debugHolderEl = document.querySelector('.debug-holder') as HTMLDivElement;
 globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
-globalState.appLoadTime = window.performance.now();
 
 const mouseMove = MouseMove.getInstance();
 mouseMove.addEventListener('mousemove', onMouseMove);

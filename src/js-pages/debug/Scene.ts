@@ -50,8 +50,6 @@ export class Scene {
       camera: this.camera,
       geometriesManager: this.geometriesManager,
     });
-
-    globalState.appLoadTime = window.performance.now() - globalState.appLoadTime;
   }
 
   private render() {
