@@ -6,7 +6,7 @@ import { Camera } from '../lib/Camera';
 
 import fragmentShader from '../shaders/background/fragment.glsl';
 import vertexShader from '../shaders/background/vertex.glsl';
-import { vec3 } from 'gl-matrix';
+import { Vec3 } from '../lib/math/Vec3';
 
 interface Constructor {
   gl: WebGL2RenderingContext;
@@ -52,7 +52,7 @@ export class Background {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.position = vec3.fromValues(0, 0, -10); // Put the background behind everything
+    this.mesh.position = new Vec3(0, 0, -10); // Put the background behind everything
   }
 
   public update() {
@@ -63,7 +63,7 @@ export class Background {
     const w = globalState.stageSize.value[0];
     const h = globalState.stageSize.value[1];
     if (this.mesh) {
-      this.mesh.scale = vec3.fromValues(w * 1.1, h * 1.1, 1);
+      this.mesh.scale = new Vec3(w * 1.1, h * 1.1, 1);
     }
   }
 

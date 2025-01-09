@@ -6,7 +6,7 @@ import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
-import { vec2 } from 'gl-matrix';
+import { Vec3 } from './lib/math/Vec3';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -52,7 +52,8 @@ export class Scene {
       gl: this.gl,
       camera: this.camera,
     });
-    this.particle.velocity = vec2.fromValues(2 * globalState.slowDownFactor.value, 0);
+
+    this.particle.velocity = new Vec3(2 * globalState.slowDownFactor.value, 0, 0);
 
     this.background = new Background({
       camera: this.camera,
