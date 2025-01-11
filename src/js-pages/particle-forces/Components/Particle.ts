@@ -6,11 +6,13 @@ import { globalState } from '../utils/globalState';
 import { Mesh } from '../lib/Mesh';
 import { Camera } from '../lib/Camera';
 import { Vec3 } from '../lib/math/Vec3';
+import { constants } from '../utils/constants';
 
 type Props = {
   x: number;
   y: number;
   mass: number;
+  radius: number;
   geometriesManager: GeometriesManager;
   gl: WebGL2RenderingContext;
   camera: Camera;
@@ -24,6 +26,7 @@ export class Particle {
   private sumForces = new Vec3();
 
   public mass: number = 1;
+  public radius: number = 1;
 
   private geometriesManager: GeometriesManager;
   private gl: WebGL2RenderingContext;
@@ -33,8 +36,9 @@ export class Particle {
 
   private camera: Camera;
 
-  constructor({ mass, geometriesManager, x, y, gl, camera }: Props) {
+  constructor({ mass, geometriesManager, x, y, gl, camera, radius }: Props) {
     this.mass = mass;
+    this.radius = radius;
     this.gl = gl;
     this.geometriesManager = geometriesManager;
     this.camera = camera;
@@ -57,7 +61,7 @@ export class Particle {
     });
 
     this.mesh.position.setTo(x, y, 0);
-    this.mesh.scale.setTo(this.mass, this.mass, 1);
+    this.mesh.scale.setTo(this.radius * 2, this.radius * 2, 1);
   }
 
   public addForce(force: Vec3) {
@@ -71,11 +75,11 @@ export class Particle {
   public update() {
     const dt = globalState.dt.value;
 
-    // Add gravity force
-    const gravityForce = new Vec3(0, -9.81, 0);
-    this.addForce(gravityForce);
+    // Add weight force (gravity)
+    const weight = new Vec3(0, -this.mass * 9.81 * constants.PIXELS_PER_METER, 0);
+    this.addForce(weight);
     //Add wind force
-    const windForce = new Vec3(-0.45, 0, 0);
+    const windForce = new Vec3(-2 * constants.PIXELS_PER_METER, 0, 0);
     this.addForce(windForce);
 
     this.integrate(dt);
@@ -86,7 +90,7 @@ export class Particle {
     const topBound = globalState.stageSize.value[1] / 2;
     const bottomBound = -globalState.stageSize.value[1] / 2;
 
-    const radius = this.mass / 2;
+    const radius = this.radius;
 
     // Handle X-bound collisions
     if (this.mesh.position.x - radius <= leftBound) {

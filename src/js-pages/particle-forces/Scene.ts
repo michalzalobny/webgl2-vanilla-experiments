@@ -49,7 +49,8 @@ export class Scene {
         const particle = new Particle({
           x: 0,
           y: 0,
-          mass: (Math.random() * 0.5 + 0.5) * 50,
+          mass: 1 + Math.random(),
+          radius: 10 + Math.random() * 10,
           geometriesManager: this.geometriesManager,
           gl: this.gl,
           camera: this.camera,
