@@ -1,8 +1,8 @@
-import { mat4 } from "gl-matrix";
+import { Mat4 } from '../lib/math/Mat4';
 
-export const printMat4 = (m: mat4) => {
+export const printMat4 = (m: Mat4) => {
   //Copy the matrix so we don't modify the original
-  const mCopy = mat4.clone(m);
+  const mCopy = new Mat4().copy(m);
 
   // Example:
   // | 1 0 0 0 |

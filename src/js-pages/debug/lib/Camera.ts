@@ -1,4 +1,5 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { Vec3 } from './math/Vec3';
+import { Mat4 } from './math/Mat4';
 
 interface MakeProjectionMatrix {
   fov: number;
@@ -8,19 +9,19 @@ interface MakeProjectionMatrix {
 }
 
 interface MakeLookAtMatrix {
-  eye?: vec3;
-  target?: vec3;
-  up?: vec3;
+  eye?: Vec3;
+  target?: Vec3;
+  up?: Vec3;
 }
 
 export class Camera {
-  public perspectiveProjectionMatrix = mat4.create();
-  public orthoProjectionMatrix = mat4.create();
-  public viewMatrix = mat4.create();
+  public perspectiveProjectionMatrix = new Mat4();
+  public orthoProjectionMatrix = new Mat4();
+  public viewMatrix = new Mat4();
 
-  public position = vec3.fromValues(0, 0, 0.36);
-  private target = vec3.fromValues(0, 0, -1);
-  private up = vec3.fromValues(0, 1, 0);
+  public position = new Vec3(0, 0, 0.36);
+  private target = new Vec3(0, 0, -1);
+  private up = new Vec3(0, 1, 0);
 
   constructor() {
     this.viewMatrix = this.makeLookAtMatrix({
@@ -41,7 +42,7 @@ export class Camera {
     const b = -t;
     const n = near;
 
-    const out = mat4.create();
+    const out = new Mat4();
 
     //Perspective projection: https://www.songho.ca/opengl/gl_projectionmatrix.html
     out[0] = (2 * n) / (r - l); // m[0][0]
@@ -67,7 +68,7 @@ export class Camera {
     const b = -t;
     const n = near;
 
-    const out = mat4.create();
+    const out = new Mat4();
 
     //Orthographic projection: https://www.songho.ca/opengl/gl_projectionmatrix.html
     out[0] = 2 / (r - l); // m[0][0]
@@ -85,18 +86,12 @@ export class Camera {
     const { eye = this.position, target = this.target, up = this.up } = props;
 
     // LookAt matrix: https://www.songho.ca/opengl/gl_camera.html
-    const forward = vec3.create();
-    vec3.subtract(forward, eye, target);
-    vec3.normalize(forward, forward);
 
-    const left = vec3.create();
-    vec3.cross(left, up, forward);
-    vec3.normalize(left, left);
+    const forward = new Vec3().sub(eye, target).normalize();
+    const left = new Vec3().cross(up, forward).normalize();
+    const newUp = new Vec3().cross(forward, left);
 
-    const newUp = vec3.create();
-    vec3.cross(newUp, forward, left);
-
-    const out = mat4.create();
+    const out = new Mat4();
 
     out[0] = left[0];
     out[1] = newUp[0];

@@ -1,11 +1,10 @@
-import { vec3 } from 'gl-matrix';
-
 import { ShaderProgram } from '../lib/ShaderProgram';
 import { Mesh } from '../lib/Mesh';
 import { TexturesManager } from '../lib/textures-manager/TexturesManager';
 import { globalState } from '../utils/globalState';
 import { GeometriesManager } from '../lib/GeometriesManager';
 import { Camera } from '../lib/Camera';
+import { Vec3 } from '../lib/math/Vec3';
 
 import fragmentShaderMedia from '../shaders/media/fragment.glsl';
 import vertexShaderMedia from '../shaders/media/vertex.glsl';
@@ -75,9 +74,9 @@ export class Objects3D {
         geometry: this.geometriesManager.getGeometry('plane'),
       });
 
-      mediaPlane.position = vec3.fromValues((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, 0);
-      mediaPlane.rotation = vec3.fromValues(0, 0, 0);
-      mediaPlane.scale = vec3.fromValues(0.01, 0.01, 0.01);
+      mediaPlane.position = new Vec3((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, 0);
+      mediaPlane.rotation = new Vec3(0);
+      mediaPlane.scale = new Vec3(0.01);
 
       this.mediaPlanes.push(mediaPlane);
     }
@@ -111,7 +110,7 @@ export class Objects3D {
     }
 
     this.mediaPlanes.forEach((mediaPlane, key) => {
-      mediaPlane.position = vec3.fromValues(
+      mediaPlane.position.setTo(
         mouse2DCurrent[0] * randomSeedsArray[key + 3] + (randomSeedsArray[key + 1] - 0.5) * 0.25,
         (randomSeedsArray[key + 2] - 0.5) * 0.25,
         randomSeedsArray[key + 3] * 0.1

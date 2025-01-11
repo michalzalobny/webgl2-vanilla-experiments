@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { Vec3 } from './lib/math/Vec3';
 
 import { globalState } from './utils/globalState';
 import { Camera } from './lib/Camera';
@@ -70,7 +70,7 @@ export class Scene {
 
     // Update camera
     this.camera.updateViewMatrix({
-      target: vec3.fromValues(mouse2DCurrent[0] * -0.25, mouse2DCurrent[1] * 0.05, -1),
+      target: new Vec3(mouse2DCurrent[0] * -0.25, mouse2DCurrent[1] * 0.05, -1),
     });
 
     this.render();

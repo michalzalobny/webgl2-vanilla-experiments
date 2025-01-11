@@ -1,9 +1,9 @@
-import { mat4, vec3 } from 'gl-matrix';
-
 import { ShaderProgram } from './ShaderProgram';
 import { createAndInitBuffer, setupVertexAttribute } from './Util';
 import { Camera } from './Camera';
 import { GeometryObject } from './parseOBJ';
+import { Vec3 } from './math/Vec3';
+import { Mat4 } from './math/Mat4';
 
 interface Constructor {
   geometry: GeometryObject | null;
@@ -27,11 +27,11 @@ export class Mesh {
   private normalBuffer: WebGLBuffer | null = null;
   private uvBuffer: WebGLBuffer | null = null;
 
-  private modelMatrix = mat4.create();
+  private modelMatrix = new Mat4();
 
-  public position = vec3.fromValues(0, 0, 0);
-  public scale = vec3.fromValues(1, 1, 1);
-  public rotation = vec3.fromValues(0, 0, 0);
+  public position = new Vec3(0);
+  public scale = new Vec3(1);
+  public rotation = new Vec3(0, 0, 0);
 
   constructor(props: Constructor) {
     const { gl, shaderProgram, geometry } = props;
@@ -112,12 +112,12 @@ export class Mesh {
     this.gl.bindVertexArray(this.VAO);
 
     // Construct model matrix
-    mat4.identity(this.modelMatrix);
-    mat4.translate(this.modelMatrix, this.modelMatrix, this.position);
-    mat4.scale(this.modelMatrix, this.modelMatrix, this.scale);
-    mat4.rotateX(this.modelMatrix, this.modelMatrix, this.rotation[0]);
-    mat4.rotateY(this.modelMatrix, this.modelMatrix, this.rotation[1]);
-    mat4.rotateZ(this.modelMatrix, this.modelMatrix, this.rotation[2]);
+    this.modelMatrix.identity();
+    this.modelMatrix.translate(this.position);
+    this.modelMatrix.scale(this.scale);
+    this.modelMatrix.rotateX(this.rotation[0]);
+    this.modelMatrix.rotateY(this.rotation[1]);
+    this.modelMatrix.rotateZ(this.rotation[2]);
 
     // Load model matrix, view matrix and projection matrix to shader
     this.shaderProgram.setUniformMatrix4fv('u_modelMatrix', this.modelMatrix);

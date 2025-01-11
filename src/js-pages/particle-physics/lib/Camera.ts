@@ -1,5 +1,5 @@
-import { Mat4 } from './math/Mat4';
 import { Vec3 } from './math/Vec3';
+import { Mat4 } from './math/Mat4';
 
 interface MakeProjectionMatrix {
   fov: number;
@@ -19,7 +19,7 @@ export class Camera {
   public orthoProjectionMatrix = new Mat4();
   public viewMatrix = new Mat4();
 
-  public position = new Vec3(0, 0, 1000);
+  public position = new Vec3(0, 0, 0.36);
   private target = new Vec3(0, 0, -1);
   private up = new Vec3(0, 1, 0);
 
@@ -86,16 +86,10 @@ export class Camera {
     const { eye = this.position, target = this.target, up = this.up } = props;
 
     // LookAt matrix: https://www.songho.ca/opengl/gl_camera.html
-    const forward = new Vec3();
-    forward.sub(eye, target);
-    forward.normalize();
 
-    const left = new Vec3();
-    left.cross(up, forward);
-    left.normalize();
-
-    const newUp = new Vec3();
-    newUp.cross(forward, left);
+    const forward = new Vec3().sub(eye, target).normalize();
+    const left = new Vec3().cross(up, forward).normalize();
+    const newUp = new Vec3().cross(forward, left);
 
     const out = new Mat4();
 
