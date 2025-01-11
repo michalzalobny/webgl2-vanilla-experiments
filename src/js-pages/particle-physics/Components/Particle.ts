@@ -20,6 +20,8 @@ export class Particle {
   public velocity = new Vec3();
   public acceleration = new Vec3();
 
+  private tempVec3 = new Vec3();
+
   public mass: number = 1;
 
   private geometriesManager: GeometriesManager;
@@ -58,15 +60,21 @@ export class Particle {
   }
 
   public update() {
+    const dt = globalState.dt.value;
     // Update acceleration so it points to the center of the screen
     const center = new Vec3(0, 0, 0);
     const force = center.sub(this.mesh.position);
     force.normalize();
-    force.multiply(0.08);
+    force.multiply(0.1);
     this.acceleration = force;
 
-    this.velocity.add(this.acceleration);
-    this.mesh.position.add(this.velocity);
+    // Update velocity: velocity += acceleration * dt
+    this.tempVec3.copy(this.acceleration).multiply(dt);
+    this.velocity.add(this.tempVec3);
+
+    // Update position: position += velocity * dt
+    this.tempVec3.copy(this.velocity).multiply(dt);
+    this.mesh.position.add(this.tempVec3);
 
     // Switch direction if we hit the walls
     const leftBound = -globalState.stageSize.value[0] / 2;

@@ -5,7 +5,7 @@ export const globalState = {
   pixelRatio: {
     value: 1,
   },
-  slowDownFactor: {
+  dt: {
     value: 1,
   },
   uTime: {

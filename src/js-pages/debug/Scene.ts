@@ -65,8 +65,8 @@ export class Scene {
     // Lerp mouse position
     const mouse2DTarget = globalState.mouse2DTarget.value;
     const mouse2DCurrent = globalState.mouse2DCurrent.value;
-    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.053 * globalState.slowDownFactor.value);
-    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.053 * globalState.slowDownFactor.value);
+    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.053 * globalState.dt.value);
+    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.053 * globalState.dt.value);
 
     // Update camera
     this.camera.updateViewMatrix({

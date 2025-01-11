@@ -78,8 +78,8 @@ export class App {
     }
 
     const delta = time - this.lastFrameTime;
-    const slowDownFactor = delta / constants.DT_FPS;
-    globalState.slowDownFactor.value = slowDownFactor;
+    const dt = delta / constants.DT_FPS;
+    globalState.dt.value = dt;
     globalState.uTime.value = time * 0.001;
 
     this.lastFrameTime = time;

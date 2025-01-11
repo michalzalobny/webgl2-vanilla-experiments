@@ -6,7 +6,6 @@ import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
-import { Vec3 } from './lib/math/Vec3';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -16,6 +15,7 @@ export class Scene {
   private geometriesManager;
 
   private particles: Particle[] = [];
+  private particlesCreationTimeouts: NodeJS.Timeout[] = [];
   private background: Background | null = null;
 
   constructor() {
@@ -44,19 +44,29 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    for (let i = 0; i < 10; i++) {
-      const particle = new Particle({
-        x: 0,
-        y: 0,
-        mass: (Math.random() * 0.5 + 0.5) * 50,
-        geometriesManager: this.geometriesManager,
-        gl: this.gl,
-        camera: this.camera,
-      });
+    const getRandom = (max: number) => {
+      let random = (Math.random() - 0.5) * max;
+      if (random < 0) random -= max * Math.random();
+      else random += max * Math.random();
+      return random;
+    };
 
-      particle.velocity.setTo((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, 0);
-      // particle.acceleration.setTo(Math.random() * 0.1 - 0.05, Math.random() * 0.1 - 0.05, 0);
-      this.particles.push(particle);
+    for (let i = 0; i < 20; i++) {
+      const timeout = setTimeout(() => {
+        const particle = new Particle({
+          x: 0,
+          y: 0,
+          mass: (Math.random() * 0.5 + 0.5) * 50,
+          geometriesManager: this.geometriesManager,
+          gl: this.gl,
+          camera: this.camera,
+        });
+
+        particle.velocity.setTo(getRandom(5), getRandom(6), 0);
+        this.particles.push(particle);
+      }, i * 20);
+
+      this.particlesCreationTimeouts.push(timeout);
     }
 
     this.background = new Background({
@@ -70,8 +80,8 @@ export class Scene {
     // Lerp mouse position
     const mouse2DTarget = globalState.mouse2DTarget.value;
     const mouse2DCurrent = globalState.mouse2DCurrent.value;
-    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.35 * globalState.slowDownFactor.value);
-    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.35 * globalState.slowDownFactor.value);
+    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.35 * globalState.dt.value);
+    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.35 * globalState.dt.value);
 
     this.render();
   }
@@ -139,6 +149,10 @@ export class Scene {
   public destroy() {
     this.geometriesManager?.destroy();
     this.texturesManager?.destroy();
+
+    this.particlesCreationTimeouts.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
 
     this.particles.forEach((particle) => {
       particle.destroy();
