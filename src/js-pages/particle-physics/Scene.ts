@@ -15,7 +15,7 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private particle: Particle | null = null;
+  private particles: Particle[] = [];
   private background: Background | null = null;
 
   constructor() {
@@ -44,16 +44,20 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    this.particle = new Particle({
-      x: 0,
-      y: 0,
-      mass: 1,
-      geometriesManager: this.geometriesManager,
-      gl: this.gl,
-      camera: this.camera,
-    });
+    for (let i = 0; i < 10; i++) {
+      const particle = new Particle({
+        x: 0,
+        y: 0,
+        mass: (Math.random() * 0.5 + 0.5) * 50,
+        geometriesManager: this.geometriesManager,
+        gl: this.gl,
+        camera: this.camera,
+      });
 
-    this.particle.velocity = new Vec3(2 * globalState.slowDownFactor.value, 0, 0);
+      particle.velocity.setTo((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, 0);
+      // particle.acceleration.setTo(Math.random() * 0.1 - 0.05, Math.random() * 0.1 - 0.05, 0);
+      this.particles.push(particle);
+    }
 
     this.background = new Background({
       camera: this.camera,
@@ -91,7 +95,9 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    this.particle?.update();
+    this.particles.forEach((particle) => {
+      particle.update();
+    });
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -125,14 +131,18 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.particle?.onResize();
+    this.particles.forEach((particle) => {
+      particle.onResize();
+    });
   }
 
   public destroy() {
     this.geometriesManager?.destroy();
     this.texturesManager?.destroy();
 
-    this.particle?.destroy();
+    this.particles.forEach((particle) => {
+      particle.destroy();
+    });
     this.background?.destroy();
   }
 }

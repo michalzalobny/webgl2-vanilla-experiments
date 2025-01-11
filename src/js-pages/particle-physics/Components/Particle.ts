@@ -54,12 +54,34 @@ export class Particle {
     });
 
     this.mesh.position.setTo(x, y, 0);
-    this.mesh.scale.setTo(this.mass * 50, this.mass * 50, 1);
+    this.mesh.scale.setTo(this.mass, this.mass, 1);
   }
 
   public update() {
-    // Add velocity to position
+    // Update acceleration so it points to the center of the screen
+    const center = new Vec3(0, 0, 0);
+    const force = center.sub(this.mesh.position);
+    force.normalize();
+    force.multiply(0.08);
+    this.acceleration = force;
+
+    this.velocity.add(this.acceleration);
     this.mesh.position.add(this.velocity);
+
+    // Switch direction if we hit the walls
+    const leftBound = -globalState.stageSize.value[0] / 2;
+    const rightBound = globalState.stageSize.value[0] / 2;
+    const topBound = globalState.stageSize.value[1] / 2;
+    const bottomBound = -globalState.stageSize.value[1] / 2;
+
+    if (this.mesh.position.x - this.mass / 2 < leftBound || this.mesh.position.x + this.mass / 2 > rightBound) {
+      this.velocity.x *= -1;
+    }
+
+    if (this.mesh.position.y - this.mass / 2 < bottomBound || this.mesh.position.y + this.mass / 2 > topBound) {
+      this.velocity.y *= -1;
+    }
+
     this.mesh.render({ camera: this.camera });
   }
 
