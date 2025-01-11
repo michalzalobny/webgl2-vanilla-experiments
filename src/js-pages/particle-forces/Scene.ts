@@ -44,13 +44,6 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    const getRandom = (max: number) => {
-      let random = (Math.random() - 0.5) * max;
-      if (random < 0) random -= max * Math.random();
-      else random += max * Math.random();
-      return random;
-    };
-
     for (let i = 0; i < 10; i++) {
       const timeout = setTimeout(() => {
         const particle = new Particle({
@@ -62,7 +55,6 @@ export class Scene {
           camera: this.camera,
         });
 
-        particle.velocity.setTo(getRandom(5), getRandom(6), 0);
         this.particles.push(particle);
       }, i * 20);
 

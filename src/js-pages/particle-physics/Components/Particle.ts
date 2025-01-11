@@ -70,18 +70,6 @@ export class Particle {
 
     this.integrate(dt);
 
-    // Dont let the particle go out of the screen
-    const leftBound = -globalState.stageSize.value[0] / 2;
-    const rightBound = globalState.stageSize.value[0] / 2;
-    const topBound = globalState.stageSize.value[1] / 2;
-    const bottomBound = -globalState.stageSize.value[1] / 2;
-    if (this.mesh.position.x - this.mass / 2 < leftBound || this.mesh.position.x + this.mass / 2 > rightBound) {
-      this.velocity.x *= -1;
-    }
-    if (this.mesh.position.y - this.mass / 2 < bottomBound || this.mesh.position.y + this.mass / 2 > topBound) {
-      this.velocity.y *= -1;
-    }
-
     this.mesh.render({ camera: this.camera });
   }
 
