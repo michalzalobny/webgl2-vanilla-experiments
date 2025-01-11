@@ -44,7 +44,7 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       const timeout = setTimeout(() => {
         const particle = new Particle({
           x: 0,
@@ -56,7 +56,7 @@ export class Scene {
         });
 
         this.particles.push(particle);
-      }, i * 20);
+      }, i * 50);
 
       this.particlesCreationTimeouts.push(timeout);
     }
