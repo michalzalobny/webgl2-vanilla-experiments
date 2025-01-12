@@ -26,6 +26,7 @@ export class Particle {
   private sumForces = new Vec3();
 
   public mass: number = 1;
+  private invMass: number;
   public radius: number = 1;
 
   private geometriesManager: GeometriesManager;
@@ -38,6 +39,8 @@ export class Particle {
 
   constructor({ mass, geometriesManager, x, y, gl, camera, radius }: Props) {
     this.mass = mass;
+    if (mass === 0) throw new Error('Mass cannot be 0');
+    this.invMass = 1 / mass;
     this.radius = radius;
     this.gl = gl;
     this.geometriesManager = geometriesManager;
@@ -116,7 +119,7 @@ export class Particle {
   // Euler integration of the particle's position and velocity
   private integrate = (dt: number) => {
     // Apply forces to acceleration
-    this.acceleration.copy(this.sumForces).divide(this.mass);
+    this.acceleration.copy(this.sumForces).multiply(this.invMass);
 
     // Update velocity: velocity += acceleration * dt
     this.tempVec3.copy(this.acceleration).multiply(dt);
