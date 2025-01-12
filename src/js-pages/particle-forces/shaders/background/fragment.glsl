@@ -54,8 +54,8 @@ void main() {
 
   float t = u_time * 0.03;
 
-  vec3 color1 = vec3(0.12, 0.32, 0.62);
-  vec3 color2 = vec3(0.1, 0.2, 0.4);
+  vec3 color1 = vec3(0.08, 0.09, 0.2);
+  vec3 color2 = vec3(0.1, 0.2, 0.2);
   vec3 colorMixed = mix(color1, color2, uv.y);
   
   float c = SmoothNoise2(vec2(uv.x + t * 1.3, uv.y + t *0.1));
