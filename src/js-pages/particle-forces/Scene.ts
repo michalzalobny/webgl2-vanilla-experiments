@@ -208,14 +208,31 @@ export class Scene {
     }
   };
 
+  private onPointerDown = (e: PointerEvent) => {
+    //Create a new particle on click
+    const particle = new Particle({
+      x: e.clientX - globalState.stageSize.value[0] / 2,
+      y: -e.clientY + globalState.stageSize.value[1] / 2,
+      mass: 1 + Math.random(),
+      radius: 10 + Math.random() * 10,
+      geometriesManager: this.geometriesManager,
+      gl: this.gl,
+      camera: this.camera,
+    });
+
+    this.particles.push(particle);
+  };
+
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
     window.addEventListener('keyup', this.onKeyUpWSAD);
+    window.addEventListener('pointerdown', this.onPointerDown);
   }
 
   private removeListeners() {
     window.removeEventListener('keydown', this.onKeyDownWSAD);
     window.removeEventListener('keyup', this.onKeyUpWSAD);
+    window.removeEventListener('pointerdown', this.onPointerDown);
   }
 
   public destroy() {
