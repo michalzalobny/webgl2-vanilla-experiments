@@ -6,6 +6,8 @@ import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
+import { Vec3 } from './lib/math/Vec3';
+import { constants } from './utils/constants';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -18,6 +20,8 @@ export class Scene {
   private particlesCreationTimeouts: NodeJS.Timeout[] = [];
   private background: Background | null = null;
 
+  private pushForce = new Vec3();
+
   constructor() {
     if (!globalState.canvasEl) {
       throw new Error('Canvas element not found');
@@ -27,6 +31,8 @@ export class Scene {
       throw new Error('WebGL2 not supported');
     }
     this.gl = ctx;
+
+    this.addListeners();
 
     this.texturesManager = new TexturesManager({ gl: this.gl });
     this.geometriesManager = new GeometriesManager();
@@ -44,7 +50,7 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 20; i++) {
       const timeout = setTimeout(() => {
         const particle = new Particle({
           x: 0,
@@ -57,7 +63,7 @@ export class Scene {
         });
 
         this.particles.push(particle);
-      }, i * 50);
+      }, i * 30);
 
       this.particlesCreationTimeouts.push(timeout);
     }
@@ -99,6 +105,7 @@ export class Scene {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     this.particles.forEach((particle) => {
+      particle.addForce(this.pushForce);
       particle.update();
     });
   }
@@ -139,9 +146,64 @@ export class Scene {
     });
   }
 
+  private onKeyDownWSAD = (e: KeyboardEvent) => {
+    const strength = 40 * constants.PIXELS_PER_METER;
+    switch (e.key) {
+      case 'w':
+      case 'ArrowUp':
+        this.pushForce[1] = strength;
+        break;
+      case 's':
+      case 'ArrowDown':
+        this.pushForce[1] = -strength;
+        break;
+      case 'a':
+      case 'ArrowLeft':
+        this.pushForce[0] = -strength;
+        break;
+      case 'd':
+      case 'ArrowRight':
+        this.pushForce[0] = strength;
+        break;
+      default:
+        break;
+    }
+  };
+
+  private onKeyUpWSAD = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case 'w':
+      case 's':
+      case 'ArrowUp':
+      case 'ArrowDown':
+        this.pushForce[1] = 0;
+        break;
+      case 'a':
+      case 'd':
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        this.pushForce[0] = 0;
+        break;
+      default:
+        break;
+    }
+  };
+
+  private addListeners() {
+    window.addEventListener('keydown', this.onKeyDownWSAD);
+    window.addEventListener('keyup', this.onKeyUpWSAD);
+  }
+
+  private removeListeners() {
+    window.removeEventListener('keydown', this.onKeyDownWSAD);
+    window.removeEventListener('keyup', this.onKeyUpWSAD);
+  }
+
   public destroy() {
     this.geometriesManager?.destroy();
     this.texturesManager?.destroy();
+
+    this.removeListeners();
 
     this.particlesCreationTimeouts.forEach((timeout) => {
       clearTimeout(timeout);

@@ -1,9 +1,7 @@
 import { globalState } from './utils/globalState';
 import { constants } from './utils/constants';
-import { debounce } from './utils/debounce';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
-import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;

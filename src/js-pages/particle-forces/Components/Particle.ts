@@ -92,11 +92,11 @@ export class Particle {
     const weight = this.generateWeightForce();
     this.addForce(weight);
     //Add wind force
-    const windForce = new Vec3(-2 * constants.PIXELS_PER_METER, 0, 0);
+    const windForce = new Vec3(-0.9 * constants.PIXELS_PER_METER, 0, 0);
     this.addForce(windForce);
     // Add drag force
-    const drag = this.generateDragForce();
-    this.addForce(drag);
+    // const drag = this.generateDragForce();
+    // this.addForce(drag);
 
     this.integrate(dt);
 
@@ -108,22 +108,23 @@ export class Particle {
 
     const radius = this.radius;
 
+    const damping = 0.6;
     // Handle X-bound collisions
     if (this.mesh.position.x - radius <= leftBound) {
       this.mesh.position.x = leftBound + radius;
-      this.velocity.x *= -0.9; // Apply damping
+      this.velocity.x *= -damping; // Apply damping
     } else if (this.mesh.position.x + radius >= rightBound) {
       this.mesh.position.x = rightBound - radius;
-      this.velocity.x *= -0.9;
+      this.velocity.x *= -damping;
     }
 
     // Handle Y-bound collisions
     if (this.mesh.position.y - radius <= bottomBound) {
       this.mesh.position.y = bottomBound + radius;
-      this.velocity.y *= -0.9;
+      this.velocity.y *= -damping;
     } else if (this.mesh.position.y + radius >= topBound) {
       this.mesh.position.y = topBound - radius;
-      this.velocity.y *= -0.9;
+      this.velocity.y *= -damping;
     }
 
     this.mesh.render({ camera: this.camera });
