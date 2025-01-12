@@ -23,6 +23,8 @@ export class Scene {
 
   private pushForce = new Vec3();
 
+  private isPointerDown = false;
+
   constructor() {
     if (!globalState.canvasEl) {
       throw new Error('Canvas element not found');
@@ -56,8 +58,8 @@ export class Scene {
         const particle = new Particle({
           x: 0,
           y: 0,
-          mass: 1 + Math.random(),
-          radius: 10 + Math.random() * 10,
+          mass: 1,
+          radius: 15,
           geometriesManager: this.geometriesManager,
           gl: this.gl,
           camera: this.camera,
@@ -194,9 +196,13 @@ export class Scene {
     }
   };
 
-  private onPointerDown = (e: PointerEvent) => {};
+  private onPointerDown = (e: PointerEvent) => {
+    this.isPointerDown = true;
+  };
 
-  private onPointerUp = (e: PointerEvent) => {};
+  private onPointerUp = (e: PointerEvent) => {
+    this.isPointerDown = false;
+  };
 
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
