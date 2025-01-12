@@ -6,11 +6,9 @@ import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
-import { Liquid } from './Components/Liquid';
 import { Vec3 } from './lib/math/Vec3';
 import { constants } from './utils/constants';
 import { Force } from './physics/Force';
-import { updateDebug } from './utils/updateDebug';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -22,7 +20,6 @@ export class Scene {
   private particles: Particle[] = [];
   private particlesCreationTimeouts: NodeJS.Timeout[] = [];
   private background: Background | null = null;
-  private liquid: Liquid | null = null;
 
   private pushForce = new Vec3();
 
@@ -54,7 +51,7 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 1; i++) {
       const timeout = setTimeout(() => {
         const particle = new Particle({
           x: 0,
@@ -73,12 +70,6 @@ export class Scene {
     }
 
     this.background = new Background({
-      camera: this.camera,
-      geometriesManager: this.geometriesManager,
-      gl: this.gl,
-    });
-
-    this.liquid = new Liquid({
       camera: this.camera,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
@@ -115,13 +106,6 @@ export class Scene {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     this.particles.forEach((particle) => {
-      // Add drag force depedning if its inside the liquid or not
-      if (!this.liquid || !this.liquid.mesh) return;
-      if (particle.mesh.position[1] * 2 < this.liquid?.mesh?.position[1]) {
-        const drag = Force.GenerateDragForce(particle, 0.05);
-        particle.addForce(drag);
-      }
-
       // Add friction force
       const friction = Force.GenerateFrictionForce(particle, 10 * constants.PIXELS_PER_METER);
       particle.addForce(friction);
@@ -129,8 +113,6 @@ export class Scene {
       particle.addForce(this.pushForce);
       particle.update();
     });
-
-    this.liquid?.update();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -164,7 +146,6 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.liquid?.onResize();
     this.particles.forEach((particle) => {
       particle.onResize();
     });
@@ -254,6 +235,5 @@ export class Scene {
       particle.destroy();
     });
     this.background?.destroy();
-    this.liquid?.destroy();
   }
 }
