@@ -75,15 +75,28 @@ export class Particle {
     this.sumForces.setTo(0, 0, 0);
   }
 
+  private generateWeightForce() {
+    const weight = new Vec3(0, -this.mass * 9.81 * constants.PIXELS_PER_METER, 0);
+    return weight;
+  }
+
+  private generateDragForce() {
+    const drag = this.velocity.clone().multiply(-0.1);
+    return drag;
+  }
+
   public update() {
     const dt = globalState.dt.value;
 
     // Add weight force (gravity)
-    const weight = new Vec3(0, -this.mass * 9.81 * constants.PIXELS_PER_METER, 0);
+    const weight = this.generateWeightForce();
     this.addForce(weight);
     //Add wind force
     const windForce = new Vec3(-2 * constants.PIXELS_PER_METER, 0, 0);
     this.addForce(windForce);
+    // Add drag force
+    const drag = this.generateDragForce();
+    this.addForce(drag);
 
     this.integrate(dt);
 
