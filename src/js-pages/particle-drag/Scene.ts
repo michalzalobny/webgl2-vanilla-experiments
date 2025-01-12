@@ -222,6 +222,16 @@ export class Scene {
 
   private onPointerUp = (e: PointerEvent) => {
     this.isPointerDown.value = false;
+
+    const impulseForce = new Vec3(
+      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
+      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
+      0
+    );
+    //Calculate the direction of the force
+    impulseForce.sub(this.particles[0].mesh.position).multiply(-0.1);
+
+    this.particles[0].velocity.setTo(impulseForce);
   };
 
   private addListeners() {
