@@ -9,6 +9,7 @@ import { Background } from './Components/Background';
 import { Vec3 } from './lib/math/Vec3';
 import { constants } from './utils/constants';
 import { Force } from './physics/Force';
+import { DragLine } from './Components/DragLine';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -23,7 +24,9 @@ export class Scene {
 
   private pushForce = new Vec3();
 
-  private isPointerDown = false;
+  private isPointerDown = { value: false };
+
+  private dragLine: DragLine | null = null;
 
   constructor() {
     if (!globalState.canvasEl) {
@@ -76,6 +79,13 @@ export class Scene {
       geometriesManager: this.geometriesManager,
       gl: this.gl,
     });
+
+    this.dragLine = new DragLine({
+      gl: this.gl,
+      geometriesManager: this.geometriesManager,
+      camera: this.camera,
+      isPointerDown: this.isPointerDown,
+    });
   }
 
   public update() {
@@ -99,8 +109,17 @@ export class Scene {
     // Clear the canvas AND the depth buffer.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Set startpoint and endpoint for drag line
+    this.dragLine?.startPoint.setTo(this.particles[0].mesh.position);
+    this.dragLine?.endPoint.setTo(
+      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
+      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
+      0
+    );
+
     // Render opaque objects first
     this.background?.update();
+    this.dragLine?.update();
 
     // Render transparent objects below
     gl.depthMask(false);
@@ -148,6 +167,7 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
+    this.dragLine?.onResize();
     this.particles.forEach((particle) => {
       particle.onResize();
     });
@@ -197,11 +217,11 @@ export class Scene {
   };
 
   private onPointerDown = (e: PointerEvent) => {
-    this.isPointerDown = true;
+    this.isPointerDown.value = true;
   };
 
   private onPointerUp = (e: PointerEvent) => {
-    this.isPointerDown = false;
+    this.isPointerDown.value = false;
   };
 
   private addListeners() {
@@ -232,5 +252,6 @@ export class Scene {
       particle.destroy();
     });
     this.background?.destroy();
+    this.dragLine?.destroy();
   }
 }
