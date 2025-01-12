@@ -16,8 +16,9 @@ out vec4 outColor;
 void main() {
   float circle = distance(v_uv, vec2(0.5, 0.5));
   circle = 1.0 - step(0.5, circle);
+  vec3 finalColor = mix(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), (v_uv.x-v_uv.y));
 
-  vec4 color = vec4(v_uv,0.0, circle);
+  vec4 color = vec4(finalColor, circle);
 
   outColor = color;
 }
