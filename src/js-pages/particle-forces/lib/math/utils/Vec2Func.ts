@@ -98,6 +98,18 @@ export function scale(out: Vec2, a: Vec2, b: number) {
 }
 
 /**
+ * Calculates the squared length of a vec2
+ *
+ * @param {Vec2} a vector to calculate squared length of
+ * @returns {Number} squared length of a
+ */
+export function squaredLength(a: Vec2) {
+  var x = a[0],
+    y = a[1];
+  return x * x + y * y;
+}
+
+/**
  * Calculates the euclidian distance between two vec2's
  *
  * @param {vec2} a the first operand

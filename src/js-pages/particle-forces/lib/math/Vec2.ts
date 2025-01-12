@@ -78,6 +78,10 @@ export class Vec2 extends Float32Array {
     return Vec2Func.cross(this, va);
   }
 
+  squaredLen() {
+    return Vec2Func.squaredLength(this);
+  }
+
   scale(v: number) {
     Vec2Func.scale(this, this, v);
     return this;

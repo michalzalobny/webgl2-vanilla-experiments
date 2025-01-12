@@ -33,7 +33,7 @@ export class Particle {
   private gl: WebGL2RenderingContext;
 
   private program: ShaderProgram;
-  private mesh: Mesh;
+  public mesh: Mesh;
 
   private camera: Camera;
 

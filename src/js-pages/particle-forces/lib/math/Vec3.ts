@@ -87,6 +87,10 @@ export class Vec3 extends Float32Array {
     return this;
   }
 
+  squaredLen() {
+    return Vec3Func.squaredLength(this);
+  }
+
   scale(v: number) {
     Vec3Func.scale(this, this, v);
     return this;

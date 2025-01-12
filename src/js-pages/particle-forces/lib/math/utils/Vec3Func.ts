@@ -119,6 +119,19 @@ export function scale(out: Vec3, a: Vec3, b: number) {
 }
 
 /**
+ * Calculates the squared length of a vec3
+ *
+ * @param {Vec3} a vector to calculate squared length of
+ * @returns {Number} squared length of a
+ */
+export function squaredLength(a: Vec3) {
+  let x = a[0];
+  let y = a[1];
+  let z = a[2];
+  return x * x + y * y + z * z;
+}
+
+/**
  * Calculates the euclidian distance between two vec3's
  *
  * @param {Vec3} a the first operand
