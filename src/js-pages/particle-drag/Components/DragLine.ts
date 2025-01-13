@@ -70,7 +70,7 @@ export class DragLine {
 
   public update() {
     if (!this.isPointerDown.value) return;
-    this.mesh?.scale.setTo(this.startPoint.distance(this.endPoint), 1.2, 1);
+    this.mesh?.scale.setTo(this.startPoint.distance(this.endPoint), 10, 1);
 
     const tempVec = new Vec3().copy(this.endPoint).sub(this.startPoint);
     const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points

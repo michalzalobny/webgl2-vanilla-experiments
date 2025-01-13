@@ -119,13 +119,12 @@ export class Scene {
 
     // Render opaque objects first
     this.background?.update();
-    this.dragLine?.update();
 
     // Render transparent objects below
     gl.depthMask(false);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
+    this.dragLine?.update();
     this.particles.forEach((particle) => {
       // Add friction force
       const friction = Force.GenerateFrictionForce(particle, 10 * constants.PIXELS_PER_METER);
