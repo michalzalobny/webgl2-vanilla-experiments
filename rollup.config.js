@@ -6,7 +6,7 @@ const glslify = require('rollup-plugin-glslify');
 const isProduction = process.env.NODE_ENV === 'production';
 
 // DEFINE FILE NAMES FROM /src/js-pages TO BE BUILD HERE:
-const FILE_NAMES = ['debug', 'particle-physics', 'particle-forces', 'particle-drag'];
+const FILE_NAMES = ['debug', 'particle-physics', 'particle-forces', 'particle-drag', 'attraction'];
 
 const commonPlugins = [
   resolve({ extensions: ['.js', '.ts'] }),
