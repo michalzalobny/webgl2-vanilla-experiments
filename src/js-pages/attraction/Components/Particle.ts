@@ -75,9 +75,9 @@ export class Particle {
   }
 
   public update() {
-    const dt = globalState.dt.value;
+    const physics_dt = globalState.physics_dt.value;
 
-    this.integrate(dt);
+    this.integrate(physics_dt);
 
     // Don't go over the bounds
     const leftBound = -globalState.stageSize.value[0] / 2;

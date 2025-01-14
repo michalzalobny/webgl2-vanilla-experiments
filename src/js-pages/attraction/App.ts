@@ -2,20 +2,22 @@ import { globalState } from './utils/globalState';
 import { constants } from './utils/constants';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
+import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;
   private isResumed = true;
   private lastFrameTime: number | null = null;
-  private scene: Scene;
+  private scene: Scene | null = null;
 
   private resizeBackupTimeout: NodeJS.Timeout; // Used for backup resize event, when the initial resize event is not triggered
 
   constructor() {
-    this.scene = new Scene();
+    this.onResize();
     this.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.addListeners();
     this.resumeAppFrame();
+    this.scene = new Scene();
     this.onResize();
 
     const measuredStageX = globalState.stageSize.value[0];
@@ -39,7 +41,7 @@ export class App {
     const stageX = bounds.width;
     const stageY = bounds.height;
     globalState.stageSize.value = [stageX, stageY];
-    this.scene.onResize();
+    this.scene?.onResize();
   };
 
   private setPixelRatio(pixelRatio: number) {
@@ -76,13 +78,24 @@ export class App {
     }
 
     const delta = time - this.lastFrameTime;
+
+    let physics_dt = delta / 1000;
+    //It means that the physics step is 60fps
+    if (physics_dt > 0.016) {
+      physics_dt = 0.016;
+    }
+
+    updateDebug(`${physics_dt}`);
+
     const dt = delta / constants.DT_FPS;
+
     globalState.dt.value = dt;
+    globalState.physics_dt.value = physics_dt;
     globalState.uTime.value = time * 0.001;
 
     this.lastFrameTime = time;
 
-    this.scene.update();
+    this.scene?.update();
   };
 
   private stopAppFrame() {
@@ -96,7 +109,7 @@ export class App {
     this.stopAppFrame();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('visibilitychange', this.onVisibilityChange);
-    this.scene.destroy();
+    this.scene?.destroy();
     if (this.resizeBackupTimeout) {
       clearTimeout(this.resizeBackupTimeout);
     }

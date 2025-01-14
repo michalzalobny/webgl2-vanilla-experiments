@@ -18,7 +18,7 @@ void main() {
   circle = 1.0 - step(0.5, circle);
   vec3 finalColor = mix(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), (v_uv.x-v_uv.y));
 
-  vec4 color = vec4(finalColor, circle);
+  vec4 color = vec4(finalColor, circle * 0.5);
 
   outColor = color;
 }
