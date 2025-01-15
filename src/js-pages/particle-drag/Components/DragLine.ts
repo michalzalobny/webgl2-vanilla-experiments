@@ -78,7 +78,10 @@ export class DragLine {
     this.mesh?.rotation.setTo(0, 0, angle);
     const meshPosition = new Vec3().copy(this.startPoint).add(this.endPoint).multiply(0.5);
     this.mesh?.position.setTo(meshPosition);
+  }
 
+  public render() {
+    if (!this.isPointerDown.value) return;
     this.mesh?.render({ camera: this.camera });
   }
 

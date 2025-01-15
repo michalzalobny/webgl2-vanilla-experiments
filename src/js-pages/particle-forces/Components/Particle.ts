@@ -6,7 +6,6 @@ import { globalState } from '../utils/globalState';
 import { Mesh } from '../lib/Mesh';
 import { Camera } from '../lib/Camera';
 import { Vec3 } from '../lib/math/Vec3';
-import { constants } from '../utils/constants';
 
 type Props = {
   x: number;
@@ -76,18 +75,18 @@ export class Particle {
   }
 
   private generateWeightForce() {
-    const weight = new Vec3(0, -this.mass * 9.81 * constants.PIXELS_PER_METER, 0);
+    const weight = new Vec3(0, -this.mass * 9.81 * 60, 0);
     return weight;
   }
 
   public update() {
-    const dt = globalState.dt.value;
+    const dt = globalState.physics_dt.value;
 
     // Add weight force (gravity)
     const weight = this.generateWeightForce();
     this.addForce(weight);
     //Add wind force
-    const windForce = new Vec3(-0.9 * constants.PIXELS_PER_METER, 0, 0);
+    const windForce = new Vec3(-0.8 * 60, 0, 0);
     this.addForce(windForce);
 
     this.integrate(dt);

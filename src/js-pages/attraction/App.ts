@@ -2,7 +2,6 @@ import { globalState } from './utils/globalState';
 import { constants } from './utils/constants';
 import { Scene } from './Scene';
 import { MouseMove } from './utils/MouseMove';
-import { updateDebug } from './utils/updateDebug';
 
 export class App {
   private rafId: number | null = null;
@@ -84,8 +83,6 @@ export class App {
     if (physics_dt > 0.016) {
       physics_dt = 0.016;
     }
-
-    updateDebug(`${physics_dt}`);
 
     const dt = delta / constants.DT_FPS;
 

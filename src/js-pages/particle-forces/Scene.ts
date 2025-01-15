@@ -8,9 +8,7 @@ import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
 import { Liquid } from './Components/Liquid';
 import { Vec3 } from './lib/math/Vec3';
-import { constants } from './utils/constants';
 import { Force } from './physics/Force';
-import { updateDebug } from './utils/updateDebug';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -56,11 +54,12 @@ export class Scene {
 
     for (let i = 0; i < 30; i++) {
       const timeout = setTimeout(() => {
+        const mass = 1 + Math.random() * 1.8;
         const particle = new Particle({
           x: 0,
           y: 0,
-          mass: 1 + Math.random(),
-          radius: 10 + Math.random() * 10,
+          mass: mass,
+          radius: mass * 6,
           geometriesManager: this.geometriesManager,
           gl: this.gl,
           camera: this.camera,
@@ -166,7 +165,7 @@ export class Scene {
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 40 * constants.PIXELS_PER_METER;
+    const strength = 4000;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':

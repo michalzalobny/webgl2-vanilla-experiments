@@ -8,6 +8,9 @@ export const globalState = {
   dt: {
     value: 1,
   },
+  physics_dt: {
+    value: 1,
+  },
   uTime: {
     value: 0,
   },

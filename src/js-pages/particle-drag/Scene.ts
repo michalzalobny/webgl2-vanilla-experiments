@@ -109,6 +109,22 @@ export class Scene {
     // Clear the canvas AND the depth buffer.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Render opaque objects first
+    this.background?.update();
+
+    // Render transparent objects below
+    gl.depthMask(false);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    const particle = this.particles[0];
+    // Add friction force
+    const friction = Force.GenerateFrictionForce(particle, 600);
+    particle.addForce(friction);
+    particle.addForce(this.pushForce);
+
+    particle.update();
+
     // Set startpoint and endpoint for drag line
     this.dragLine?.startPoint.setTo(this.particles[0].mesh.position);
     this.dragLine?.endPoint.setTo(
@@ -117,22 +133,10 @@ export class Scene {
       0
     );
 
-    // Render opaque objects first
-    this.background?.update();
-
-    // Render transparent objects below
-    gl.depthMask(false);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // Separate update and render
     this.dragLine?.update();
-    this.particles.forEach((particle) => {
-      // Add friction force
-      const friction = Force.GenerateFrictionForce(particle, 10 * constants.PIXELS_PER_METER);
-      particle.addForce(friction);
-
-      particle.addForce(this.pushForce);
-      particle.update();
-    });
+    this.dragLine?.render();
+    particle.render();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -173,7 +177,7 @@ export class Scene {
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 40 * constants.PIXELS_PER_METER;
+    const strength = 2000;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':
@@ -228,7 +232,7 @@ export class Scene {
       0
     );
     //Calculate the direction of the force
-    impulseForce.sub(this.particles[0].mesh.position).multiply(-0.1);
+    impulseForce.sub(this.particles[0].mesh.position).multiply(-5);
 
     this.particles[0].velocity.setTo(impulseForce);
   };

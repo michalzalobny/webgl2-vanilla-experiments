@@ -64,8 +64,8 @@ export class Scene {
     this.bigPlanet = new Particle({
       x: 500 - globalState.stageSize.value[0] / 2,
       y: -500 + globalState.stageSize.value[1] / 2,
-      mass: 20,
-      radius: 20,
+      mass: 45,
+      radius: 40,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
@@ -120,12 +120,32 @@ export class Scene {
     this.bigPlanet.addForce(bigPlanetFriction);
 
     // Add gravitational force
-    const gravitationalForce = Force.GenerateGravitationalForce(this.smallPlanet, this.bigPlanet, 1000, 5, 100);
+    const gravitationalForce = Force.GenerateGravitationalForce(this.smallPlanet, this.bigPlanet, 1500, 10, 90);
     this.smallPlanet.addForce(gravitationalForce);
     this.bigPlanet.addForce(gravitationalForce.multiply(-1));
 
     this.smallPlanet.update();
     this.bigPlanet.update();
+
+    const smallPlanetPosition = this.smallPlanet.mesh.position;
+    const bigPlanetPosition = this.bigPlanet.mesh.position;
+
+    const distance = smallPlanetPosition.distance(bigPlanetPosition);
+
+    if (distance < this.smallPlanet.radius + this.bigPlanet.radius) {
+      // Collision
+      const normal = smallPlanetPosition.clone().sub(bigPlanetPosition).normalize();
+      const relativeVelocity = this.smallPlanet.velocity.clone().sub(this.bigPlanet.velocity);
+      const relativeSpeed = relativeVelocity.dot(normal);
+
+      const impulse = normal.clone().multiply(-1.6 * relativeSpeed);
+      this.smallPlanet.velocity.add(impulse);
+
+      // Move the small planet away from the big planet
+      this.smallPlanet.mesh.position.setTo(
+        this.bigPlanet.mesh.position.clone().add(normal.multiply(this.bigPlanet.radius + this.smallPlanet.radius))
+      );
+    }
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -164,7 +184,7 @@ export class Scene {
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 2500;
+    const strength = 1000;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':

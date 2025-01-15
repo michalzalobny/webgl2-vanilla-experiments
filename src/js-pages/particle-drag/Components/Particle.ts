@@ -75,7 +75,7 @@ export class Particle {
   }
 
   public update() {
-    const dt = globalState.dt.value;
+    const dt = globalState.physics_dt.value;
 
     this.integrate(dt);
 
@@ -105,7 +105,9 @@ export class Particle {
       this.mesh.position.y = topBound - radius;
       this.velocity.y *= -damping;
     }
+  }
 
+  render() {
     this.mesh.render({ camera: this.camera });
   }
 
