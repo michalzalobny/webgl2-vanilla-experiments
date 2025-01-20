@@ -172,14 +172,38 @@ export class ShaderProgram {
       if (typeof value === 'number') {
         this.setUniform1f(objKey, value);
       } else if (value instanceof Array) {
-        if (value.length === 4) {
-          this.setUniform4f(objKey, [value[0], value[1], value[2], value[3]]);
-        }
-        if (value.length === 2) {
-          this.setUniform2f(objKey, [value[0], value[1]]);
+        switch (value.length) {
+          case 2:
+            this.setUniform2f(objKey, [value[0], value[1]]);
+            break;
+          case 3:
+            this.setUniform3f(objKey, [value[0], value[1], value[2]]);
+            break;
+          case 4:
+            this.setUniform4f(objKey, [value[0], value[1], value[2], value[3]]);
+            break;
+          default:
+            console.error('Array length not supported for uniform setting');
+            break;
         }
       } else if (value instanceof Float32Array) {
-        this.setUniformMatrix4fv(objKey, value);
+        switch (value.length) {
+          case 2:
+            this.setUniform2f(objKey, [value[0], value[1]]);
+            break;
+          case 3:
+            this.setUniform3f(objKey, [value[0], value[1], value[2]]);
+            break;
+          case 4:
+            this.setUniform4f(objKey, [value[0], value[1], value[2], value[3]]);
+            break;
+          case 16:
+            this.setUniformMatrix4fv(objKey, value);
+            break;
+          default:
+            console.error('Float32Array length not supported for uniform setting');
+            break;
+        }
       }
     });
   }

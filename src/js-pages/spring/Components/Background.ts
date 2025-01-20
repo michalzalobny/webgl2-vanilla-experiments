@@ -52,10 +52,12 @@ export class Background {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.position = new Vec3(0, 0, -0.001); // Put the background behind everything
+    this.mesh.position = new Vec3(0, 0, -1); // Put the background behind everything
   }
 
-  public update() {
+  public update() {}
+
+  public render() {
     this.mesh?.render({ camera: this.camera });
   }
 

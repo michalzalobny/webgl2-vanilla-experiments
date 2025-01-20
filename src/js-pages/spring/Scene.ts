@@ -6,7 +6,6 @@ import { GeometriesManager } from './lib/GeometriesManager';
 
 import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
-import { Liquid } from './Components/Liquid';
 import { Vec3 } from './lib/math/Vec3';
 import { Force } from './physics/Force';
 
@@ -17,10 +16,10 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private particles: Particle[] = [];
-  private particlesCreationTimeouts: NodeJS.Timeout[] = [];
+  private smallPlanet: Particle | null = null;
+  private bigPlanet: Particle | null = null;
+
   private background: Background | null = null;
-  private liquid: Liquid | null = null;
 
   private pushForce = new Vec3();
 
@@ -52,32 +51,27 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    for (let i = 0; i < 3; i++) {
-      const timeout = setTimeout(() => {
-        const mass = 1 + Math.random() * 1.8;
-        const particle = new Particle({
-          x: 0,
-          y: 0,
-          mass: mass,
-          radius: mass * 6,
-          geometriesManager: this.geometriesManager,
-          gl: this.gl,
-          camera: this.camera,
-        });
-
-        this.particles.push(particle);
-      }, i * 30);
-
-      this.particlesCreationTimeouts.push(timeout);
-    }
-
-    this.background = new Background({
-      camera: this.camera,
+    this.smallPlanet = new Particle({
+      x: 200 - globalState.stageSize.value[0] / 2,
+      y: -200 + globalState.stageSize.value[1] / 2,
+      mass: 1,
+      radius: 6,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
+      camera: this.camera,
     });
 
-    this.liquid = new Liquid({
+    this.bigPlanet = new Particle({
+      x: 500 - globalState.stageSize.value[0] / 2,
+      y: -500 + globalState.stageSize.value[1] / 2,
+      mass: 45,
+      radius: 40,
+      geometriesManager: this.geometriesManager,
+      gl: this.gl,
+      camera: this.camera,
+    });
+
+    this.background = new Background({
       camera: this.camera,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
@@ -107,24 +101,54 @@ export class Scene {
 
     // Render opaque objects first
     this.background?.update();
+    this.background?.render();
 
     // Render transparent objects below
     gl.depthMask(false);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    this.particles.forEach((particle) => {
-      // Add drag force depedning if its inside the liquid or not
-      if (!this.liquid || !this.liquid.mesh) return;
-      if (particle.mesh.position[1] * 2 < this.liquid?.mesh?.position[1]) {
-        const drag = Force.GenerateDragForce(particle, 0.05);
-        particle.addForce(drag);
-      }
-      particle.addForce(this.pushForce);
-      particle.update();
-    });
+    if (!this.smallPlanet || !this.bigPlanet) return;
 
-    this.liquid?.update();
+    // Add push force
+    this.smallPlanet.addForce(this.pushForce);
+    this.bigPlanet.addForce(this.pushForce);
+
+    // Add friction force
+    const smallPlanetFriction = Force.GenerateFrictionForce(this.smallPlanet, 20);
+    const bigPlanetFriction = Force.GenerateFrictionForce(this.bigPlanet, 20);
+    this.smallPlanet.addForce(smallPlanetFriction);
+    this.bigPlanet.addForce(bigPlanetFriction);
+
+    // Add gravitational force
+    const gravitationalForce = Force.GenerateGravitationalForce(this.smallPlanet, this.bigPlanet, 1500, 10, 90);
+    this.smallPlanet.addForce(gravitationalForce);
+    this.bigPlanet.addForce(gravitationalForce.multiply(-1));
+
+    this.smallPlanet.update();
+    this.smallPlanet.render();
+    this.bigPlanet.update();
+    this.bigPlanet.render();
+
+    const smallPlanetPosition = this.smallPlanet.mesh.position;
+    const bigPlanetPosition = this.bigPlanet.mesh.position;
+
+    const distance = smallPlanetPosition.distance(bigPlanetPosition);
+
+    if (distance < this.smallPlanet.radius + this.bigPlanet.radius) {
+      // Collision
+      const normal = smallPlanetPosition.clone().sub(bigPlanetPosition).normalize();
+      const relativeVelocity = this.smallPlanet.velocity.clone().sub(this.bigPlanet.velocity);
+      const relativeSpeed = relativeVelocity.dot(normal);
+
+      const impulse = normal.clone().multiply(-1.6 * relativeSpeed);
+      this.smallPlanet.velocity.add(impulse);
+
+      // Move the small planet away from the big planet
+      this.smallPlanet.mesh.position.setTo(
+        this.bigPlanet.mesh.position.clone().add(normal.multiply(this.bigPlanet.radius + this.smallPlanet.radius))
+      );
+    }
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -158,14 +182,12 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.liquid?.onResize();
-    this.particles.forEach((particle) => {
-      particle.onResize();
-    });
+    this.smallPlanet?.onResize();
+    this.bigPlanet?.onResize();
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 4000;
+    const strength = 1000;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':
@@ -207,32 +229,14 @@ export class Scene {
     }
   };
 
-  private onPointerDown = (e: PointerEvent) => {
-    const mass = 1 + Math.random() * 1.8;
-    //Create a new particle on click
-    const particle = new Particle({
-      x: e.clientX - globalState.stageSize.value[0] / 2,
-      y: -e.clientY + globalState.stageSize.value[1] / 2,
-      mass: mass,
-      radius: mass * 6,
-      geometriesManager: this.geometriesManager,
-      gl: this.gl,
-      camera: this.camera,
-    });
-
-    this.particles.push(particle);
-  };
-
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
     window.addEventListener('keyup', this.onKeyUpWSAD);
-    window.addEventListener('pointerdown', this.onPointerDown);
   }
 
   private removeListeners() {
     window.removeEventListener('keydown', this.onKeyDownWSAD);
     window.removeEventListener('keyup', this.onKeyUpWSAD);
-    window.removeEventListener('pointerdown', this.onPointerDown);
   }
 
   public destroy() {
@@ -241,14 +245,9 @@ export class Scene {
 
     this.removeListeners();
 
-    this.particlesCreationTimeouts.forEach((timeout) => {
-      clearTimeout(timeout);
-    });
+    this.smallPlanet?.destroy();
+    this.bigPlanet?.destroy();
 
-    this.particles.forEach((particle) => {
-      particle.destroy();
-    });
     this.background?.destroy();
-    this.liquid?.destroy();
   }
 }

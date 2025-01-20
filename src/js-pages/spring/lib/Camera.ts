@@ -19,7 +19,7 @@ export class Camera {
   public orthoProjectionMatrix = new Mat4();
   public viewMatrix = new Mat4();
 
-  public position = new Vec3(0, 0, 0.36);
+  public position = new Vec3(0, 0, 1000);
   private target = new Vec3(0, 0, -1);
   private up = new Vec3(0, 1, 0);
 

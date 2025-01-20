@@ -22,7 +22,7 @@ void main() {
   // vec3 color2 = vec3(0.01, 0.02, 0.18);
 
   float diff = 0.05;
-  float strength = 0.3;
+  float strength = 0.2;
   // mind the aspect ratio
   float circle = smoothstep(strength + diff, strength - diff, distance(uv_aspect, vec2(0.5, 0.5 * aspect)));
 

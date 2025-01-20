@@ -6,7 +6,6 @@ import { globalState } from '../utils/globalState';
 import { Mesh } from '../lib/Mesh';
 import { Camera } from '../lib/Camera';
 import { Vec3 } from '../lib/math/Vec3';
-import { Tween } from '../utils/Tween';
 
 type Props = {
   x: number;
@@ -37,11 +36,6 @@ export class Particle {
 
   private camera: Camera;
 
-  private uniforms = {
-    u_time: globalState.uTime,
-    u_entry_scale: { value: 0 },
-  };
-
   constructor({ mass, geometriesManager, x, y, gl, camera, radius }: Props) {
     this.mass = mass;
     if (mass === 0) throw new Error('Mass cannot be 0');
@@ -57,7 +51,9 @@ export class Particle {
       fragmentCode: fragmentShader,
       texturesManager: null,
       texturesToUse: [],
-      uniforms: this.uniforms,
+      uniforms: {
+        u_time: globalState.uTime,
+      },
     });
 
     this.mesh = new Mesh({
@@ -68,10 +64,6 @@ export class Particle {
 
     this.mesh.position.setTo(x, y, 0);
     this.mesh.scale.setTo(this.radius * 2, this.radius * 2, 1);
-
-    const particleTween = new Tween(`particleTween${Math.random()}`, 200);
-    particleTween.addTask(this.uniforms.u_entry_scale).to({ value: 1 });
-    particleTween.start();
   }
 
   public addForce(force: Vec3) {
@@ -82,22 +74,10 @@ export class Particle {
     this.sumForces.setTo(0, 0, 0);
   }
 
-  private generateWeightForce() {
-    const weight = new Vec3(0, -this.mass * 9.81 * 60, 0);
-    return weight;
-  }
-
   public update() {
-    const dt = globalState.physics_dt.value;
+    const physics_dt = globalState.physics_dt.value;
 
-    // Add weight force (gravity)
-    const weight = this.generateWeightForce();
-    this.addForce(weight);
-    //Add wind force
-    const windForce = new Vec3(-0.8 * 60, 0, 0);
-    this.addForce(windForce);
-
-    this.integrate(dt);
+    this.integrate(physics_dt);
 
     // Don't go over the bounds
     const leftBound = -globalState.stageSize.value[0] / 2;
@@ -125,7 +105,9 @@ export class Particle {
       this.mesh.position.y = topBound - radius;
       this.velocity.y *= -damping;
     }
+  }
 
+  public render() {
     this.mesh.render({ camera: this.camera });
   }
 

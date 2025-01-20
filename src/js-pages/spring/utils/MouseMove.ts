@@ -1,4 +1,4 @@
-import { EventDispatcher } from "./EventDispatcher";
+import { EventDispatcher } from './EventDispatcher';
 
 interface Mouse {
   x: number;
@@ -29,7 +29,7 @@ export class MouseMove extends EventDispatcher {
     super();
 
     if (MouseMove._instance || !MouseMove._canCreate) {
-      throw new Error("Use MouseMove.getInstance()");
+      throw new Error('Use MouseMove.getInstance()');
     }
 
     this._addEvents();
@@ -40,25 +40,22 @@ export class MouseMove extends EventDispatcher {
   _onTouchDown = (event: TouchEvent | MouseEvent) => {
     this._isInit = true;
     this._isTouching = true;
-    this._mouseLast.x =
-      "touches" in event ? event.touches[0].clientX : event.clientX;
-    this._mouseLast.y =
-      "touches" in event ? event.touches[0].clientY : event.clientY;
+    this._mouseLast.x = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    this._mouseLast.y = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
     this.mouse.x = this._mouseLast.x;
     this.mouse.y = this._mouseLast.y;
 
     this._clickStart.x = this.mouse.x;
     this._clickStart.y = this.mouse.y;
-    this.dispatchEvent({ type: "down" });
+    this.dispatchEvent({ type: 'down' });
+    this.dispatchEvent({ type: 'mousemove' });
   };
 
   _onTouchMove = (event: TouchEvent | MouseEvent) => {
     this._isInit = true;
-    const touchX =
-      "touches" in event ? event.touches[0].clientX : event.clientX;
-    const touchY =
-      "touches" in event ? event.touches[0].clientY : event.clientY;
+    const touchX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    const touchY = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
     const deltaX = touchX - this._mouseLast.x;
     const deltaY = touchY - this._mouseLast.y;
@@ -71,26 +68,23 @@ export class MouseMove extends EventDispatcher {
     this.mouse.x += deltaX;
     this.mouse.y += deltaY;
 
-    this.dispatchEvent({ type: "mousemove" });
+    this.dispatchEvent({ type: 'mousemove' });
     this._mouseLast.x = this.mouse.x;
     this._mouseLast.y = this.mouse.y;
   };
 
   _onTouchUp = () => {
     this._isTouching = false;
-    this.dispatchEvent({ type: "up" });
+    this.dispatchEvent({ type: 'up' });
   };
 
   _onMouseLeave = () => {
-    this.dispatchEvent({ type: "left" });
+    this.dispatchEvent({ type: 'left' });
   };
 
   _onClick = (e: any) => {
     // Dont react if the user clicked on a button or a link
-    if (
-      e.target instanceof HTMLButtonElement ||
-      e.target instanceof HTMLAnchorElement
-    ) {
+    if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement) {
       // console.warn("The clicked element is not a canvas");
       return;
     }
@@ -101,19 +95,19 @@ export class MouseMove extends EventDispatcher {
 
     //Make sure that the user's click is held between certain boundaries
     if (xDiff <= clickBounds && yDiff <= clickBounds) {
-      this.dispatchEvent({ type: "click" });
+      this.dispatchEvent({ type: 'click' });
     }
   };
 
   _addEvents() {
-    window.addEventListener("pointerdown", this._onTouchDown);
+    window.addEventListener('pointerdown', this._onTouchDown);
 
-    window.addEventListener("mousemove", this._onTouchMove, { passive: true });
-    window.addEventListener("touchmove", this._onTouchMove, { passive: true });
+    window.addEventListener('mousemove', this._onTouchMove, { passive: true });
+    window.addEventListener('touchmove', this._onTouchMove, { passive: true });
 
-    window.addEventListener("pointerup", this._onTouchUp);
+    window.addEventListener('pointerup', this._onTouchUp);
 
-    window.addEventListener("click", this._onClick);
-    window.addEventListener("mouseout", this._onMouseLeave);
+    window.addEventListener('click', this._onClick);
+    window.addEventListener('mouseout', this._onMouseLeave);
   }
 }
