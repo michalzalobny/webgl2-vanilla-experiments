@@ -79,8 +79,8 @@ export class App {
     const delta = time - this.lastFrameTime;
 
     let physics_dt = delta / 1000;
-    //It means that the physics step is 60fps
-    if (physics_dt > 0.016) {
+    //It caps the physics to min 30fps, if its lower, the whole simulation will slow down -> its more to prevent the simulation from exploding
+    if (physics_dt > 0.016 * 2) {
       physics_dt = 0.016;
     }
 
