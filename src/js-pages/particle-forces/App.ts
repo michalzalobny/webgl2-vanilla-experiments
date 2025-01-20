@@ -91,6 +91,7 @@ export class App {
 
     this.lastFrameTime = time;
 
+    globalState.tweenManager.update();
     this.scene?.update();
   };
 

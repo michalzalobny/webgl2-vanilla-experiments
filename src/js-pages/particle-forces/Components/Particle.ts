@@ -6,6 +6,7 @@ import { globalState } from '../utils/globalState';
 import { Mesh } from '../lib/Mesh';
 import { Camera } from '../lib/Camera';
 import { Vec3 } from '../lib/math/Vec3';
+import { Tween } from '../utils/Tween';
 
 type Props = {
   x: number;
@@ -36,6 +37,11 @@ export class Particle {
 
   private camera: Camera;
 
+  private uniforms = {
+    u_time: globalState.uTime,
+    u_entry_scale: { value: 0 },
+  };
+
   constructor({ mass, geometriesManager, x, y, gl, camera, radius }: Props) {
     this.mass = mass;
     if (mass === 0) throw new Error('Mass cannot be 0');
@@ -51,9 +57,7 @@ export class Particle {
       fragmentCode: fragmentShader,
       texturesManager: null,
       texturesToUse: [],
-      uniforms: {
-        u_time: globalState.uTime,
-      },
+      uniforms: this.uniforms,
     });
 
     this.mesh = new Mesh({
@@ -64,6 +68,10 @@ export class Particle {
 
     this.mesh.position.setTo(x, y, 0);
     this.mesh.scale.setTo(this.radius * 2, this.radius * 2, 1);
+
+    const particleTween = new Tween(`particleTween${Math.random()}`, 200);
+    particleTween.addTask(this.uniforms.u_entry_scale).to({ value: 1 });
+    particleTween.start();
   }
 
   public addForce(force: Vec3) {

@@ -1,3 +1,5 @@
+import { TweenManager } from './Tween';
+
 export const globalState = {
   stageSize: {
     value: [100, 100],
@@ -22,4 +24,5 @@ export const globalState = {
   },
   debugHolderEl: null as HTMLDivElement | null,
   canvasEl: null as HTMLCanvasElement | null,
+  tweenManager: new TweenManager(),
 };
