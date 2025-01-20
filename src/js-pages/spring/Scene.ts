@@ -59,8 +59,8 @@ export class Scene {
     this.bob = new Particle({
       x: this.anchorPos.x,
       y: this.anchorPos.y - this.restLength * 1.2,
-      mass: 4,
-      radius: 20,
+      mass: 2,
+      radius: 15,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
