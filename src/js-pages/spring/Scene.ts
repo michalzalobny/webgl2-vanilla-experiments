@@ -17,16 +17,19 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private restLength = 400;
+  private restLength = 300;
   private k = 100;
-  private anchorPos = new Vec3(0, 200, 0);
+  private anchorPos = new Vec3(0);
   private anchor: Particle | null = null;
   private bob: Particle | null = null;
   private line: Line | null = null;
+  private forceLine: Line | null = null;
 
   private background: Background | null = null;
 
   private pushForce = new Vec3();
+
+  private isPointerDown = { value: false };
 
   constructor() {
     if (!globalState.canvasEl) {
@@ -56,10 +59,12 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
+    this.anchorPos.setTo(0, globalState.stageSize.value[1] / 2, 0);
+
     this.bob = new Particle({
       x: this.anchorPos.x,
-      y: this.anchorPos.y - this.restLength * 1.2,
-      mass: 2,
+      y: this.anchorPos.y - this.restLength * 1.12,
+      mass: 3,
       radius: 10,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
@@ -80,6 +85,14 @@ export class Scene {
       gl: this.gl,
       camera: this.camera,
       geometriesManager: this.geometriesManager,
+      color: new Vec3(0.65, 0.65, 0.65),
+    });
+
+    this.forceLine = new Line({
+      gl: this.gl,
+      camera: this.camera,
+      geometriesManager: this.geometriesManager,
+      color: new Vec3(0.1, 0.1, 0.9),
     });
 
     this.background = new Background({
@@ -119,13 +132,13 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    if (!this.bob || !this.anchor || !this.line) return;
+    if (!this.bob || !this.anchor || !this.line || !this.forceLine) return;
 
     // Add push force
     this.bob.addForce(this.pushForce);
 
     // Add drag force
-    const dragForce = Force.GenerateDragForce(this.bob, 0.001);
+    const dragForce = Force.GenerateDragForce(this.bob, 0.002);
     this.bob.addForce(dragForce);
 
     // Add weight force
@@ -140,7 +153,19 @@ export class Scene {
     this.anchor.update();
     this.line.update(this.anchor.mesh.position, this.bob.mesh.position);
 
+    const endPoint = new Vec3(
+      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
+      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
+      0
+    );
+    this.forceLine.update(this.bob.mesh.position, endPoint);
+
     this.line.render();
+
+    if (this.isPointerDown.value) {
+      this.forceLine.render();
+    }
+
     this.bob.render();
     this.anchor.render();
   }
@@ -224,14 +249,38 @@ export class Scene {
     }
   };
 
+  private onPointerDown = (e: PointerEvent) => {
+    this.isPointerDown.value = true;
+  };
+
+  private onPointerUp = (e: PointerEvent) => {
+    this.isPointerDown.value = false;
+
+    if (!this.bob) return;
+
+    const impulseForce = new Vec3(
+      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
+      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
+      0
+    );
+    //Calculate the direction of the force
+    impulseForce.sub(this.bob.mesh.position).multiply(-5);
+
+    this.bob.velocity.setTo(impulseForce);
+  };
+
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
     window.addEventListener('keyup', this.onKeyUpWSAD);
+    window.addEventListener('pointerdown', this.onPointerDown);
+    window.addEventListener('pointerup', this.onPointerUp);
   }
 
   private removeListeners() {
     window.removeEventListener('keydown', this.onKeyDownWSAD);
     window.removeEventListener('keyup', this.onKeyUpWSAD);
+    window.removeEventListener('pointerdown', this.onPointerDown);
+    window.removeEventListener('pointerup', this.onPointerUp);
   }
 
   public destroy() {
@@ -243,6 +292,7 @@ export class Scene {
     this.bob?.destroy();
     this.anchor?.destroy();
     this.line?.destroy();
+    this.forceLine?.destroy();
 
     this.background?.destroy();
   }

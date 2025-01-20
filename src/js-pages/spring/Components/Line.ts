@@ -12,6 +12,7 @@ interface Constructor {
   gl: WebGL2RenderingContext;
   geometriesManager: GeometriesManager;
   camera: Camera;
+  color: Vec3;
 }
 
 export class Line {
@@ -30,14 +31,17 @@ export class Line {
   private programUniforms = {
     u_time: globalState.uTime,
     u_resolution: globalState.stageSize,
+    u_color: { value: new Vec3(0) },
   };
 
   constructor(props: Constructor) {
-    const { gl, geometriesManager, camera } = props;
+    const { gl, geometriesManager, camera, color } = props;
 
     this.gl = gl;
     this.geometriesManager = geometriesManager;
     this.camera = camera;
+
+    this.programUniforms.u_color.value.setTo(color);
 
     this.init();
   }
@@ -65,7 +69,7 @@ export class Line {
   public update(startPoint: Vec3, endPoint: Vec3) {
     this.startPoint.setTo(startPoint);
     this.endPoint.setTo(endPoint);
-    this.mesh?.scale.setTo(this.startPoint.distance(this.endPoint), 10, 1);
+    this.mesh?.scale.setTo(this.startPoint.distance(this.endPoint), 4, 1);
 
     const tempVec = new Vec3().copy(this.endPoint).sub(this.startPoint);
     const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points
