@@ -8,62 +8,57 @@ uniform float u_time;
 
 uniform vec2 u_resolution;
 
-#define PI 3.14159265359
-
-float N21 (vec2 p){
-    return fract(sin(p.x * 100.0 + p.y * 657.0) * 5647.0);
-}
-
-float SmoothNoise(vec2 uv){
-    vec2 lv = fract(uv);
-    vec2 id = floor(uv);
-
-    lv = lv * lv * (3.0 - 2.0 * lv); //3x^2 - 2x^3
-
-    float bl = N21(id);
-    float br = N21(id + vec2(1.0, 0.0));
-    float b = mix(bl, br, lv.x);
-
-    float tl = N21(id + vec2(0.0, 1.0));
-    float tr = N21(id + vec2(1.0, 1.0));
-    float t = mix(tl, tr, lv.x);
-
-    return mix(b, t, lv.y);
-}
-
-float SmoothNoise2(vec2 uv){
-    float c = SmoothNoise(uv * 4.0);
-    c += SmoothNoise(uv * 8.0) * 0.5;
-    c += SmoothNoise(uv * 16.0) * 0.25;
-    c += SmoothNoise(uv * 32.0) * 0.125;
-    c += SmoothNoise(uv * 65.0) * 0.0625;
-
-    return c /= 1.9375; // (sum of all possible maximum values)so that it's always between 0 - 1
-}
-
 // we need to declare an output for the fragment shader
 out vec4 outColor;
 
+#define PI 3.14159265359
+#define NUM_PARTICLES 10.0
+#define NUM_EXPLOSIONS 2.0
 
-void main() {
-  vec2 uv = v_uv;
-
-  //fix uv aspect ratio
-  float aspect = u_resolution.x / u_resolution.y;
-  uv.x *= aspect * 0.5;
-
-  float t = u_time * 0.1;
-
-  vec3 color1 = vec3(0.12, 0.12, 0.12);
-  vec3 color2 = vec3(0.7, 0.7, 0.7);
-  vec3 colorMixed = mix(color1, color2, uv.y);
-  
-  float c = SmoothNoise2(vec2(uv.x + t * 1.3, uv.y + t *0.1));
-  float c2 = SmoothNoise2(vec2(uv.x + t * 8.0, uv.y));
-  c = mix(c, c2, 0.2);
-
-  colorMixed = mix(colorMixed, vec3(c), 0.31);
-
-  outColor = vec4(colorMixed, 1.0);
+//random hashing function that takes one float and returns two (vec2)
+vec2 Hash12(float t){
+    float x = fract(sin(t*674.3)*453.2);
+    float y = fract(sin((t+x)*714.3)*263.2);
+    return vec2(x,y);
 }
+
+vec2 Hash12_Polar(float t){
+    float a = fract(sin(t*674.3)*453.2) * 2.0 * PI; //Angle from 0 to 2PI
+    float d = fract(sin((t+a)*714.3)*263.2); //Distance from 0 to 1
+    return vec2(sin(a) , cos(a)) * d; //Converting polar coords to cartesian coords system
+}
+
+float explosion (vec2 st, float t){
+    float sparks = 0.0;
+    for(float i = 0.0 ; i< NUM_PARTICLES; i++) {
+        vec2 dir = Hash12_Polar(i + 1.0) * 0.5; 
+        float d = length(st - dir * t);
+        float brightness = mix(0.0, 0.0005, smoothstep(0.0, 0.1, t));
+        brightness *= sin(t * 15. + i) * 0.5 + 0.5; // blinking of firework while alive
+        brightness *= smoothstep(1.0, 0.5, t); // fades out the effect before it restarts
+        sparks += brightness / d ;
+    }
+    return sparks;
+}
+
+void main()
+{
+    vec3 color;
+    vec2 st = v_uv * vec2(u_resolution.x / u_resolution.y, 1.0);
+    st -= 0.5;
+
+    for(float i = 0.0 ; i< NUM_EXPLOSIONS; i++) {
+        float part = i / NUM_EXPLOSIONS;
+        float t = u_time * (part + 0.2) + part * 0.8;
+        float ft = floor(t);
+        vec3 colorValue = sin(vec3(.34 * part, .54 * (1.0 - part), 0.45) * ft) * 0.45 + 0.55;
+        vec2 offset = Hash12(i + 1.0 + ft) - 0.5;
+        offset *= vec2(0.85, 0.15); //Shrink the possible explosion area
+        offset += vec2(0.0, 0.25); //Move the possible explosion area up
+        color += explosion(st - offset, fract(t)) * colorValue;
+    }
+
+    color *= 2.0;
     
+    outColor = vec4(vec3(color), 1.0);
+}
