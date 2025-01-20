@@ -1,31 +1,29 @@
+:root {
+  --space-1: 15px;
+}
+
 .footerIcons {
   position: fixed;
-  bottom: 15px;
-  right: 15px;
+  bottom: var(--space-1);
+  right: var(--space-1);
   z-index: 10;
-
-  @media only screen and (min-width: 768px) {
-    bottom: 25px;
-    right: 25px;
-  }
 }
 
 .footerName {
   position: fixed;
-  bottom: 15px;
-  left: 15px;
+  bottom: var(--space-1);
+  left: var(--space-1);
   z-index: 10;
-
-  @media only screen and (min-width: 768px) {
-    bottom: 25px;
-    left: 25px;
-  }
 }
 
 .nameWrapper {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
-  line-height: 1.5;
+  width: 130px;
+
+  @media only screen and (min-width: 768px) {
+    width: initial;
+  }
 }
 
 .socials {
@@ -64,11 +62,11 @@
   svg {
     fill: rgb(255, 255, 255);
     width: 100%;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: opacity 0.35s;
 
     &:hover {
-      opacity: 0.85;
+      opacity: 1;
     }
   }
 }
@@ -101,14 +99,13 @@
 .links-container {
   display: flex;
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 5px;
+  right: var(--space-1);
+  top: var(--space-1);
   color: white;
 }
 
 .links-container > *:not(:last-child) {
-  margin-right: 10px;
+  margin-right: 8px;
 }
 
 .links-container a {
@@ -118,35 +115,39 @@
 .debug-holder {
   position: fixed;
   z-index: 100;
-  top: 5px;
-  right: 5px;
+  top: 45px;
+  left: var(--space-1);
   color: rgb(0, 0, 0);
   background-color: rgb(206, 206, 206);
   border: 1px solid rgb(0, 0, 0);
+  border-radius: 3px;
   font-size: 11px;
-  padding: 3px 4px;
+  padding: 3px;
+  opacity: 0.5;
+  display: none;
 }
 
 .fps {
   position: fixed;
   z-index: 100;
-  top: 5px;
-  left: 5px;
+  top: var(--space-1);
+  left: var(--space-1);
   color: rgb(0, 0, 0);
   background-color: rgb(206, 206, 206);
   border: 1px solid rgb(0, 0, 0);
+  border-radius: 3px;
   font-size: 11px;
-  padding: 3px 4px;
+  padding: 3px;
+  opacity: 0.5;
 }
 
-@media (pointer: coarse) and (hover: none) {
-  .hide-on-mobile {
-    display: none;
-  }
+.info-icon {
+  height: 50px;
+  color: white;
+  opacity: 0.35;
 }
 
 // Animations
-
 :root {
   --animate-duration: 1.5s;
 }
@@ -187,4 +188,26 @@
   animation-name: bounceIn;
   animation-delay: 0.3s;
   animation-fill-mode: backwards;
+}
+
+@keyframes enterInfoIcon {
+  from {
+    left: 50%;
+    bottom: calc(var(--space-1) * 3.5);
+  }
+  to {
+    left: 50%;
+    bottom: var(--space-1);
+  }
+}
+
+.enter-info-icon {
+  animation-duration: 1.1s;
+  animation-timing-function: var(--easing-1);
+  animation-name: enterInfoIcon;
+  animation-delay: 0.7s;
+  animation-fill-mode: both;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 10;
 }

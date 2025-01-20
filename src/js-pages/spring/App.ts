@@ -153,4 +153,9 @@ globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
 const mouseMove = MouseMove.getInstance();
 mouseMove.addEventListener('mousemove', onMouseMove);
 
+//Check if there is "deubg" in the url, if so, make the debug visible
+if (window.location.href.indexOf('debug') > -1) {
+  globalState.debugHolderEl.style.display = 'block';
+}
+
 new App();
