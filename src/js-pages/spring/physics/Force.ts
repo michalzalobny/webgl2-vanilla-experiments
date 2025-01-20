@@ -37,4 +37,13 @@ export class Force {
     const attractionForce = attractionDirection.multiply(attractionMagnitude);
     return attractionForce;
   }
+
+  static GenerateSpringForce(particle: Particle, anchor: Vec3, restLength: number, k: number) {
+    const d = particle.mesh.position.clone().sub(anchor);
+    const displacement = d.len() - restLength;
+    const springDirection = d.clone().normalize();
+    const springMagnitude = -k * displacement;
+    const springForce = springDirection.multiply(springMagnitude);
+    return springForce;
+  }
 }

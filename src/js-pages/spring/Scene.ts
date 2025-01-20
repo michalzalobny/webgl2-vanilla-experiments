@@ -8,6 +8,7 @@ import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
 import { Vec3 } from './lib/math/Vec3';
 import { Force } from './physics/Force';
+import { Line } from './Components/Line';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -16,8 +17,12 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private smallPlanet: Particle | null = null;
-  private bigPlanet: Particle | null = null;
+  private restLength = 200;
+  private k = 100;
+  private anchorPos = new Vec3(0, 0, 0);
+  private anchor: Particle | null = null;
+  private bob: Particle | null = null;
+  private line: Line | null = null;
 
   private background: Background | null = null;
 
@@ -51,24 +56,30 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    this.smallPlanet = new Particle({
-      x: 200 - globalState.stageSize.value[0] / 2,
-      y: -200 + globalState.stageSize.value[1] / 2,
-      mass: 1,
-      radius: 6,
+    this.bob = new Particle({
+      x: this.anchorPos.x,
+      y: this.anchorPos.y - this.restLength * 1.2,
+      mass: 4,
+      radius: 20,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
     });
 
-    this.bigPlanet = new Particle({
-      x: 500 - globalState.stageSize.value[0] / 2,
-      y: -500 + globalState.stageSize.value[1] / 2,
-      mass: 45,
-      radius: 40,
+    this.anchor = new Particle({
+      x: this.anchorPos.x,
+      y: this.anchorPos.y,
+      mass: 1,
+      radius: 4,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
+    });
+
+    this.line = new Line({
+      gl: this.gl,
+      camera: this.camera,
+      geometriesManager: this.geometriesManager,
     });
 
     this.background = new Background({
@@ -108,47 +119,30 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    if (!this.smallPlanet || !this.bigPlanet) return;
+    if (!this.bob || !this.anchor || !this.line) return;
 
     // Add push force
-    this.smallPlanet.addForce(this.pushForce);
-    this.bigPlanet.addForce(this.pushForce);
+    this.bob.addForce(this.pushForce);
 
-    // Add friction force
-    const smallPlanetFriction = Force.GenerateFrictionForce(this.smallPlanet, 20);
-    const bigPlanetFriction = Force.GenerateFrictionForce(this.bigPlanet, 20);
-    this.smallPlanet.addForce(smallPlanetFriction);
-    this.bigPlanet.addForce(bigPlanetFriction);
+    // Add drag force
+    const dragForce = Force.GenerateDragForce(this.bob, 0.001);
+    this.bob.addForce(dragForce);
 
-    // Add gravitational force
-    const gravitationalForce = Force.GenerateGravitationalForce(this.smallPlanet, this.bigPlanet, 1500, 10, 90);
-    this.smallPlanet.addForce(gravitationalForce);
-    this.bigPlanet.addForce(gravitationalForce.multiply(-1));
+    // Add weight force
+    const weight = new Vec3(0, this.bob.mass * -9.8 * 60, 0);
+    this.bob.addForce(weight);
 
-    this.smallPlanet.update();
-    this.smallPlanet.render();
-    this.bigPlanet.update();
-    this.bigPlanet.render();
+    // Add spring force
+    const springForce = Force.GenerateSpringForce(this.bob, this.anchorPos, this.restLength, this.k);
+    this.bob.addForce(springForce);
 
-    const smallPlanetPosition = this.smallPlanet.mesh.position;
-    const bigPlanetPosition = this.bigPlanet.mesh.position;
+    this.bob.update();
+    this.anchor.update();
+    this.line.update(this.anchor.mesh.position, this.bob.mesh.position);
 
-    const distance = smallPlanetPosition.distance(bigPlanetPosition);
-
-    if (distance < this.smallPlanet.radius + this.bigPlanet.radius) {
-      // Collision
-      const normal = smallPlanetPosition.clone().sub(bigPlanetPosition).normalize();
-      const relativeVelocity = this.smallPlanet.velocity.clone().sub(this.bigPlanet.velocity);
-      const relativeSpeed = relativeVelocity.dot(normal);
-
-      const impulse = normal.clone().multiply(-1.6 * relativeSpeed);
-      this.smallPlanet.velocity.add(impulse);
-
-      // Move the small planet away from the big planet
-      this.smallPlanet.mesh.position.setTo(
-        this.bigPlanet.mesh.position.clone().add(normal.multiply(this.bigPlanet.radius + this.smallPlanet.radius))
-      );
-    }
+    this.line.render();
+    this.bob.render();
+    this.anchor.render();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -182,8 +176,9 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.smallPlanet?.onResize();
-    this.bigPlanet?.onResize();
+    this.bob?.onResize();
+    this.anchor?.onResize();
+    this.line?.onResize();
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
@@ -245,8 +240,9 @@ export class Scene {
 
     this.removeListeners();
 
-    this.smallPlanet?.destroy();
-    this.bigPlanet?.destroy();
+    this.bob?.destroy();
+    this.anchor?.destroy();
+    this.line?.destroy();
 
     this.background?.destroy();
   }
