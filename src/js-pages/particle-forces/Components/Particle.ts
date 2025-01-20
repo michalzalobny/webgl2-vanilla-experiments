@@ -87,7 +87,7 @@ export class Particle {
     this.addForce(weight);
     //Add wind force
     const windForce = new Vec3(-0.8 * 60, 0, 0);
-    this.addForce(windForce);
+    // this.addForce(windForce);
 
     this.integrate(dt);
 

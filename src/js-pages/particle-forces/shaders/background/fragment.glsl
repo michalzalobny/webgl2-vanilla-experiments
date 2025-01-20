@@ -52,7 +52,7 @@ void main() {
   float aspect = u_resolution.x / u_resolution.y;
   uv.x *= aspect * 0.74;
 
-  float t = u_time * 0.03;
+  float t =mod(u_time * 0.03,20.0);
 
   vec3 color1 = vec3(0.08, 0.09, 0.2);
   vec3 color2 = vec3(0.1, 0.2, 0.2);
