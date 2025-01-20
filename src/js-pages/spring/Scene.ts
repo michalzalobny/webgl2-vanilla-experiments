@@ -17,9 +17,9 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private restLength = 200;
+  private restLength = 400;
   private k = 100;
-  private anchorPos = new Vec3(0, 0, 0);
+  private anchorPos = new Vec3(0, 200, 0);
   private anchor: Particle | null = null;
   private bob: Particle | null = null;
   private line: Line | null = null;
@@ -60,7 +60,7 @@ export class Scene {
       x: this.anchorPos.x,
       y: this.anchorPos.y - this.restLength * 1.2,
       mass: 2,
-      radius: 15,
+      radius: 10,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
@@ -182,7 +182,7 @@ export class Scene {
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 1000;
+    const strength = 2500;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':
