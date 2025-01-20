@@ -208,12 +208,13 @@ export class Scene {
   };
 
   private onPointerDown = (e: PointerEvent) => {
+    const mass = 1 + Math.random() * 1.8;
     //Create a new particle on click
     const particle = new Particle({
       x: e.clientX - globalState.stageSize.value[0] / 2,
       y: -e.clientY + globalState.stageSize.value[1] / 2,
-      mass: 1 + Math.random(),
-      radius: 10 + Math.random() * 10,
+      mass: mass,
+      radius: mass * 6,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
