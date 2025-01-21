@@ -17,8 +17,8 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private restLength = 10;
-  private k = 100;
+  private restLength = 15;
+  private k = 300;
   private anchorPos = new Vec3(0);
   private anchor: Particle | null = null;
   private bobs: Particle[] = [];
