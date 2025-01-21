@@ -10,6 +10,8 @@ import { Vec3 } from './lib/math/Vec3';
 import { Force } from './physics/Force';
 import { Line } from './Components/Line';
 
+const PARTICLES_COUNT = 17;
+
 export class Scene {
   private gl: WebGL2RenderingContext;
   private camera = new Camera();
@@ -62,7 +64,7 @@ export class Scene {
     this.anchorPos.setTo(0, globalState.stageSize.value[1] / 2, 0);
 
     //Create bobs
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < PARTICLES_COUNT; i++) {
       const bob = new Particle({
         x: this.anchorPos.x,
         y: this.anchorPos.y - (i + 1) * this.restLength,
