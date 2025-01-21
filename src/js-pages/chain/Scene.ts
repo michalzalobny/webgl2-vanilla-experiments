@@ -154,16 +154,15 @@ export class Scene {
       bob.addForce(weight);
 
       // Add spring force
+      const isPrevParticleAnchor = i === 0;
       const prevParticle = this.bobs[i - 1] || this.anchor;
-      const nextParticle = this.bobs[i + 1] || null;
-      const springForcePrev = Force.GenerateSpringForceTwoParticles(bob, prevParticle, this.restLength, this.k);
+      const springForce = Force.GenerateSpringForceTwoParticles(bob, prevParticle, this.restLength, this.k);
 
-      if (nextParticle) {
-        const springForceNext = Force.GenerateSpringForceTwoParticles(bob, nextParticle, this.restLength, this.k);
-        bob.addForce(springForceNext);
+      bob.addForce(springForce);
+      if (!isPrevParticleAnchor) {
+        prevParticle.addForce(springForce.multiply(-1));
       }
 
-      bob.addForce(springForcePrev);
       bob.update();
     });
 
