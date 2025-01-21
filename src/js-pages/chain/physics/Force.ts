@@ -46,4 +46,13 @@ export class Force {
     const springForce = springDirection.multiply(springMagnitude);
     return springForce;
   }
+
+  static GenerateSpringForceTwoParticles(particleA: Particle, particleB: Particle, restLength: number, k: number) {
+    const d = particleA.mesh.position.clone().sub(particleB.mesh.position);
+    const displacement = d.len() - restLength;
+    const springDirection = d.clone().normalize();
+    const springMagnitude = -k * displacement;
+    const springForce = springDirection.multiply(springMagnitude);
+    return springForce;
+  }
 }

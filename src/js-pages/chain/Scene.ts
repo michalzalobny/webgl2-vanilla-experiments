@@ -17,12 +17,12 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private restLength = 300;
+  private restLength = 10;
   private k = 100;
   private anchorPos = new Vec3(0);
   private anchor: Particle | null = null;
-  private bob: Particle | null = null;
-  private line: Line | null = null;
+  private bobs: Particle[] = [];
+  private lines: Line[] = [];
   private forceLine: Line | null = null;
 
   private background: Background | null = null;
@@ -61,15 +61,19 @@ export class Scene {
 
     this.anchorPos.setTo(0, globalState.stageSize.value[1] / 2, 0);
 
-    this.bob = new Particle({
-      x: this.anchorPos.x,
-      y: this.anchorPos.y - this.restLength * 1.12,
-      mass: 3,
-      radius: 10,
-      geometriesManager: this.geometriesManager,
-      gl: this.gl,
-      camera: this.camera,
-    });
+    //Create bobs
+    for (let i = 0; i < 12; i++) {
+      const bob = new Particle({
+        x: this.anchorPos.x,
+        y: this.anchorPos.y - (i + 1) * this.restLength,
+        mass: 0.8,
+        radius: 4,
+        geometriesManager: this.geometriesManager,
+        gl: this.gl,
+        camera: this.camera,
+      });
+      this.bobs.push(bob);
+    }
 
     this.anchor = new Particle({
       x: this.anchorPos.x,
@@ -81,18 +85,21 @@ export class Scene {
       camera: this.camera,
     });
 
-    this.line = new Line({
-      gl: this.gl,
-      camera: this.camera,
-      geometriesManager: this.geometriesManager,
-      color: new Vec3(0.65, 0.65, 0.65),
-    });
+    for (let i = 0; i < this.bobs.length; i++) {
+      const line = new Line({
+        gl: this.gl,
+        camera: this.camera,
+        geometriesManager: this.geometriesManager,
+        color: new Vec3(0.65, 0.65, 0.65),
+      });
+      this.lines.push(line);
+    }
 
     this.forceLine = new Line({
       gl: this.gl,
       camera: this.camera,
       geometriesManager: this.geometriesManager,
-      color: new Vec3(0.1, 0.1, 0.9),
+      color: new Vec3(0.1, 0.9, 0.1),
     });
 
     this.background = new Background({
@@ -132,41 +139,60 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    if (!this.bob || !this.anchor || !this.line || !this.forceLine) return;
+    if (!this.anchor || !this.forceLine) return;
 
-    // Add push force
-    this.bob.addForce(this.pushForce);
+    this.bobs.forEach((bob, i) => {
+      // Add push force
+      bob.addForce(this.pushForce);
 
-    // Add drag force
-    const dragForce = Force.GenerateDragForce(this.bob, 0.002);
-    this.bob.addForce(dragForce);
+      // Add drag force
+      const dragForce = Force.GenerateDragForce(bob, 0.002);
+      bob.addForce(dragForce);
 
-    // Add weight force
-    const weight = new Vec3(0, this.bob.mass * -9.8 * 60, 0);
-    this.bob.addForce(weight);
+      // Add weight force
+      const weight = new Vec3(0, bob.mass * -9.8 * 60, 0);
+      bob.addForce(weight);
 
-    // Add spring force
-    const springForce = Force.GenerateSpringForce(this.bob, this.anchorPos, this.restLength, this.k);
-    this.bob.addForce(springForce);
+      // Add spring force
+      const prevParticle = this.bobs[i - 1] || this.anchor;
+      const nextParticle = this.bobs[i + 1] || null;
+      const springForcePrev = Force.GenerateSpringForceTwoParticles(bob, prevParticle, this.restLength, this.k);
 
-    this.bob.update();
+      if (nextParticle) {
+        const springForceNext = Force.GenerateSpringForceTwoParticles(bob, nextParticle, this.restLength, this.k);
+        bob.addForce(springForceNext);
+      }
+
+      bob.addForce(springForcePrev);
+      bob.update();
+    });
+
     this.anchor.update();
-    this.line.update(this.anchor.mesh.position, this.bob.mesh.position);
+    this.lines.forEach((line, i) => {
+      const bob = this.bobs[i - 1] || this.anchor;
+      const nextBob = this.bobs[i];
+      line.update(bob.mesh.position, nextBob.mesh.position);
+    });
 
     const endPoint = new Vec3(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
       0
     );
-    this.forceLine.update(this.bob.mesh.position, endPoint);
+    const bob = this.bobs[this.bobs.length - 1];
+    this.forceLine.update(bob.mesh.position, endPoint);
 
-    this.line.render();
+    this.lines.forEach((line) => {
+      line.render();
+    });
 
     if (this.isPointerDown.value) {
       this.forceLine.render();
     }
 
-    this.bob.render();
+    this.bobs.forEach((bob) => {
+      bob.render();
+    });
     this.anchor.render();
   }
 
@@ -201,9 +227,13 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.bob?.onResize();
+    this.bobs.forEach((bob) => {
+      bob.onResize();
+    });
     this.anchor?.onResize();
-    this.line?.onResize();
+    this.lines.forEach((line) => {
+      line.onResize();
+    });
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
@@ -256,17 +286,17 @@ export class Scene {
   private onPointerUp = (e: PointerEvent) => {
     this.isPointerDown.value = false;
 
-    if (!this.bob) return;
-
     const impulseForce = new Vec3(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
       0
     );
-    //Calculate the direction of the force
-    impulseForce.sub(this.bob.mesh.position).multiply(-5);
 
-    this.bob.velocity.setTo(impulseForce);
+    const bob = this.bobs[this.bobs.length - 1];
+    //Calculate the direction of the force
+    impulseForce.sub(bob.mesh.position).multiply(-5);
+
+    bob.velocity.setTo(impulseForce);
   };
 
   private addListeners() {
@@ -289,9 +319,13 @@ export class Scene {
 
     this.removeListeners();
 
-    this.bob?.destroy();
+    this.bobs.forEach((bob) => {
+      bob.destroy();
+    });
     this.anchor?.destroy();
-    this.line?.destroy();
+    this.lines.forEach((line) => {
+      line.destroy();
+    });
     this.forceLine?.destroy();
 
     this.background?.destroy();
