@@ -88,7 +88,7 @@ export class Particle {
     const radius = this.radius;
 
     const damping = 0.6;
-    // Handle X-bound collisions
+    // // Handle X-bound collisions
     if (this.mesh.position.x - radius <= leftBound) {
       this.mesh.position.x = leftBound + radius;
       this.velocity.x *= -damping; // Apply damping
@@ -98,10 +98,11 @@ export class Particle {
     }
 
     // Handle Y-bound collisions
-    if (this.mesh.position.y - radius <= bottomBound) {
-      this.mesh.position.y = bottomBound + radius;
-      this.velocity.y *= -damping;
-    } else if (this.mesh.position.y + radius >= topBound) {
+    // if (this.mesh.position.y - radius <= bottomBound) {
+    //   this.mesh.position.y = bottomBound + radius;
+    //   this.velocity.y *= -damping;
+    // }
+    if (this.mesh.position.y + radius >= topBound) {
       this.mesh.position.y = topBound - radius;
       this.velocity.y *= -damping;
     }

@@ -10,7 +10,7 @@ import { Vec3 } from './lib/math/Vec3';
 import { Force } from './physics/Force';
 import { Line } from './Components/Line';
 
-const PARTICLES_COUNT = 17;
+const PARTICLES_COUNT = 14;
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -68,8 +68,8 @@ export class Scene {
       const bob = new Particle({
         x: this.anchorPos.x,
         y: this.anchorPos.y - (i + 1) * this.restLength,
-        mass: 0.8,
-        radius: 4,
+        mass: 2,
+        radius: 6,
         geometriesManager: this.geometriesManager,
         gl: this.gl,
         camera: this.camera,
@@ -80,8 +80,8 @@ export class Scene {
     this.anchor = new Particle({
       x: this.anchorPos.x,
       y: this.anchorPos.y,
-      mass: 1,
-      radius: 4,
+      mass: 2,
+      radius: 6,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
       camera: this.camera,
@@ -152,7 +152,7 @@ export class Scene {
       bob.addForce(dragForce);
 
       // Add weight force
-      const weight = new Vec3(0, bob.mass * -9.8 * 60, 0);
+      const weight = new Vec3(0, bob.mass * -9.8 * 50, 0);
       bob.addForce(weight);
 
       // Add spring force
