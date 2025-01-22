@@ -10,7 +10,7 @@ import { Vec3 } from './lib/math/Vec3';
 import { Force } from './physics/Force';
 import { Line } from './Components/Line';
 
-const PARTICLES_COUNT = 14;
+const PARTICLES_COUNT = 10;
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -20,7 +20,7 @@ export class Scene {
   private geometriesManager;
 
   private restLength = 15;
-  private k = 300;
+  private k = 200;
   private anchorPos = new Vec3(0);
   private anchor: Particle | null = null;
   private bobs: Particle[] = [];
