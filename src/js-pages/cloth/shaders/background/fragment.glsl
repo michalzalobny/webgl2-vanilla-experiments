@@ -16,8 +16,8 @@ void main() {
   float aspect = u_resolution.y / u_resolution.x;
   vec2 uv_aspect = vec2(uv.x, uv.y * aspect);
 
-  vec3 color1 = vec3(0.04, 0.12, 0.12);
-  vec3 color2 = vec3(0.04, 0.22, 0.18);
+  vec3 color1 = vec3(0.12, 0.12, 0.12);
+  vec3 color2 = vec3(0.18, 0.18, 0.18);
   // vec3 color1 = vec3(0.01, 0.02, 0.12);
   // vec3 color2 = vec3(0.01, 0.02, 0.18);
 

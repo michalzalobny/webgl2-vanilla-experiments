@@ -4,13 +4,9 @@ import { lerp } from './utils/lerp';
 import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 
-import { Particle } from './Components/Particle';
 import { Background } from './Components/Background';
 import { Vec3 } from './lib/math/Vec3';
-import { Force } from './physics/Force';
-import { Line } from './Components/Line';
-
-const PARTICLES_COUNT = 40;
+import { Cloth } from './Components/Cloth';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -19,19 +15,10 @@ export class Scene {
   private texturesManager;
   private geometriesManager;
 
-  private restLength = 1;
-  private k = 4000;
-  private anchorPos = new Vec3(0);
-  private anchor: Particle | null = null;
-  private bobs: Particle[] = [];
-  private lines: Line[] = [];
-  private forceLine: Line | null = null;
-
   private background: Background | null = null;
+  private cloth: Cloth | null = null;
 
   private pushForce = new Vec3();
-
-  private isPointerDown = { value: false };
 
   constructor() {
     if (!globalState.canvasEl) {
@@ -61,47 +48,10 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    this.anchorPos.setTo(0, globalState.stageSize.value[1] / 2, 0);
-
-    //Create bobs
-    for (let i = 0; i < PARTICLES_COUNT; i++) {
-      const bob = new Particle({
-        x: this.anchorPos.x,
-        y: this.anchorPos.y - (i + 1) * this.restLength,
-        mass: 2,
-        radius: 6,
-        geometriesManager: this.geometriesManager,
-        gl: this.gl,
-        camera: this.camera,
-      });
-      this.bobs.push(bob);
-    }
-
-    this.anchor = new Particle({
-      x: this.anchorPos.x,
-      y: this.anchorPos.y,
-      mass: 2,
-      radius: 6,
-      geometriesManager: this.geometriesManager,
-      gl: this.gl,
-      camera: this.camera,
-    });
-
-    for (let i = 0; i < this.bobs.length; i++) {
-      const line = new Line({
-        gl: this.gl,
-        camera: this.camera,
-        geometriesManager: this.geometriesManager,
-        color: new Vec3(0.65, 0.65, 0.65),
-      });
-      this.lines.push(line);
-    }
-
-    this.forceLine = new Line({
-      gl: this.gl,
+    this.cloth = new Cloth({
       camera: this.camera,
       geometriesManager: this.geometriesManager,
-      color: new Vec3(0.1, 0.9, 0.1),
+      gl: this.gl,
     });
 
     this.background = new Background({
@@ -141,60 +91,8 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    if (!this.anchor || !this.forceLine) return;
-
-    this.bobs.forEach((bob, i) => {
-      // Add push force
-      bob.addForce(this.pushForce);
-
-      // Add drag force
-      const dragForce = Force.GenerateDragForce(bob, 0.002);
-      bob.addForce(dragForce);
-
-      // Add weight force
-      const weight = new Vec3(0, bob.mass * -9.8 * 50, 0);
-      bob.addForce(weight);
-
-      // Add spring force
-      const isPrevParticleAnchor = i === 0;
-      const prevParticle = this.bobs[i - 1] || this.anchor;
-      const springForce = Force.GenerateSpringForceTwoParticles(bob, prevParticle, this.restLength, this.k);
-
-      bob.addForce(springForce);
-      if (!isPrevParticleAnchor) {
-        prevParticle.addForce(springForce.multiply(-1));
-      }
-
-      bob.update();
-    });
-
-    this.anchor.update();
-    this.lines.forEach((line, i) => {
-      const bob = this.bobs[i - 1] || this.anchor;
-      const nextBob = this.bobs[i];
-      line.update(bob.mesh.position, nextBob.mesh.position);
-    });
-
-    const endPoint = new Vec3(
-      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
-      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
-    );
-    const bob = this.bobs[this.bobs.length - 1];
-    this.forceLine.update(bob.mesh.position, endPoint);
-
-    this.lines.forEach((line) => {
-      line.render();
-    });
-
-    if (this.isPointerDown.value) {
-      this.forceLine.render();
-    }
-
-    this.bobs.forEach((bob) => {
-      bob.render();
-    });
-    this.anchor.render();
+    this.cloth?.update();
+    this.cloth?.render();
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
@@ -228,13 +126,7 @@ export class Scene {
     this.texturesManager.resize();
 
     this.background?.onResize();
-    this.bobs.forEach((bob) => {
-      bob.onResize();
-    });
-    this.anchor?.onResize();
-    this.lines.forEach((line) => {
-      line.onResize();
-    });
+    this.cloth?.onResize();
   }
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
@@ -280,38 +172,14 @@ export class Scene {
     }
   };
 
-  private onPointerDown = (e: PointerEvent) => {
-    this.isPointerDown.value = true;
-  };
-
-  private onPointerUp = (e: PointerEvent) => {
-    this.isPointerDown.value = false;
-
-    const impulseForce = new Vec3(
-      (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
-      (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
-    );
-
-    const bob = this.bobs[this.bobs.length - 1];
-    //Calculate the direction of the force
-    impulseForce.sub(bob.mesh.position).multiply(-5);
-
-    bob.velocity.setTo(impulseForce);
-  };
-
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
     window.addEventListener('keyup', this.onKeyUpWSAD);
-    window.addEventListener('pointerdown', this.onPointerDown);
-    window.addEventListener('pointerup', this.onPointerUp);
   }
 
   private removeListeners() {
     window.removeEventListener('keydown', this.onKeyDownWSAD);
     window.removeEventListener('keyup', this.onKeyUpWSAD);
-    window.removeEventListener('pointerdown', this.onPointerDown);
-    window.removeEventListener('pointerup', this.onPointerUp);
   }
 
   public destroy() {
@@ -320,15 +188,7 @@ export class Scene {
 
     this.removeListeners();
 
-    this.bobs.forEach((bob) => {
-      bob.destroy();
-    });
-    this.anchor?.destroy();
-    this.lines.forEach((line) => {
-      line.destroy();
-    });
-    this.forceLine?.destroy();
-
+    this.cloth?.destroy();
     this.background?.destroy();
   }
 }
