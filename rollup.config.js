@@ -15,6 +15,7 @@ const FILE_NAMES = [
   'spring',
   'chain',
   'cloth',
+  'tutorial',
 ];
 
 const commonPlugins = [
