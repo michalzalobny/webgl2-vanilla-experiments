@@ -30,6 +30,11 @@ export class Scene {
     }
     this.gl = ctx;
 
+    const ext = this.gl.getExtension('ANGLE_instanced_arrays');
+    if (!ext) {
+      throw new Error('Instanced rendering not supported in this browser.');
+    }
+
     this.addListeners();
 
     this.texturesManager = new TexturesManager({ gl: this.gl });
@@ -48,10 +53,19 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
+    const width = 30;
+    const height = 30;
+    const spacing = 20;
+
     this.cloth = new Cloth({
       camera: this.camera,
       geometriesManager: this.geometriesManager,
       gl: this.gl,
+      width,
+      height,
+      startX: -(width * spacing) / 2,
+      startY: -(height * spacing) / 2,
+      spacing,
     });
 
     this.background = new Background({

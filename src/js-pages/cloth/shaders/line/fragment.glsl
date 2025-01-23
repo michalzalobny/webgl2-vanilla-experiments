@@ -15,7 +15,6 @@ out vec4 outColor;
 void main() {
   vec2 uv = v_uv;
 
-  float s = 1.0 - abs(uv.y - 0.5) * 2.0;
-  outColor = vec4(u_color, s);
+  outColor = vec4(u_color, 1.0);
 }
     

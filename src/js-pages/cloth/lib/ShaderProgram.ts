@@ -147,6 +147,7 @@ export class ShaderProgram {
     if (!this.program) {
       throw new Error('Cannot use program, program is not set');
     }
+
     this.gl.useProgram(this.program);
 
     // Bind textures to texture units, it stats every time from 0 (below), since we don't know how many textures will be used

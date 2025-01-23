@@ -58,5 +58,5 @@ export const useTexture = (props: UseTexture) => {
 
   if (!uniformLocation) return;
 
-  gl.uniform1i(uniformLocation, textureUnit);
+  // gl.uniform1i(uniformLocation, textureUnit);
 };
