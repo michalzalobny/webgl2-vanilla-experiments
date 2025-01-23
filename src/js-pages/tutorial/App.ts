@@ -1,4 +1,5 @@
 //@ts-nocheck
+//Based on https://github.com/scriptfoundry/WebGL2-Videos-Materials
 
 const vertexShaderSource = `#version 300 es
 #pragma vscode_glsllint_stage: vert
