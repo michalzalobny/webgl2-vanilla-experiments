@@ -2,6 +2,11 @@
 layout: 'layouts/base.njk'
 ---
 
+<style>
+  body {
+    background:grey;
+  }
+</style>
 <div class="debug-holder">debug</div>
 <div class="fps">fps: <span id="fps"></span></div>
 <canvas width="450" height="250" style="border:1px solid black; position:fixed; top:50%; left:50%; transform: translate(-50%,-50%);"></canvas>
