@@ -113,7 +113,7 @@ export class Objects3D {
       mediaPlane.position.setTo(
         mouse2DCurrent[0] * randomSeedsArray[key + 3] + (randomSeedsArray[key + 1] - 0.5) * 0.25,
         (randomSeedsArray[key + 2] - 0.5) * 0.25,
-        randomSeedsArray[key + 3] * 0.1
+        randomSeedsArray[key + 3] * 0.1,
       );
 
       mediaPlane.render({ camera: this.camera });

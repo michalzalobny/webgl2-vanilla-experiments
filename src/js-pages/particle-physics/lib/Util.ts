@@ -27,7 +27,7 @@ export const setupVertexAttribute = (props: SetupVertexAttribute) => {
   const location = gl.getAttribLocation(program, name);
   if (location === -1) {
     console.warn(
-      `Could not find attribute location for ${name}. Either the attribute is not used in the vertex shader or the name is misspelled.`
+      `Could not find attribute location for ${name}. Either the attribute is not used in the vertex shader or the name is misspelled.`,
     );
     return null;
   }

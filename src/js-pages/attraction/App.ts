@@ -121,7 +121,7 @@ document.addEventListener(
       event.preventDefault();
     }
   },
-  { passive: false }
+  { passive: false },
 );
 
 // https://webglfundamentals.org/webgl/lessons/webgl-qna-recording-fps-in-webgl.html

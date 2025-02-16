@@ -18,7 +18,7 @@ export class Mat4 extends Float32Array {
     m30 = 0,
     m31 = 0,
     m32 = 0,
-    m33 = 1
+    m33 = 1,
   ) {
     super([m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]);
     return this;
@@ -73,7 +73,7 @@ export class Mat4 extends Float32Array {
     m30 = m00,
     m31 = m00,
     m32 = m00,
-    m33 = m00
+    m33 = m00,
   ) {
     // @ts-ignore
     if (m00.length) return this.copy(m00);

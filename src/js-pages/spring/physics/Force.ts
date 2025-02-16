@@ -26,7 +26,7 @@ export class Force {
     particle2: Particle,
     G: number,
     minDistance: number,
-    maxDistance: number
+    maxDistance: number,
   ) {
     const d = particle2.mesh.position.clone().sub(particle1.mesh.position);
     let distanceSquared = d.squaredLen();

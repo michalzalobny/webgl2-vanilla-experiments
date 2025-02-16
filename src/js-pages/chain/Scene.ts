@@ -178,7 +178,7 @@ export class Scene {
     const endPoint = new Vec3(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
+      0,
     );
     const bob = this.bobs[this.bobs.length - 1];
     this.forceLine.update(bob.mesh.position, endPoint);
@@ -290,7 +290,7 @@ export class Scene {
     const impulseForce = new Vec3(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
+      0,
     );
 
     const bob = this.bobs[this.bobs.length - 1];

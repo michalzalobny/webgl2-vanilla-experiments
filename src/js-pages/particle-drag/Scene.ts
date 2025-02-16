@@ -130,7 +130,7 @@ export class Scene {
     this.dragLine?.endPoint.setTo(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
+      0,
     );
 
     // Separate update and render
@@ -229,7 +229,7 @@ export class Scene {
     const impulseForce = new Vec3(
       (globalState.mouse2DTarget.value[0] * globalState.stageSize.value[0]) / 2,
       (globalState.mouse2DTarget.value[1] * globalState.stageSize.value[1]) / 2,
-      0
+      0,
     );
     //Calculate the direction of the force
     impulseForce.sub(this.particles[0].mesh.position).multiply(-5);

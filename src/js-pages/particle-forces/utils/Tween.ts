@@ -134,7 +134,7 @@ class TweenTask {
           // Stop parent tween and log error
           globalState.tweenManager.removeTween(this.parentTween);
           console.error(
-            `Error TweenId: ${this.parentTween.id} when creating initObj. Was expecting number or array of numbers`
+            `Error TweenId: ${this.parentTween.id} when creating initObj. Was expecting number or array of numbers`,
           );
         }
       }
@@ -167,7 +167,7 @@ class TweenTask {
           // Stop parent tween and log error
           globalState.tweenManager.removeTween(this.parentTween);
           console.error(
-            `Error TweenId: ${this.parentTween.id} when updating tween. Was expecting number or array of numbers`
+            `Error TweenId: ${this.parentTween.id} when updating tween. Was expecting number or array of numbers`,
           );
         }
       }

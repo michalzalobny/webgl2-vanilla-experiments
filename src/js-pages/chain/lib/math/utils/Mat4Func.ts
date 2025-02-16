@@ -53,7 +53,7 @@ export function set(
   m30: number,
   m31: number,
   m32: number,
-  m33: number
+  m33: number,
 ) {
   out[0] = m00;
   out[1] = m01;

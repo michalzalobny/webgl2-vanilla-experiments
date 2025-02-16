@@ -143,7 +143,7 @@ export class Scene {
 
       // Move the small planet away from the big planet
       this.smallPlanet.mesh.position.setTo(
-        this.bigPlanet.mesh.position.clone().add(normal.multiply(this.bigPlanet.radius + this.smallPlanet.radius))
+        this.bigPlanet.mesh.position.clone().add(normal.multiply(this.bigPlanet.radius + this.smallPlanet.radius)),
       );
     }
   }

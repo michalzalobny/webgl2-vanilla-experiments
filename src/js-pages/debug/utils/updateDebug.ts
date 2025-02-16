@@ -1,4 +1,4 @@
-import { globalState } from "./globalState";
+import { globalState } from './globalState';
 
 export const updateDebug = (text: string) => {
   if (!globalState.debugHolderEl) return;
