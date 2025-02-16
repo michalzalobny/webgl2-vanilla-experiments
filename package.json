@@ -9,7 +9,8 @@
     "watch:scss": "nodemon -e scss -x \"npm run scss\"",
     "rollup-compile-app": "rollup -c",
     "watch:rollup-compile-app": "rollup -cw",
-    "dev": "npm run build:pre-eleventy && concurrently \"npm run watch:scss\" \"npm run watch:rollup-compile-app\" \"eleventy --serve\""
+    "dev": "npm run build:pre-eleventy && concurrently \"npm run watch:scss\" \"npm run watch:rollup-compile-app\" \"eleventy --serve\"",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -40,6 +41,7 @@
     "rollup-plugin-swc": "0.2.1"
   },
   "devDependencies": {
+    "prettier": "^3.5.1",
     "typescript": "5.1.6"
   }
 }
