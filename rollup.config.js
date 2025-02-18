@@ -16,6 +16,7 @@ const FILE_NAMES = [
   'chain',
   'cloth',
   'tutorial',
+  'leetcode',
 ];
 
 const commonPlugins = [

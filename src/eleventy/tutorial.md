@@ -4,7 +4,7 @@ layout: 'layouts/base.njk'
 
 <style>
   body {
-    background:grey;
+    background:pink;
   }
 </style>
 <div class="debug-holder">debug</div>
