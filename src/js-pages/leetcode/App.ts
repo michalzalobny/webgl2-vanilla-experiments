@@ -21,4 +21,22 @@ function numSubarrayProductLessThanK(nums: number[], k: number): number {
   }
   return ans;
 }
-const value = numSubarrayProductLessThanK([10, 5, 2, 6], 100);
+// numSubarrayProductLessThanK([10, 5, 2, 6], 100);
+
+function findBestSubarray(nums: number[], k: number): number {
+  let curr = 0;
+
+  for (let i = 0; i < k; i++) {
+    curr += nums[i];
+  }
+
+  let ans = curr;
+
+  for (let i = k; i < nums.length - 1; i++) {
+    curr += nums[i] - nums[i - k];
+    ans = Math.max(ans, curr);
+  }
+
+  return ans;
+}
+console.log(findBestSubarray([3, -1, 4, 12, -8, 5, 6], 2));
