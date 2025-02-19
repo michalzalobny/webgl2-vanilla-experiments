@@ -48,16 +48,16 @@ function findBestSubarray(nums: number[], k: number): number {
 */
 function answerQueries(nums: number[], queries: number[][], limit: number): boolean[] {
   let ans: boolean[] = [];
-  //Pre process nums array -> create prefix array, to easily get the sum of any contiguous sub array
+  //Pre process nums array -> create runningSum array, to easily get the sum of any contiguous sub array
   // [1, 6, 3, 2, 7, 2] -> [1, 7, 10, 12, 19, 21]
-  const prefix = [nums[0]];
+  const runningSum = [nums[0]];
   for (let i = 1; i < nums.length; i++) {
-    prefix.push(prefix[i - 1] + nums[i]);
+    runningSum.push(runningSum[i - 1] + nums[i]);
   }
 
   for (let i = 0; i < queries.length; i++) {
     const sub = queries[i];
-    const totalSum = prefix[sub[1]] - prefix[sub[0]] + nums[sub[0]];
+    const totalSum = runningSum[sub[1]] - runningSum[sub[0]] + nums[sub[0]];
     ans.push(totalSum < limit);
   }
 
@@ -85,19 +85,19 @@ function answerQueries(nums: number[], queries: number[][], limit: number): bool
   Return the number of valid splits in nums.
 */
 function waysToSplitArray(nums: number[]): number {
-  let prefix = []; // Stores the sums of all contiguous subarrays, [10, 4, -8, 7] -> [10, 14, 6, 13]
-  prefix[0] = nums[0];
+  let runningSum = []; // Stores the sums of all contiguous subarrays, [10, 4, -8, 7] -> [10, 14, 6, 13]
+  runningSum[0] = nums[0];
 
   for (let i = 1; i < nums.length; i++) {
-    prefix[i] = prefix[i - 1] + nums[i];
+    runningSum[i] = runningSum[i - 1] + nums[i];
   }
 
   let ans = 0;
 
   for (let i = 0; i <= nums.length - 2; i++) {
     // We are going till the
-    const leftSide = prefix[i];
-    const rightSide = prefix[nums.length - 1] - leftSide;
+    const leftSide = runningSum[i];
+    const rightSide = runningSum[nums.length - 1] - leftSide;
 
     if (leftSide >= rightSide) {
       ans += 1;
