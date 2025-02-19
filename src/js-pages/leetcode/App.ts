@@ -32,7 +32,7 @@ function findBestSubarray(nums: number[], k: number): number {
 
   let ans = curr;
 
-  for (let i = k; i < nums.length - 1; i++) {
+  for (let i = k; i < nums.length; i++) {
     curr += nums[i] - nums[i - k];
     ans = Math.max(ans, curr);
   }
