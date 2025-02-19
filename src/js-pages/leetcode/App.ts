@@ -105,4 +105,33 @@ function waysToSplitArray(nums: number[]): number {
   }
   return ans;
 }
-console.log(waysToSplitArray([10, 4, -8, 7]));
+// console.log(waysToSplitArray([10, 4, -8, 7]));
+
+/*
+  Given an array of integers nums, you start with an initial positive value startValue.
+  In each iteration, you calculate the step by step sum of startValue plus elements in nums (from left to right).
+  Return the minimum positive value of startValue such that the step by step sum is never less than 1.
+*/
+function minStartValue(nums: number[]): number {
+  let runningSum = [nums[0]];
+  for (let i = 1; i < nums.length; i++) {
+    runningSum[i] = runningSum[i - 1] + nums[i];
+  }
+
+  let lowest = 0;
+
+  // 1. Need to find lowest number from the runningSum
+  // 2. Answer will be (Math.abs(lowest number) + 1) if its <= 0 OR 0 if lowest number > 0
+
+  for (let i = 0; i < nums.length; i++) {
+    lowest = Math.min(lowest, runningSum[i]);
+  }
+
+  if (lowest <= 0) {
+    return Math.abs(lowest) + 1;
+  } else {
+    return 0;
+  }
+}
+
+console.log(minStartValue([-3, 2, -3, 4, 2]));
