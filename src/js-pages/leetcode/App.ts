@@ -63,15 +63,46 @@ function answerQueries(nums: number[], queries: number[][], limit: number): bool
 
   return ans;
 }
+// console.log(
+//   answerQueries(
+//     [1, 6, 3, 2, 7, 2],
+//     [
+//       [0, 3],
+//       [2, 5],
+//       [2, 4],
+//     ],
+//     13,
+//   ),
+// );
 
-console.log(
-  answerQueries(
-    [1, 6, 3, 2, 7, 2],
-    [
-      [0, 3],
-      [2, 5],
-      [2, 4],
-    ],
-    13,
-  ),
-);
+/*
+  You are given a 0-indexed integer array nums of length n.
+
+  nums contains a valid split at index i if the following are true:
+
+  The sum of the first i + 1 elements is greater than or equal to the sum of the last n - i - 1 elements.
+  There is at least one element to the right of i. That is, 0 <= i < n - 1.
+  Return the number of valid splits in nums.
+*/
+function waysToSplitArray(nums: number[]): number {
+  let prefix = []; // Stores the sums of all contiguous subarrays, [10, 4, -8, 7] -> [10, 14, 6, 13]
+  prefix[0] = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    prefix[i] = prefix[i - 1] + nums[i];
+  }
+
+  let ans = 0;
+
+  for (let i = 0; i <= nums.length - 2; i++) {
+    // We are going till the
+    const leftSide = prefix[i];
+    const rightSide = prefix[nums.length - 1] - leftSide;
+
+    if (leftSide >= rightSide) {
+      ans += 1;
+    }
+  }
+  return ans;
+}
+console.log(waysToSplitArray([10, 4, -8, 7]));
