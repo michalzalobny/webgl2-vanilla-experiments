@@ -160,4 +160,26 @@ function getAverages(nums: number[], k: number): number[] {
   }
   return ans;
 }
-console.log(getAverages([7, 4, 3, 9, 1, 8, 5, 2, 6], 3));
+// console.log(getAverages([7, 4, 3, 9, 1, 8, 5, 2, 6], 3));
+
+/*
+  Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+  You may assume that each input would have exactly one solution, and you may not use the same element twice.
+  You can return the answer in any order.
+*/
+function twoSum(nums: number[], target: number): number[] {
+  const d = new Map();
+
+  for (let i = 0; i < nums.length; i++) {
+    const num = nums[i];
+    const complementary = target - num;
+    if (d.has(complementary)) {
+      return [i, d.get(complementary)];
+    } else {
+      d.set(num, i);
+    }
+  }
+  return [];
+}
+
+console.log(twoSum([2, 7, 11, 15], 9));
