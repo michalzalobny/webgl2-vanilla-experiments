@@ -235,10 +235,35 @@ function intersection(nums: number[][]): number[] {
 
   return ans.sort((curr, next) => curr - next);
 }
-console.log(
-  intersection([
-    [3, 1, 2, 4, 5],
-    [1, 2, 3, 4],
-    [3, 4, 5, 6],
-  ]),
-);
+// console.log(
+//   intersection([
+//     [3, 1, 2, 4, 5],
+//     [1, 2, 3, 4],
+//     [3, 4, 5, 6],
+//   ]),
+// );
+
+/*
+  Given a string s, return true if s is a good string, or false otherwise.
+  A string s is good if all the characters that appear in s have the same number of occurrences (i.e., the same frequency).
+  Example 1:
+  Input: s = "abacbc"
+  Output: true
+*/
+function areOccurrencesEqual(s: string): boolean {
+  const m = new Map();
+
+  for (let i = 0; i < s.length; i++) {
+    const v = m.get(s[i]);
+    if (!v) {
+      m.set(s[i], 1);
+    } else {
+      m.set(s[i], v + 1);
+    }
+  }
+
+  //Check if all the values are the same
+  return new Set([...m.values()]).size === 1;
+}
+
+console.log(areOccurrencesEqual('abacbc'));
