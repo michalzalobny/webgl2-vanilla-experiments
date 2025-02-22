@@ -181,5 +181,64 @@ function twoSum(nums: number[], target: number): number[] {
   }
   return [];
 }
+// console.log(twoSum([2, 7, 11, 15], 9));
 
-console.log(twoSum([2, 7, 11, 15], 9));
+function countElements(arr: number[]): number {
+  const m = new Map();
+  let ans = 0;
+  for (let i = 0; i < arr.length; i++) {
+    const num = arr[i];
+    m.set(num, num + 1);
+  }
+
+  console.log(m);
+
+  for (let i = 0; i < arr.length; i++) {
+    const num = arr[i] + 1;
+    if (m.get(num)) {
+      ans++;
+    }
+  }
+
+  return ans;
+}
+// console.log(countElements([1, 2, 3]));
+
+/*
+  Given a 2D integer array nums where nums[i] is a non-empty array of distinct positive integers, return the list of
+  integers that are present in each array of nums sorted in ascending order.
+  Example 1:
+  Input: nums = [[3,1,2,4,5],[1,2,3,4],[3,4,5,6]]
+  Output: [3,4]
+*/
+function intersection(nums: number[][]): number[] {
+  const m = new Map();
+
+  nums.forEach((arr) => {
+    arr.forEach((el) => {
+      const occ = m.get(el);
+      if (!occ) {
+        m.set(el, 1);
+      } else {
+        m.set(el, occ + 1);
+      }
+    });
+  });
+
+  let ans: number[] = [];
+
+  m.forEach((value, key) => {
+    if (value === nums.length) {
+      ans.push(key);
+    }
+  });
+
+  return ans.sort((curr, next) => curr - next);
+}
+console.log(
+  intersection([
+    [3, 1, 2, 4, 5],
+    [1, 2, 3, 4],
+    [3, 4, 5, 6],
+  ]),
+);
