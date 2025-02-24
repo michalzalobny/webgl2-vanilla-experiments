@@ -265,5 +265,26 @@ function areOccurrencesEqual(s: string): boolean {
   //Check if all the values are the same
   return new Set([...m.values()]).size === 1;
 }
+// console.log(areOccurrencesEqual('abacbc'));
 
-console.log(areOccurrencesEqual('abacbc'));
+/*
+  Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+  A subarray is a contiguous non-empty sequence of elements within an array.
+*/
+function subarraySum(nums: number[], k: number): number {
+  const counts = new Map();
+  counts.set(0, 1);
+  let curr = 0;
+  let ans = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    const num = nums[i];
+    curr += num;
+
+    ans += counts.get(curr - k) || 0;
+    counts.set(curr, (counts.get(curr) || 0) + 1);
+  }
+
+  return ans;
+}
+console.log(subarraySum([1, 1, 1], 2));
