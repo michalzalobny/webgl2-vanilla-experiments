@@ -359,4 +359,42 @@ function largestUniqueNumber(nums: number[]): number {
 
   return once.map((arr) => arr[0]).sort((a, b) => b - a)[0];
 }
-console.log(largestUniqueNumber([5, 7, 3, 9, 4, 9, 8, 3, 1]));
+// console.log(largestUniqueNumber([5, 7, 3, 9, 4, 9, 8, 3, 1]));
+
+/*
+  Given a string text, you want to use the characters of text to form as many instances of the word "balloon" as possible.
+  You can use each character in text at most once. Return the maximum number of instances that can be formed.
+*/
+function maxNumberOfBalloons(text: string): number {
+  const occurrences = new Map();
+  const needs = new Map();
+
+  const targetWord = 'balloon';
+
+  for (let i = 0; i < targetWord.length; i++) {
+    const letter = targetWord[i];
+    needs.set(letter, (needs.get(letter) || 0) + 1);
+  }
+
+  const target = new Set(targetWord);
+  for (let i = 0; i < text.length; i++) {
+    const letter = text[i];
+    if (target.has(letter)) {
+      occurrences.set(letter, (occurrences.get(letter) || 0) + 1);
+    }
+  }
+
+  let ans = [];
+
+  const n = Array.from(target);
+  for (let i = 0; i < n.length; i++) {
+    const letter = n[i];
+    const occAmount = occurrences.get(letter) || 0;
+    const needAmount = needs.get(letter);
+    const final = Math.floor(occAmount / needAmount);
+    ans[i] = final;
+  }
+
+  return ans.sort((a, b) => a - b)[0];
+}
+console.log(maxNumberOfBalloons('loonbalxballpoon'));
