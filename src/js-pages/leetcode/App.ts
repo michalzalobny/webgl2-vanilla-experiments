@@ -397,4 +397,28 @@ function maxNumberOfBalloons(text: string): number {
 
   return ans.sort((a, b) => a - b)[0];
 }
-console.log(maxNumberOfBalloons('loonbalxballpoon'));
+// console.log(maxNumberOfBalloons('loonbalxballpoon'));
+
+/* 
+  Given a binary array nums, return the maximum length of a contiguous subarray with an equal number of 0 and 1.
+*/
+function findMaxLength(nums: number[]): number {
+  const map = new Map<number, number>();
+  map.set(0, -1); // To handle cases where the entire prefix forms a valid subarray
+  let maxLength = 0;
+  let balance = 0;
+
+  for (let i = 0; i < nums.length; i++) {
+    balance += nums[i] === 1 ? 1 : -1;
+
+    if (map.has(balance)) {
+      maxLength = Math.max(maxLength, i - map.get(balance)!);
+    } else {
+      map.set(balance, i);
+    }
+  }
+
+  return maxLength;
+}
+
+console.log(findMaxLength([0, 1, 0]));
