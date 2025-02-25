@@ -466,4 +466,42 @@ function minimumCardPickup(cards: number[]): number {
   return ans === Infinity ? -1 : ans;
 }
 
-console.log(minimumCardPickup([3, 4, 2, 3, 4, 7]));
+// console.log(minimumCardPickup([3, 4, 2, 3, 4, 7]));
+
+/*
+You are given a 0-indexed array nums consisting of positive integers. 
+You can choose two indices i and j, such that i != j, and the sum of digits of the number nums[i] is equal to that of nums[j].
+
+Return the maximum value of nums[i] + nums[j] that you can obtain over all possible indices i and j 
+that satisfy the conditions. If no such pair of indices exists, return -1.
+*/
+function maximumSum(nums: number[]): number {
+  const occur = new Map<number, number[]>();
+
+  // Populate the map with numbers grouped by their digit sum
+  for (const num of nums) {
+    const digitSum = num
+      .toString()
+      .split('')
+      .reduce((acc, curr) => acc + Number(curr), 0);
+
+    if (!occur.has(digitSum)) {
+      occur.set(digitSum, []);
+    }
+    occur.get(digitSum)!.push(num);
+  }
+
+  let maxValue = -1;
+
+  // Iterate over the grouped numbers
+  for (const numList of occur.values()) {
+    if (numList.length > 1) {
+      numList.sort((a, b) => b - a); // Sort in descending order
+      maxValue = Math.max(maxValue, numList[0] + numList[1]); // Take top two
+    }
+  }
+
+  return maxValue;
+}
+
+console.log(maximumSum([18, 43, 36, 13, 7]));
