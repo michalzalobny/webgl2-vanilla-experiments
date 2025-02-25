@@ -442,4 +442,28 @@ function groupAnagrams(strs: string[]): string[][] {
   return Array.from(hash.values());
 }
 
-console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));
+// console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));
+
+/* 
+You are given an integer array cards where cards[i] represents the value of the ith card. 
+A pair of cards are matching if the cards have the same value.
+
+Return the minimum number of consecutive cards you have to pick up to have a pair of matching cards 
+among the picked cards. If it is impossible to have matching cards, return -1.
+*/
+function minimumCardPickup(cards: number[]): number {
+  const occ = new Map();
+  let ans = Infinity;
+
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    if (occ.has(card)) {
+      ans = Math.min(ans, i - occ.get(card) + 1);
+    }
+    occ.set(card, i);
+  }
+
+  return ans === Infinity ? -1 : ans;
+}
+
+console.log(minimumCardPickup([3, 4, 2, 3, 4, 7]));
