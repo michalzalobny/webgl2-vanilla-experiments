@@ -323,17 +323,40 @@ function findWinners(matches: number[][]): number[][] {
   });
   return [Array.from(winnersIds).sort((a, b) => a - b), Array.from(lost.keys()).sort((a, b) => a - b)];
 }
-console.log(
-  findWinners([
-    [1, 3],
-    [2, 3],
-    [3, 6],
-    [5, 6],
-    [5, 7],
-    [4, 5],
-    [4, 8],
-    [4, 9],
-    [10, 4],
-    [10, 9],
-  ]),
-);
+// console.log(
+//   findWinners([
+//     [1, 3],
+//     [2, 3],
+//     [3, 6],
+//     [5, 6],
+//     [5, 7],
+//     [4, 5],
+//     [4, 8],
+//     [4, 9],
+//     [10, 4],
+//     [10, 9],
+//   ]),
+// );
+
+/* 
+  Given an integer array nums, return the largest integer that only occurs once. If no integer occurs once, return -1.
+*/
+function largestUniqueNumber(nums: number[]): number {
+  const occurrences = new Map();
+
+  for (let i = 0; i < nums.length; i++) {
+    const num = nums[i];
+    occurrences.set(num, (occurrences.get(num) || 0) + 1);
+  }
+
+  const once = Array.from(occurrences.entries()).filter((arr) => {
+    return arr[1] === 1;
+  });
+
+  if (once.length === 0) {
+    return -1;
+  }
+
+  return once.map((arr) => arr[0]).sort((a, b) => b - a)[0];
+}
+console.log(largestUniqueNumber([5, 7, 3, 9, 4, 9, 8, 3, 1]));
