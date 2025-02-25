@@ -271,20 +271,69 @@ function areOccurrencesEqual(s: string): boolean {
   Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
   A subarray is a contiguous non-empty sequence of elements within an array.
 */
-function subarraySum(nums: number[], k: number): number {
-  const counts = new Map();
-  counts.set(0, 1);
-  let curr = 0;
-  let ans = 0;
+// function subarraySum(nums: number[], k: number): number {
+//   const counts = new Map();
+//   counts.set(0, 1);
+//   let curr = 0;
+//   let ans = 0;
 
-  for (let i = 0; i < nums.length; i++) {
-    const num = nums[i];
-    curr += num;
+//   for (let i = 0; i < nums.length; i++) {
+//     const num = nums[i];
+//     curr += num % 2; // add 0 or 1
 
-    ans += counts.get(curr - k) || 0;
-    counts.set(curr, (counts.get(curr) || 0) + 1);
+//     ans += counts.get(curr - k) || 0;
+//     counts.set(curr, (counts.get(curr) || 0) + 1);
+//   }
+
+//   return ans;
+// }
+// console.log(subarraySum([1, 1, 1], 2));
+
+/*
+  You are given an integer array matches where matches[i] = [winneri, loseri] indicates that the player winneri
+  defeated player loseri in a match.
+
+  Return a list answer of size 2 where:
+
+  answer[0] is a list of all players that have not lost any matches.
+  answer[1] is a list of all players that have lost exactly one match.
+  The values in the two lists should be returned in increasing order.
+*/
+function findWinners(matches: number[][]): number[][] {
+  const lost = new Map(); /* (id:loss-count) */
+  const winnersIds: Set<number> = new Set();
+
+  for (let i = 0; i < matches.length; i++) {
+    const outcome = matches[i];
+
+    const winId = outcome[0];
+    const lostId = outcome[1];
+
+    lost.set(lostId, (lost.get(lostId) || 0) + 1);
+
+    winnersIds.add(winId);
   }
 
-  return ans;
+  // Remove any players that lost anything different than one match.
+  lost.forEach((value, key) => {
+    winnersIds.delete(key);
+    if (value !== 1) {
+      lost.delete(key);
+    }
+  });
+  return [Array.from(winnersIds).sort((a, b) => a - b), Array.from(lost.keys()).sort((a, b) => a - b)];
 }
-console.log(subarraySum([1, 1, 1], 2));
+console.log(
+  findWinners([
+    [1, 3],
+    [2, 3],
+    [3, 6],
+    [5, 6],
+    [5, 7],
+    [4, 5],
+    [4, 8],
+    [4, 9],
+    [10, 4],
+    [10, 9],
+  ]),
+);
