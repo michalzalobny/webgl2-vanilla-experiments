@@ -421,4 +421,25 @@ function findMaxLength(nums: number[]): number {
   return maxLength;
 }
 
-console.log(findMaxLength([0, 1, 0]));
+// console.log(findMaxLength([0, 1, 0]));
+
+/*
+  Given an array of strings strs, group the anagrams together. You can return the answer in any order.
+*/
+function groupAnagrams(strs: string[]): string[][] {
+  const hash = new Map();
+  for (let i = 0; i < strs.length; i++) {
+    const word = strs[i];
+    const wordSorted = word.split('').sort().join();
+
+    const existingWords = hash.get(wordSorted);
+    if (existingWords) {
+      hash.set(wordSorted, [...existingWords, word]);
+    } else {
+      hash.set(wordSorted, [word]);
+    }
+  }
+  return Array.from(hash.values());
+}
+
+console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));
