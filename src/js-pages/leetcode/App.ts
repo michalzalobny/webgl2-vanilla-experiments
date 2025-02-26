@@ -503,5 +503,42 @@ function maximumSum(nums: number[]): number {
 
   return maxValue;
 }
+// console.log(maximumSum([18, 43, 36, 13, 7]));
 
-console.log(maximumSum([18, 43, 36, 13, 7]));
+/*
+Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.
+
+A row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).
+*/
+function equalPairs(grid: number[][]): number {
+  const map = new Map<string, number>();
+  let count = 0;
+
+  // Store row occurrences in a map
+  for (let i = 0; i < grid.length; i++) {
+    const key = grid[i].toString();
+    map.set(key, (map.get(key) || 0) + 1);
+  }
+
+  // Count matching columns
+  for (let i = 0; i < grid.length; i++) {
+    const col = [];
+    for (let j = 0; j < grid.length; j++) {
+      col.push(grid[j][i]);
+    }
+    const key = col.toString();
+    if (map.has(key)) {
+      count += map.get(key)!; // Add the count of matching rows
+    }
+  }
+
+  return count;
+}
+
+console.log(
+  equalPairs([
+    [3, 2, 1],
+    [1, 7, 6],
+    [2, 7, 7],
+  ]),
+);
