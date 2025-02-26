@@ -534,11 +534,44 @@ function equalPairs(grid: number[][]): number {
 
   return count;
 }
+// console.log(
+//   equalPairs([
+//     [3, 2, 1],
+//     [1, 7, 6],
+//     [2, 7, 7],
+//   ]),
+// );
 
-console.log(
-  equalPairs([
-    [3, 2, 1],
-    [1, 7, 6],
-    [2, 7, 7],
-  ]),
-);
+/*
+Given two strings ransomNote and magazine, return true if ransomNote can be constructed by using the 
+letters from magazine and false otherwise.
+
+Each letter in magazine can only be used once in ransomNote.
+*/
+
+function canConstruct(ransomNote: string, magazine: string): boolean {
+  const available = new Map();
+
+  for (let i = 0; i < magazine.length; i++) {
+    const letter = magazine[i];
+    available.set(letter, (available.get(letter) || 0) + 1);
+  }
+
+  for (let i = 0; i < ransomNote.length; i++) {
+    const letter = ransomNote[i];
+    if (available.has(letter)) {
+      const value = available.get(letter);
+      if (value === 1) {
+        available.delete(letter);
+      } else {
+        available.set(letter, value - 1);
+      }
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+console.log(canConstruct('aa', 'aab'));
