@@ -622,4 +622,20 @@ function lengthOfLongestSubstring(s: string): number {
   return maxLength;
 }
 
-console.log(lengthOfLongestSubstring('abcabcbb'));
+// console.log(lengthOfLongestSubstring('abcabcbb'));
+
+var deleteDuplicates = function (head: any) {
+  let curr = head;
+
+  while (curr && curr.next) {
+    if (curr.val === curr.next.val) {
+      // Skip the duplicate node
+      curr.next = curr.next.next;
+    } else {
+      // Move to the next node only if no deletion happened
+      curr = curr.next;
+    }
+  }
+
+  return head;
+};
