@@ -639,3 +639,38 @@ var deleteDuplicates = function (head: any) {
 
   return head;
 };
+
+class ListNode {
+  constructor(val = 0, next = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
+
+/*
+Given the head of a singly linked list and two integers left and right where left <= right, 
+reverse the nodes of the list from position left to position right, and return the reversed list.
+*/
+var reverseBetween = function (head, left, right) {
+  let ln = head;
+
+  for (let i = 0; i < left - 1; i++) {
+    ln = ln.next;
+  }
+  let rn = ln;
+  for (let i = left; i < right; i++) {
+    rn = rn.next;
+  }
+
+  return rn;
+};
+
+//Nodes
+
+const t = new ListNode(5, null);
+const s = new ListNode(4, t);
+const r = new ListNode(3, s);
+const i = new ListNode(2, r);
+const f = new ListNode(1, i);
+
+console.log(reverseBetween(f, 2, 4));
