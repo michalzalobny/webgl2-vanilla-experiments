@@ -673,4 +673,37 @@ const r = new ListNode(3, s);
 const i = new ListNode(2, r);
 const f = new ListNode(1, i);
 
-console.log(reverseBetween(f, 2, 4));
+// console.log(reverseBetween(f, 2, 4));
+
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+var isValid = function (s) {
+  if (s.length === 1) return false;
+  const stack = [];
+  const options = new Map([
+    ['{', '}'],
+    ['[', ']'],
+    ['(', ')'],
+  ]);
+  const closing = new Set(Array.from(options.values()));
+
+  for (let i = 0; i < s.length; i++) {
+    const char = s[i];
+    //Char is a closing one. Now we need to compare it with dict value
+    if (closing.has(char)) {
+      if (char !== options.get(stack.pop())) {
+        return false;
+      }
+    } else {
+      // Char is not closing one, so push it to the stack.
+      stack.push(char);
+    }
+  }
+
+  if (stack.length !== 0) return false;
+
+  return true;
+};
+console.log(isValid('()[]'));
