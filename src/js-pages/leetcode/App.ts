@@ -733,4 +733,43 @@ var removeDuplicates = function (s) {
   return lifo.join('');
 };
 
-console.log(removeDuplicates('azxxzy'));
+// console.log(removeDuplicates('azxxzy'));
+
+/*
+Given two strings s and t, return true if they are equal
+when both are typed into empty text editors. '#' means a backspace character.
+
+Note that after backspacing an empty text, the text will continue empty.
+*/
+
+var backspaceCompare = function (s, t) {
+  const sWord = [];
+
+  for (let i = 0; i < s.length; i++) {
+    const char = s[i];
+    if (char === '#') {
+      sWord.pop();
+    } else {
+      sWord.push(char);
+    }
+  }
+
+  const tWord = [];
+
+  for (let i = 0; i < t.length; i++) {
+    const char = t[i];
+    if (char === '#') {
+      tWord.pop();
+    } else {
+      tWord.push(char);
+    }
+  }
+
+  console.log(sWord, tWord);
+
+  if (sWord.join('') === tWord.join('')) return true;
+
+  return false;
+};
+
+console.log(backspaceCompare('ab##', 'c#d#'));
