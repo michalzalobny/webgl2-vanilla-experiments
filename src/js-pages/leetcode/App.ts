@@ -725,7 +725,6 @@ var removeDuplicates = function (s) {
 
     if (lifo[lifo.length - 1] === letter) {
       lifo.pop();
-      continue;
     } else {
       lifo.push(letter);
     }
