@@ -833,5 +833,50 @@ RecentCounter.prototype.ping = function (t) {
 /**
  * Your RecentCounter object will be instantiated and called as such:
  */
-var obj = new RecentCounter();
-var param_1 = obj.ping('RecentCounter', 'ping', 'ping', 'ping', 'ping');
+// var obj = new RecentCounter();
+// var param_1 = obj.ping('RecentCounter', 'ping', 'ping', 'ping', 'ping');
+
+/*
+Given an array of integers temperatures represents the daily temperatures, 
+return an array answer such that answer[i] is the number of days you have to wait 
+after the ith day to get a warmer temperature. If there is no future day for which this is possible, 
+keep answer[i] == 0 instead.
+ */
+var dailyTemperatures = function (temperatures) {
+  let stack = [];
+  let answer = new Array(temperatures.length).fill(0);
+
+  for (let i = 0; i < temperatures.length; i++) {
+    while (stack.length && temperatures[stack[stack.length - 1]] < temperatures[i]) {
+      let j = stack.pop();
+      answer[j] = i - j;
+    }
+
+    stack.push(i);
+  }
+
+  return answer;
+};
+
+// console.log(dailyTemperatures([73, 74, 75, 71, 69, 72, 76, 73]));
+
+class Animal {
+  name = 'twojstary';
+
+  speak() {
+    console.log('Animal makes a sound');
+  }
+}
+
+class Dog extends Animal {
+  speak() {
+    console.log('Dog barks', this.name);
+  }
+
+  x = () => {
+    console.log('x called: ', this.name);
+  };
+}
+
+const x = new Dog();
+x.x();
