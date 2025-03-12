@@ -65,7 +65,7 @@ export class Background {
     const w = globalState.stageSize.value[0];
     const h = globalState.stageSize.value[1];
     if (this.mesh) {
-      this.mesh.setScale(new Vec3(w * 1.4, h * 1.4, 1));
+      this.mesh.setScale(new Vec3(w * 1.01, h * 1.01, 1));
     }
   }
 
