@@ -17,6 +17,8 @@ const FILE_NAMES = [
   'cloth',
   'tutorial',
   'leetcode',
+  'instanced-points',
+  'instanced-objects',
 ];
 
 const commonPlugins = [
