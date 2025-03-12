@@ -42,8 +42,8 @@ export class Cloth {
 
     this.init();
 
-    console.log(this.sticks);
-    console.log(this.points);
+    // console.log(this.sticks);
+    // console.log(this.points);
   }
 
   private init() {
@@ -52,56 +52,66 @@ export class Cloth {
     const startX = this.startX;
     const startY = this.startY;
     const spacing = this.spacing;
-    for (let y = 0; y <= height; y++) {
-      for (let x = 0; x <= width; x++) {
-        const point = new Point({
-          camera: this.camera,
-          geometriesManager: this.geometriesManager,
-          gl: this.gl,
-          x: startX + x * spacing,
-          y: startY + y * spacing,
-        });
+    // for (let y = 0; y <= height; y++) {
+    //   for (let x = 0; x <= width; x++) {
+    //     const point = new Point({
+    //       camera: this.camera,
+    //       geometriesManager: this.geometriesManager,
+    //       gl: this.gl,
+    //       x: startX + x * spacing,
+    //       y: startY + y * spacing,
+    //     });
 
-        if (x !== 0) {
-          const leftPoint = this.points[this.points.length - 1];
-          const stick = new Stick({
-            camera: this.camera,
-            color: new Vec3(1, 1, 1),
-            geometriesManager: this.geometriesManager,
-            gl: this.gl,
-            p1: point,
-            p2: leftPoint,
-          });
+    //     if (x !== 0) {
+    //       const leftPoint = this.points[this.points.length - 1];
+    //       const stick = new Stick({
+    //         camera: this.camera,
+    //         color: new Vec3(1, 1, 1),
+    //         geometriesManager: this.geometriesManager,
+    //         gl: this.gl,
+    //         p1: point,
+    //         p2: leftPoint,
+    //       });
 
-          leftPoint.addStick(stick, 0);
-          point.addStick(stick, 0);
-          this.sticks.push(stick);
-        }
+    //       leftPoint.addStick(stick, 0);
+    //       point.addStick(stick, 0);
+    //       this.sticks.push(stick);
+    //     }
 
-        if (y !== 0) {
-          const upPoint = this.points[x + (y - 1) * (width + 1)];
+    //     if (y !== 0) {
+    //       const upPoint = this.points[x + (y - 1) * (width + 1)];
 
-          const stick = new Stick({
-            camera: this.camera,
-            color: new Vec3(1, 1, 1),
-            geometriesManager: this.geometriesManager,
-            gl: this.gl,
-            p1: point,
-            p2: upPoint,
-          });
+    //       const stick = new Stick({
+    //         camera: this.camera,
+    //         color: new Vec3(1, 1, 1),
+    //         geometriesManager: this.geometriesManager,
+    //         gl: this.gl,
+    //         p1: point,
+    //         p2: upPoint,
+    //       });
 
-          upPoint.addStick(stick, 1);
-          point.addStick(stick, 1);
-          this.sticks.push(stick);
-        }
+    //       upPoint.addStick(stick, 1);
+    //       point.addStick(stick, 1);
+    //       this.sticks.push(stick);
+    //     }
 
-        if (y === 0 && x % 2 === 0) {
-          point.pin();
-        }
+    //     if (y === 0 && x % 2 === 0) {
+    //       point.pin();
+    //     }
 
-        this.points.push(point);
-      }
-    }
+    //     this.points.push(point);
+    //   }
+    // }
+
+    const point = new Point({
+      camera: this.camera,
+      geometriesManager: this.geometriesManager,
+      gl: this.gl,
+      x: (startX + spacing) * 0,
+      y: (startY + spacing) * 0,
+    });
+
+    this.points.push(point);
   }
 
   public update() {

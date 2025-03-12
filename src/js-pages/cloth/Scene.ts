@@ -30,11 +30,6 @@ export class Scene {
     }
     this.gl = ctx;
 
-    const ext = this.gl.getExtension('ANGLE_instanced_arrays');
-    if (!ext) {
-      throw new Error('Instanced rendering not supported in this browser.');
-    }
-
     this.addListeners();
 
     this.texturesManager = new TexturesManager({ gl: this.gl });
@@ -44,6 +39,12 @@ export class Scene {
   }
 
   private async init() {
+    await this.geometriesManager.addGeometriesToLoad([
+      '/public/assets/models/f22/f22.obj',
+      '/public/assets/models/efa/efa.obj',
+      '/public/assets/models/crab/crab.obj',
+    ]);
+
     // Plane made out of two triangles
     const planeVertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, -0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
     const planeTexcoords = [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1];
@@ -53,8 +54,8 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    const width = 30;
-    const height = 30;
+    const width = 8;
+    const height = 8;
     const spacing = 20;
 
     this.cloth = new Cloth({
@@ -73,14 +74,20 @@ export class Scene {
       geometriesManager: this.geometriesManager,
       gl: this.gl,
     });
+    this.onResize();
   }
 
   public update() {
     // Lerp mouse position
     const mouse2DTarget = globalState.mouse2DTarget.value;
     const mouse2DCurrent = globalState.mouse2DCurrent.value;
-    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.35 * globalState.dt.value);
-    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.35 * globalState.dt.value);
+    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.25 * globalState.dt.value);
+    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.25 * globalState.dt.value);
+
+    // Update camera
+    this.camera.updateViewMatrix({
+      target: new Vec3(mouse2DCurrent[0] * 100, mouse2DCurrent[1] * 100, -1),
+    });
 
     this.render();
   }

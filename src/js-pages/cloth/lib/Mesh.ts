@@ -29,9 +29,10 @@ export class Mesh {
 
   private modelMatrix = new Mat4();
 
-  public position = new Vec3(0);
-  public scale = new Vec3(1);
-  public rotation = new Vec3(0, 0, 0);
+  private position = new Vec3(0);
+  private scale = new Vec3(1);
+  private rotation = new Vec3(0, 0, 0);
+  private shouldUpdateModelMatrix = true;
 
   constructor(props: Constructor) {
     const { gl, shaderProgram, geometry } = props;
@@ -105,22 +106,36 @@ export class Mesh {
     this.gl.bindVertexArray(null);
   }
 
+  public setPosition(pos: Vec3) {
+    this.position.setTo(pos);
+    this.shouldUpdateModelMatrix = true;
+  }
+
+  public setScale(pos: Vec3) {
+    this.scale.setTo(pos);
+    this.shouldUpdateModelMatrix = true;
+  }
+
   public render(props: Render) {
     const { camera } = props;
 
     this.shaderProgram.use();
     this.gl.bindVertexArray(this.VAO);
 
-    // Construct model matrix
-    this.modelMatrix.identity();
-    this.modelMatrix.translate(this.position);
-    this.modelMatrix.scale(this.scale);
-    this.modelMatrix.rotateX(this.rotation[0]);
-    this.modelMatrix.rotateY(this.rotation[1]);
-    this.modelMatrix.rotateZ(this.rotation[2]);
+    if (this.shouldUpdateModelMatrix) {
+      // Construct model matrix
+      this.modelMatrix.identity();
+      this.modelMatrix.translate(this.position);
+      this.modelMatrix.scale(this.scale);
+      this.modelMatrix.rotateX(this.rotation[0]);
+      this.modelMatrix.rotateY(this.rotation[1]);
+      this.modelMatrix.rotateZ(this.rotation[2]);
 
-    // Load model matrix, view matrix and projection matrix to shader
-    this.shaderProgram.setUniformMatrix4fv('u_modelMatrix', this.modelMatrix);
+      // Load model matrix, view matrix and projection matrix to shader
+      this.shaderProgram.setUniformMatrix4fv('u_modelMatrix', this.modelMatrix);
+      this.shouldUpdateModelMatrix = false;
+    }
+
     this.shaderProgram.setUniformMatrix4fv('u_viewMatrix', camera.viewMatrix);
     this.shaderProgram.setUniform3f('u_cameraPositionWorld', camera.position);
     this.shaderProgram.setUniformMatrix4fv('u_projectionMatrix', camera.perspectiveProjectionMatrix);

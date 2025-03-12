@@ -3,6 +3,8 @@
 in vec3 a_position;
 in vec3 a_normal;
 in vec2 a_uv;
+in vec3 a_instanceOffset;
+in vec3 a_instanceColor;
 
 uniform mat4 u_projectionMatrix;
 uniform mat4 u_modelMatrix;
@@ -11,9 +13,11 @@ uniform mat4 u_viewMatrix;
 out vec2 v_uv;
 out vec3 v_fragNormal;
 out vec3 v_fragPosition;
+out vec3 v_instanceColor;
 
 void main() {
-    vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0);
+    // vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0);
+    vec4 worldPosition = u_modelMatrix * vec4(a_position + a_instanceOffset, 1.0);
     vec4 viewPosition = u_viewMatrix * worldPosition;
 
     gl_Position = u_projectionMatrix * viewPosition;
@@ -31,4 +35,5 @@ void main() {
     v_fragPosition = vec3(viewPosition);
     v_fragNormal = normal.xyz;
     v_uv = a_uv; 
+    v_instanceColor = a_instanceColor;
 }

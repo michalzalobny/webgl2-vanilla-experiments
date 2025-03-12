@@ -1,9 +1,14 @@
 import fragmentShader from '../shaders/particle/fragment.glsl';
 import vertexShader from '../shaders/particle/vertex.glsl';
+
+import fragmentShaderPoints from '../shaders/pointParticle/fragment.glsl';
+import vertexShaderPoints from '../shaders/pointParticle/vertex.glsl';
+
 import { GeometriesManager } from '../lib/GeometriesManager';
 import { ShaderProgram } from '../lib/ShaderProgram';
 import { globalState } from '../utils/globalState';
-import { Mesh } from '../lib/Mesh';
+import { InstancedMesh } from '../lib/InstancedMesh';
+import { InstancedPoints } from '../lib/InstancedPoints';
 import { Camera } from '../lib/Camera';
 import { Vec3 } from '../lib/math/Vec3';
 import { Stick } from './Stick';
@@ -31,11 +36,13 @@ export class Point {
   private geometriesManager: GeometriesManager;
   private invMass: number;
   private program: ShaderProgram;
+  private instancedPointsProgram: ShaderProgram;
   private sticks: Stick[] = [];
-  public mesh: Mesh;
+  public mesh: InstancedMesh;
+  public instancedPoints: InstancedPoints;
 
   constructor(props: Props) {
-    const { camera, geometriesManager, gl, x, y, mass = 1, pinned = false, radius = 4 } = props;
+    const { camera, geometriesManager, gl, x, y, mass = 1, pinned = false, radius = 1 } = props;
     if (props.mass === 0) throw new Error('Mass cannot be 0');
     this.gl = gl;
     this.pinned = pinned;
@@ -58,14 +65,31 @@ export class Point {
       },
     });
 
-    this.mesh = new Mesh({
+    this.instancedPointsProgram = new ShaderProgram({
       gl: this.gl,
-      shaderProgram: this.program,
-      geometry: this.geometriesManager.getGeometry('plane'),
+      vertexCode: vertexShaderPoints,
+      fragmentCode: fragmentShaderPoints,
+      texturesManager: null,
+      texturesToUse: [],
+      uniforms: {
+        u_time: globalState.uTime,
+      },
     });
 
-    this.mesh.position.setTo(this.x, this.y, 0);
-    this.mesh.scale.setTo(this.radius * 2, this.radius * 2, 1);
+    // this.mesh = new InstancedMesh({
+    //   gl: this.gl,
+    //   shaderProgram: this.program,
+    //   geometry: this.geometriesManager.getGeometry('plane'),
+    // });
+
+    this.mesh = new InstancedPoints({
+      instanceCount: 10000,
+      gl: this.gl,
+      shaderProgram: this.instancedPointsProgram,
+    });
+
+    // this.mesh.position.setTo(this.x, this.y, 0);
+    // this.mesh.scale.setTo(this.radius * 2, this.radius * 2, 1);
   }
 
   public addStick(stick: Stick, index: number) {

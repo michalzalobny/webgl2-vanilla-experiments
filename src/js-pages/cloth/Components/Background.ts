@@ -52,7 +52,7 @@ export class Background {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.position = new Vec3(0, 0, -1); // Put the background behind everything
+    this.mesh.setPosition(new Vec3(0, 0, -1)); // Put the background behind everything
   }
 
   public update() {}
@@ -65,7 +65,7 @@ export class Background {
     const w = globalState.stageSize.value[0];
     const h = globalState.stageSize.value[1];
     if (this.mesh) {
-      this.mesh.scale = new Vec3(w * 1.1, h * 1.1, 1);
+      this.mesh.setScale(new Vec3(w * 1.4, h * 1.4, 1));
     }
   }
 

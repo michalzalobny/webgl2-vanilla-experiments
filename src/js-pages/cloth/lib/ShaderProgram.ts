@@ -24,7 +24,7 @@ export class ShaderProgram {
   private vertexCode: string;
   private fragmentCode: string;
   private gl: WebGL2RenderingContext;
-  public program: WebGLProgram | null = null;
+  public program: WebGLProgram;
   private texturesManager;
 
   private uniformLocations = new Map<string, WebGLUniformLocation>();
@@ -45,7 +45,15 @@ export class ShaderProgram {
     if (texturesToUse) this.texturesToUse = texturesToUse;
     if (uniforms) this.uniforms = uniforms;
 
-    this.init(this.gl);
+    const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.vertexCode);
+    if (!vertexShader) throw new Error('Could not create vertex shader');
+
+    const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.fragmentCode);
+    if (!fragmentShader) throw new Error('Could not create fragment shader');
+
+    const program = this.createProgram(gl, vertexShader, fragmentShader);
+    if (!program) throw new Error('Could not create program');
+    this.program = program;
   }
 
   private createShader(gl: WebGL2RenderingContext, type: number, source: string) {
@@ -72,18 +80,6 @@ export class ShaderProgram {
 
     if (success) return program;
     gl.deleteProgram(program);
-  }
-
-  private init(gl: WebGL2RenderingContext) {
-    const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.vertexCode);
-    if (!vertexShader) throw new Error('Could not create vertex shader');
-
-    const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.fragmentCode);
-    if (!fragmentShader) throw new Error('Could not create fragment shader');
-
-    const program = this.createProgram(gl, vertexShader, fragmentShader);
-    if (!program) throw new Error('Could not create program');
-    this.program = program;
   }
 
   private getUniformLocation(name: string) {
