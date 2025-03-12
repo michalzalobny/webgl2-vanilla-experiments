@@ -63,7 +63,7 @@ export class Point {
     });
 
     this.mesh = new InstancedMesh({
-      instanceCount: 10000,
+      instanceCount: 1000000,
       geometry: this.geometriesManager.getGeometry('plane'),
       gl: this.gl,
       shaderProgram: this.program,
