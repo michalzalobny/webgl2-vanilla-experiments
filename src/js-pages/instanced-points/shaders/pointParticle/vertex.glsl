@@ -12,6 +12,6 @@ out vec3 v_instanceColor;
 
 void main() {
     gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_instanceOffset, 1.0);
-    gl_PointSize = 5.0 / gl_Position.w * 1000.0;
+    gl_PointSize = 2.0 / gl_Position.w * 1000.0;
     v_instanceColor = a_instanceColor;
 }
