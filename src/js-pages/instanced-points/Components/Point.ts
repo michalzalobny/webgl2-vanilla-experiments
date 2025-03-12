@@ -58,7 +58,7 @@ export class Point {
     });
 
     this.mesh = new InstancedPoints({
-      instanceCount: 10000,
+      instanceCount: 500000,
       gl: this.gl,
       shaderProgram: this.program,
     });
