@@ -4,6 +4,7 @@ import { Camera } from './Camera';
 import { GeometryObject } from './parseOBJ';
 import { Vec3 } from './math/Vec3';
 import { Mat4 } from './math/Mat4';
+import { globalState } from '../utils/globalState';
 
 interface Constructor {
   geometry: GeometryObject | null;
@@ -166,7 +167,7 @@ export class InstancedMesh {
   public updateInstances() {
     for (let i = 0; i < this.instanceCount; i++) {
       const index = i * 3;
-      this.instanceOffsets[index + 2] = (window.performance.now() * 0.1 * index) / this.instanceCount;
+      this.instanceOffsets[index + 2] = (globalState.uTime.value * 100 * index) / this.instanceCount;
     }
 
     // Efficiently update only the instance buffer with new data

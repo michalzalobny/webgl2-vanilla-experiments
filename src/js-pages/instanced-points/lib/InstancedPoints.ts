@@ -2,6 +2,7 @@ import { ShaderProgram } from './ShaderProgram';
 import { Camera } from './Camera';
 import { Vec3 } from './math/Vec3';
 import { Mat4 } from './math/Mat4';
+import { globalState } from '../utils/globalState';
 
 interface Constructor {
   shaderProgram: ShaderProgram;
@@ -94,7 +95,7 @@ export class InstancedPoints {
   public updateInstances() {
     for (let i = 0; i < this.instanceCount; i++) {
       const index = i * 3;
-      this.instanceOffsets[index + 2] = (window.performance.now() * 0.1 * index) / this.instanceCount;
+      this.instanceOffsets[index + 2] = (globalState.uTime.value * 100 * index) / this.instanceCount;
     }
 
     // Efficiently update only the instance buffer with new data
