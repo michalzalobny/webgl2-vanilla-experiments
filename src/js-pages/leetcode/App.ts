@@ -1029,22 +1029,44 @@ Given a binary tree root, a node X in the tree is named good if in the path from
 Return the number of good nodes in the binary tree.
 */
 
-var goodNodes = function (root) {
-  let ans = 0;
-  const dfs = (node, currMax) => {
-    if (!node) return;
+// var goodNodes = function (root) {
+//   let ans = 0;
+//   const dfs = (node, currMax) => {
+//     if (!node) return;
 
-    if (node.val >= currMax) {
-      ans += 1;
-    }
+//     if (node.val >= currMax) {
+//       ans += 1;
+//     }
 
-    currMax = Math.max(currMax, node.val);
+//     currMax = Math.max(currMax, node.val);
 
-    dfs(node.left, currMax);
-    dfs(node.right, currMax);
-  };
+//     dfs(node.left, currMax);
+//     dfs(node.right, currMax);
+//   };
 
-  dfs(root, root.val);
+//   dfs(root, root.val);
 
-  return ans;
+//   return ans;
+// };
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} p
+ * @param {TreeNode} q
+ * @return {boolean}
+ */
+var isSameTree = function (p, q) {
+  if (!p && q) return false;
+  if (!q && p) return false;
+  if (!p && !q) return true;
+  if (p.val !== q.val) return false;
+
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
 };
