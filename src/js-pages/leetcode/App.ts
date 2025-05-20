@@ -927,4 +927,30 @@ var nextGreaterElement = function (nums1, nums2) {
 };
 
 // console.log(nextGreaterElement([1, 3, 5, 2, 4], [6, 5, 4, 3, 2, 1, 7]));
-console.log(nextGreaterElement([4, 1, 2], [1, 3, 4, 2]));
+// console.log(nextGreaterElement([4, 1, 2], [1, 3, 4, 2]));
+
+/*
+Given the root of a binary tree, return its maximum depth.
+
+A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
+*/
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var maxDepth = function (root) {
+  if (!root) return 0;
+  let lc = maxDepth(root.left);
+  let rc = maxDepth(root.right);
+
+  return Math.max(lc, rc) + 1;
+};
