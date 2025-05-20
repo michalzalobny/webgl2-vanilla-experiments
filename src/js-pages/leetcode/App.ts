@@ -1003,22 +1003,48 @@ A binary tree's maximum depth is the number of nodes along the longest path from
  * @return {boolean}
  */
 
-var hasPathSum = function (root, targetSum) {
-  let dfs = (node, curr) => {
-    if (!node) {
-      return false;
+// var hasPathSum = function (root, targetSum) {
+//   let dfs = (node, curr) => {
+//     if (!node) {
+//       return false;
+//     }
+
+//     // if both children are null, then the node is a leaf
+//     if (!node.left && !node.right) {
+//       return curr + node.val == targetSum;
+//     }
+
+//     curr += node.val;
+//     let left = dfs(node.left, curr);
+//     let right = dfs(node.right, curr);
+//     return left || right;
+//   };
+
+//   return dfs(root, 0);
+// };
+
+/*
+Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X.
+
+Return the number of good nodes in the binary tree.
+*/
+
+var goodNodes = function (root) {
+  let ans = 0;
+  const dfs = (node, currMax) => {
+    if (!node) return;
+
+    if (node.val >= currMax) {
+      ans += 1;
     }
 
-    // if both children are null, then the node is a leaf
-    if (!node.left && !node.right) {
-      return curr + node.val == targetSum;
-    }
+    currMax = Math.max(currMax, node.val);
 
-    curr += node.val;
-    let left = dfs(node.left, curr);
-    let right = dfs(node.right, curr);
-    return left || right;
+    dfs(node.left, currMax);
+    dfs(node.right, currMax);
   };
 
-  return dfs(root, 0);
+  dfs(root, root.val);
+
+  return ans;
 };
