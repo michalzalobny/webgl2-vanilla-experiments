@@ -1062,11 +1062,33 @@ Return the number of good nodes in the binary tree.
  * @param {TreeNode} q
  * @return {boolean}
  */
-var isSameTree = function (p, q) {
-  if (!p && q) return false;
-  if (!q && p) return false;
-  if (!p && !q) return true;
-  if (p.val !== q.val) return false;
+// var isSameTree = function (p, q) {
+//   if (!p && q) return false;
+//   if (!q && p) return false;
+//   if (!p && !q) return true;
+//   if (p.val !== q.val) return false;
 
-  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+//   return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+// };
+
+var lowestCommonAncestor = function (root, p, q) {
+  if (!root) {
+    return null;
+  }
+
+  // first case
+  if (root == p || root == q) {
+    return root;
+  }
+
+  let left = lowestCommonAncestor(root.left, p, q);
+  let right = lowestCommonAncestor(root.right, p, q);
+
+  // second case
+  if (left && right) {
+    return root;
+  }
+
+  // Third case
+  return right || left;
 };
