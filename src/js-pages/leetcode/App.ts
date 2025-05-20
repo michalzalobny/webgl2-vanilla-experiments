@@ -1071,24 +1071,52 @@ Return the number of good nodes in the binary tree.
 //   return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
 // };
 
-var lowestCommonAncestor = function (root, p, q) {
-  if (!root) {
-    return null;
-  }
+// var lowestCommonAncestor = function (root, p, q) {
+//   if (!root) {
+//     return null;
+//   }
 
-  // first case
-  if (root == p || root == q) {
-    return root;
-  }
+//   // first case
+//   if (root == p || root == q) {
+//     return root;
+//   }
 
-  let left = lowestCommonAncestor(root.left, p, q);
-  let right = lowestCommonAncestor(root.right, p, q);
+//   let left = lowestCommonAncestor(root.left, p, q);
+//   let right = lowestCommonAncestor(root.right, p, q);
 
-  // second case
-  if (left && right) {
-    return root;
-  }
+//   // second case
+//   if (left && right) {
+//     return root;
+//   }
 
-  // Third case
-  return right || left;
+//   // Third case
+//   return right || left;
+// };
+
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {number}
+ */
+var maxAncestorDiff = function (root) {
+  const dfs = (node, currMax, currMin) => {
+    if (!node) return currMax - currMin;
+
+    currMax = Math.max(node.val, currMax);
+    currMin = Math.min(node.val, currMin);
+
+    const left = dfs(node.left, currMax, currMin);
+    const right = dfs(node.right, currMax, currMin);
+
+    return Math.max(left, right);
+  };
+
+  return dfs(root, -Infinity, Infinity);
 };
