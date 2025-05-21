@@ -1105,18 +1105,44 @@ Return the number of good nodes in the binary tree.
  * @param {TreeNode} root
  * @return {number}
  */
-var maxAncestorDiff = function (root) {
-  const dfs = (node, currMax, currMin) => {
-    if (!node) return currMax - currMin;
+// var maxAncestorDiff = function (root) {
+//   const dfs = (node, currMax, currMin) => {
+//     if (!node) return currMax - currMin;
 
-    currMax = Math.max(node.val, currMax);
-    currMin = Math.min(node.val, currMin);
+//     currMax = Math.max(node.val, currMax);
+//     currMin = Math.min(node.val, currMin);
 
-    const left = dfs(node.left, currMax, currMin);
-    const right = dfs(node.right, currMax, currMin);
+//     const left = dfs(node.left, currMax, currMin);
+//     const right = dfs(node.right, currMax, currMin);
 
-    return Math.max(left, right);
+//     return Math.max(left, right);
+//   };
+
+//   return dfs(root, -Infinity, Infinity);
+// };
+
+// Simple test library
+const add = (...args) => {
+  return args.reduce((acc, curr) => acc + curr, 0);
+};
+
+const equalTo = (num) => {
+  return (compareTo) => {
+    return compareTo === num;
+  };
+};
+
+const expect = (returnValue) => {
+  const toBe = (fn) => {
+    return fn(returnValue);
   };
 
-  return dfs(root, -Infinity, Infinity);
+  return {
+    toBe,
+  };
 };
+
+console.log(expect(add(0, 3, 3)).toBe(equalTo(7)));
+console.log(expect(add(0, 3, 3)).toBe(equalTo(6)));
+
+console.log(add(0, 3, 3)); // 15
