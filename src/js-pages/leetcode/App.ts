@@ -1142,7 +1142,57 @@ const expect = (returnValue) => {
   };
 };
 
-console.log(expect(add(0, 3, 3)).toBe(equalTo(7)));
-console.log(expect(add(0, 3, 3)).toBe(equalTo(6)));
+// console.log(expect(add(0, 3, 3)).toBe(equalTo(7)));
+// console.log(expect(add(0, 3, 3)).toBe(equalTo(6)));
 
-console.log(add(0, 3, 3)); // 15
+// console.log(add(0, 3, 3)); // 15
+
+// Definition for a binary tree node
+function TreeNode(val, left = null, right = null) {
+  this.val = val;
+  this.left = left;
+  this.right = right;
+}
+
+// Helper function to insert into BST
+function insertIntoBST(root, val) {
+  if (!root) return new TreeNode(val);
+  if (val < root.val) {
+    root.left = insertIntoBST(root.left, val);
+  } else {
+    root.right = insertIntoBST(root.right, val);
+  }
+  return root;
+}
+
+// Build the BST from array
+const values = [4, 2, 6, 1, 3];
+let root = null;
+for (const val of values) {
+  root = insertIntoBST(root, val);
+}
+
+// getMinimumDifference function
+function getMinimumDifference(root) {
+  let prev = null;
+  let minDiff = Infinity;
+
+  function inOrder(node) {
+    if (!node) return;
+
+    inOrder(node.left);
+
+    if (prev !== null) {
+      minDiff = Math.min(minDiff, Math.abs(node.val - prev));
+    }
+    prev = node.val;
+
+    inOrder(node.right);
+  }
+
+  inOrder(root);
+  return minDiff;
+}
+
+// Run the function and log the result
+console.log(getMinimumDifference(root)); // Output: 1
