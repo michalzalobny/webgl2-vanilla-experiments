@@ -19,7 +19,6 @@ const FILE_NAMES = [
   'leetcode',
   'instanced-points',
   'instanced-objects',
-  'tree-view-mvp',
 ];
 
 const commonPlugins = [
