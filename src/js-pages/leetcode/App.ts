@@ -1225,12 +1225,25 @@ root.right = new TreeNode(5);
 root.left.left = new TreeNode(1);
 root.left.right = new TreeNode(3);
 
-const traverse = (node: TreeNode | null) => {
-  if (!node) return null;
+// const traverse = (node: TreeNode | null) => {
+//   if (!node) return null;
 
-  const l = traverse(node.left);
-  console.log(node.val);
-  const r = traverse(node.right);
+//   const l = traverse(node.left);
+//   console.log(node.val);
+//   const r = traverse(node.right);
+// };
+
+// traverse(root);
+
+const fn = () => {
+  const q = [root];
+
+  while (q.length > 0) {
+    const n = q.shift();
+    console.log(n.val);
+    n.right && q.push(n.right);
+    n.left && q.push(n.left);
+  }
 };
 
-traverse(root);
+fn();
