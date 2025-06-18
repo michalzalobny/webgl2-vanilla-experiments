@@ -1148,51 +1148,89 @@ const expect = (returnValue) => {
 // console.log(add(0, 3, 3)); // 15
 
 // Definition for a binary tree node
-function TreeNode(val, left = null, right = null) {
-  this.val = val;
-  this.left = left;
-  this.right = right;
-}
+// function TreeNode(val, left = null, right = null) {
+//   this.val = val;
+//   this.left = left;
+//   this.right = right;
+// }
 
-// Helper function to insert into BST
-function insertIntoBST(root, val) {
-  if (!root) return new TreeNode(val);
-  if (val < root.val) {
-    root.left = insertIntoBST(root.left, val);
-  } else {
-    root.right = insertIntoBST(root.right, val);
-  }
-  return root;
-}
+// // Helper function to insert into BST
+// function insertIntoBST(root, val) {
+//   if (!root) return new TreeNode(val);
+//   if (val < root.val) {
+//     root.left = insertIntoBST(root.left, val);
+//   } else {
+//     root.right = insertIntoBST(root.right, val);
+//   }
+//   return root;
+// }
 
-// Build the BST from array
-const values = [4, 2, 6, 1, 3];
-let root = null;
-for (const val of values) {
-  root = insertIntoBST(root, val);
-}
+// // Build the BST from array
+// const values = [4, 2, 6, 1, 3];
+// let root = null;
+// for (const val of values) {
+//   root = insertIntoBST(root, val);
+// }
 
-// getMinimumDifference function
-function getMinimumDifference(root) {
-  let prev = null;
-  let minDiff = Infinity;
+// // getMinimumDifference function
+// function getMinimumDifference(root) {
+//   let prev = null;
+//   let minDiff = Infinity;
 
-  function inOrder(node) {
-    if (!node) return;
+//   function inOrder(node) {
+//     if (!node) return;
 
-    inOrder(node.left);
+//     inOrder(node.left);
 
-    if (prev !== null) {
-      minDiff = Math.min(minDiff, Math.abs(node.val - prev));
-    }
-    prev = node.val;
+//     if (prev !== null) {
+//       minDiff = Math.min(minDiff, Math.abs(node.val - prev));
+//     }
+//     prev = node.val;
 
-    inOrder(node.right);
-  }
+//     inOrder(node.right);
+//   }
 
-  inOrder(root);
-  return minDiff;
-}
+//   inOrder(root);
+//   return minDiff;
+// }
 
 // Run the function and log the result
-console.log(getMinimumDifference(root)); // Output: 1
+// console.log(getMinimumDifference(root)); // Output: 1
+
+// root = [4,2,5,1,3]
+
+//     4
+//    / \
+//   2   5
+//  / \
+// 1   3
+
+// Define a Tree Node
+class TreeNode {
+  left: TreeNode | null;
+  right: TreeNode | null;
+  val: number;
+
+  constructor(val: number) {
+    this.val = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+// Create nodes
+const root = new TreeNode(4);
+root.left = new TreeNode(2);
+root.right = new TreeNode(5);
+root.left.left = new TreeNode(1);
+root.left.right = new TreeNode(3);
+
+const traverse = (node: TreeNode | null) => {
+  if (!node) return null;
+
+  const l = traverse(node.left);
+  console.log(node.val);
+  const r = traverse(node.right);
+};
+
+traverse(root);
