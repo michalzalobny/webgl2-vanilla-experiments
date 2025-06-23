@@ -7,6 +7,7 @@ import { Camera } from '../lib/Camera';
 import fragmentShader from '../shaders/background/fragment.glsl';
 import vertexShader from '../shaders/background/vertex.glsl';
 import { Vec3 } from '../lib/math/Vec3';
+import { GlobalResize } from '../utils/GlobalResize';
 
 interface Constructor {
   gl: WebGL2RenderingContext;
@@ -42,7 +43,7 @@ export class Background {
       texturesManager: null,
       uniforms: {
         u_time: globalState.uTime,
-        u_resolution: globalState.stageSize,
+        u_resolution: GlobalResize.windowSize,
       },
     });
 
@@ -62,10 +63,10 @@ export class Background {
   }
 
   public onResize() {
-    const w = globalState.stageSize.value[0];
-    const h = globalState.stageSize.value[1];
+    const w = GlobalResize.windowSize.value[0];
+    const h = GlobalResize.windowSize.value[1];
     if (this.mesh) {
-      this.mesh.setScale(new Vec3(w * 1.4, h * 1.4, 1));
+      this.mesh.setScale(new Vec3(w * 0.4, h * 0.4, 1));
     }
   }
 

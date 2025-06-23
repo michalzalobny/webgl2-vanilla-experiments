@@ -8,6 +8,7 @@ import fragmentShader from '../shaders/line/fragment.glsl';
 import vertexShader from '../shaders/line/vertex.glsl';
 import { Vec3 } from '../lib/math/Vec3';
 import { Point } from './Point';
+import { GlobalResize } from '../utils/GlobalResize';
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -32,7 +33,7 @@ export class Stick {
 
   private programUniforms = {
     u_time: globalState.uTime,
-    u_resolution: globalState.stageSize,
+    u_resolution: GlobalResize.windowSize,
     u_color: { value: new Vec3(0) },
   };
 

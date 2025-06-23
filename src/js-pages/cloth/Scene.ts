@@ -3,10 +3,12 @@ import { Camera } from './lib/Camera';
 import { lerp } from './utils/lerp';
 import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
+import { eventBus } from './utils/EventDispatcher';
 
 import { Background } from './Components/Background';
 import { Vec3 } from './lib/math/Vec3';
 import { Cloth } from './Components/Cloth';
+import { GlobalResize } from './utils/GlobalResize';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -77,20 +79,14 @@ export class Scene {
     this.onResize();
   }
 
-  public update() {
-    // Lerp mouse position
-    const mouse2DTarget = globalState.mouse2DTarget.value;
-    const mouse2DCurrent = globalState.mouse2DCurrent.value;
-    mouse2DCurrent[0] = lerp(mouse2DCurrent[0], mouse2DTarget[0], 0.25 * globalState.dt.value);
-    mouse2DCurrent[1] = lerp(mouse2DCurrent[1], mouse2DTarget[1], 0.25 * globalState.dt.value);
-
+  public update = () => {
     // Update camera
     this.camera.updateViewMatrix({
-      target: new Vec3(mouse2DCurrent[0] * 100, mouse2DCurrent[1] * 100, -1),
+      target: new Vec3(globalState.mouse2DCurrent.value[0] * 200, globalState.mouse2DCurrent.value[1] * 200, -1),
     });
 
     this.render();
-  }
+  };
 
   private render() {
     const gl = this.gl;
@@ -117,9 +113,9 @@ export class Scene {
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-  public onResize() {
-    let w = globalState.stageSize.value[0];
-    let h = globalState.stageSize.value[1];
+  public onResize = () => {
+    let w = GlobalResize.windowSize.value[0];
+    let h = GlobalResize.windowSize.value[1];
 
     const ratio = globalState.pixelRatio.value;
 
@@ -133,7 +129,7 @@ export class Scene {
     this.gl.canvas.height = h;
 
     // 1 screen pixel = 1 CSS pixel
-    const windowHeight = globalState.stageSize.value[1];
+    const windowHeight = GlobalResize.windowSize.value[1];
     const cameraPositionZ = this.camera.position[2];
     const fov = 2 * Math.atan(windowHeight / 2 / cameraPositionZ);
 
@@ -148,7 +144,7 @@ export class Scene {
 
     this.background?.onResize();
     this.cloth?.onResize();
-  }
+  };
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
     const strength = 2500;
@@ -196,11 +192,17 @@ export class Scene {
   private addListeners() {
     window.addEventListener('keydown', this.onKeyDownWSAD);
     window.addEventListener('keyup', this.onKeyUpWSAD);
+
+    eventBus.addEventListener('resize', this.onResize);
+    eventBus.addEventListener('update', this.update);
   }
 
   private removeListeners() {
     window.removeEventListener('keydown', this.onKeyDownWSAD);
     window.removeEventListener('keyup', this.onKeyUpWSAD);
+
+    eventBus.removeEventListener('resize', this.onResize);
+    eventBus.removeEventListener('update', this.update);
   }
 
   public destroy() {

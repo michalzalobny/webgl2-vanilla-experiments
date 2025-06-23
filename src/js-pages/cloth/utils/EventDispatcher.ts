@@ -16,7 +16,7 @@ interface EventMap {
   [type: string]: Listener[];
 }
 
-class EventDispatcher {
+export class EventDispatcher {
   _listeners?: EventMap;
 
   addEventListener(type: string, listener: Listener) {
@@ -77,4 +77,4 @@ class EventDispatcher {
   }
 }
 
-export { EventDispatcher };
+export const eventBus = new EventDispatcher();
