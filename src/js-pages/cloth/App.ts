@@ -50,7 +50,7 @@ export class App {
     globalState.mouse2DTarget.value = [(mouseX / stageX) * 2 - 1, -(mouseY / stageY) * 2 + 1];
   };
 
-  private renderOnFrame = (time: number) => {
+  private renderOnFrame = () => {
     // Lerp mouse position
     const lerpSpeed = 0.3;
     const mouse2DTarget = globalState.mouse2DTarget.value;
