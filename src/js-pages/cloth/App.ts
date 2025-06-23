@@ -5,7 +5,6 @@ import { MouseMove } from './utils/MouseMove';
 import { Scene } from './Scene';
 import { eventBus } from './utils/EventDispatcher';
 import { lerp } from './utils/lerp';
-import { debounce } from './utils/debounce';
 import { GlobalResize } from './utils/GlobalResize';
 import { GlobalFrame, UpdateEventProps } from './utils/GlobalFrame';
 
@@ -30,10 +29,6 @@ export class App {
     eventBus.dispatchEvent({ type: 'resize' });
   };
 
-  private onResizeDebounced = debounce(() => {
-    this.onResize();
-  }, 400);
-
   private setPixelRatio(pixelRatio: number) {
     globalState.pixelRatio.value = pixelRatio;
     eventBus.dispatchEvent({ type: 'pixelratiochange' });
@@ -42,7 +37,7 @@ export class App {
   private addListeners() {
     this.globalFrame.addEventListener('update', this.renderOnFrame);
     this.mouseMove.addEventListener('mousemove', this.onMouseMove);
-    this.globalResize.addEventListener('resize', this.onResizeDebounced);
+    this.globalResize.addEventListener('resize', this.onResize);
   }
 
   private onMouseMove = (e: any) => {
@@ -67,7 +62,7 @@ export class App {
   };
 
   public destroy() {
-    this.globalResize.removeEventListener('resize', this.onResizeDebounced);
+    this.globalResize.removeEventListener('resize', this.onResize);
     this.globalFrame.addEventListener('update', this.renderOnFrame);
     this.mouseMove.removeEventListener('mousemove', this.onMouseMove);
     globalState.gui?.destroy();

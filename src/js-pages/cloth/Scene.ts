@@ -1,6 +1,5 @@
 import { globalState } from './utils/globalState';
 import { Camera } from './lib/Camera';
-import { lerp } from './utils/lerp';
 import { TexturesManager } from './lib/textures-manager/TexturesManager';
 import { GeometriesManager } from './lib/GeometriesManager';
 import { eventBus } from './utils/EventDispatcher';

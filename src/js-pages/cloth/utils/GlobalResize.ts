@@ -1,4 +1,6 @@
 import { EventDispatcher } from './EventDispatcher';
+import { debounce } from './debounce';
+import { globalState } from './globalState';
 
 export class GlobalResize extends EventDispatcher {
   // This can be read directly from the GlobalResize class
@@ -24,7 +26,7 @@ export class GlobalResize extends EventDispatcher {
 
   constructor() {
     super();
-    window.addEventListener('resize', this.onResize);
+    window.addEventListener('resize', this.onResizeDebounced);
     this.onResize(); // Trigger initial resize event
   }
 
@@ -36,17 +38,23 @@ export class GlobalResize extends EventDispatcher {
       this.dispatchEvent({ type: 'resize' });
     }
 
-    const newWidth = window.innerWidth;
+    const el = globalState.canvasEl;
+    if (!el) throw new Error('Cannot find canvas element in GlobalResize.ts');
+    const bounds = globalState.canvasEl!.getBoundingClientRect();
+
+    const newWidth = bounds.width; // window.innerWidth
     if (newWidth === currentSize) return; // No change in width, no need to update
 
-    const newHeight = window.innerHeight;
+    const newHeight = bounds.height; //window.innerHeight
     GlobalResize.windowSize.value = [newWidth, newHeight];
 
     this.dispatchEvent({ type: 'resize' });
   };
 
+  private onResizeDebounced = debounce(this.onResize, 300);
+
   private destroy() {
-    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('resize', this.onResizeDebounced);
     this.dispatchEvent({ type: 'destroy' });
   }
 }
