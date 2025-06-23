@@ -41,12 +41,6 @@ export class Scene {
   }
 
   private async init() {
-    await this.geometriesManager.addGeometriesToLoad([
-      '/public/assets/models/f22/f22.obj',
-      '/public/assets/models/efa/efa.obj',
-      '/public/assets/models/crab/crab.obj',
-    ]);
-
     // Plane made out of two triangles
     const planeVertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, -0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
     const planeTexcoords = [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1];
@@ -76,7 +70,12 @@ export class Scene {
       geometriesManager: this.geometriesManager,
       gl: this.gl,
     });
-    this.onResize();
+
+    await this.geometriesManager.addGeometriesToLoad([
+      '/public/assets/models/f22/f22.obj',
+      '/public/assets/models/efa/efa.obj',
+      '/public/assets/models/crab/crab.obj',
+    ]);
   }
 
   public update = () => {

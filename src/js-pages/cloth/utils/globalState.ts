@@ -2,9 +2,6 @@ import GUI from 'lil-gui';
 
 export const globalState = {
   gui: null as GUI | null,
-  stageSize: {
-    value: [100, 100],
-  },
   pixelRatio: {
     value: 1,
   },
