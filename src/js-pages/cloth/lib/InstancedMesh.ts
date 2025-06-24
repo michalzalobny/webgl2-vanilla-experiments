@@ -27,7 +27,6 @@ export class InstancedMesh {
   private positionBuffer: WebGLBuffer | null = null;
   private normalBuffer: WebGLBuffer | null = null;
   private uvBuffer: WebGLBuffer | null = null;
-  private instanceBuffer: WebGLBuffer | null = null;
   private instanceColorBuffer: WebGLBuffer | null = null;
 
   private modelMatrix = new Mat4();
@@ -36,9 +35,10 @@ export class InstancedMesh {
   public scale = new Vec3(1);
   public rotation = new Vec3(0, 0, 0);
 
-  private instanceOffsets;
   private instanceColors;
   private instanceCount: number;
+
+  private instanceMatrixBuffer: WebGLBuffer | null = null;
 
   constructor(props: Constructor) {
     const { gl, shaderProgram, geometry, instanceCount } = props;
@@ -53,7 +53,6 @@ export class InstancedMesh {
 
     this.instanceCount = instanceCount;
 
-    this.instanceOffsets = new Float32Array(this.instanceCount * 3);
     this.instanceColors = new Float32Array(this.instanceCount * 3);
 
     this.init();
@@ -114,22 +113,6 @@ export class InstancedMesh {
     }
 
     // ---- Instancing data ----
-    for (let i = 0; i < this.instanceCount; i++) {
-      this.instanceOffsets[i * 3 + 0] = (Math.random() * 2 - 1) * 40;
-      this.instanceOffsets[i * 3 + 1] = (Math.random() * 2 - 1) * 40;
-      this.instanceOffsets[i * 3 + 2] = 0; // Flat grid, but can be randomized too
-    }
-
-    this.instanceBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, this.instanceOffsets, gl.STATIC_DRAW);
-
-    const a_instanceOffset = gl.getAttribLocation(program, 'a_instanceOffset');
-    if (a_instanceOffset !== -1) {
-      gl.enableVertexAttribArray(a_instanceOffset);
-      gl.vertexAttribPointer(a_instanceOffset, 3, gl.FLOAT, false, 0, 0);
-      gl.vertexAttribDivisor(a_instanceOffset, 1); // advance per instance
-    }
 
     // Instanced colors
     for (let i = 0; i < this.instanceCount; i++) {
@@ -152,17 +135,37 @@ export class InstancedMesh {
     gl.bindVertexArray(null);
   }
 
-  public updatePositions(newOffsets: Float32Array) {
-    if (newOffsets.length !== this.instanceOffsets.length) {
-      throw new Error('Invalid offset array length');
+  public setInstanceMatrices(instanceMatrices: Float32Array) {
+    const gl = this.gl;
+
+    if (instanceMatrices.length !== this.instanceCount * 16) {
+      throw new Error(`Expected ${this.instanceCount * 16} matrix elements, got ${instanceMatrices.length}`);
     }
 
-    // Update internal data
-    this.instanceOffsets.set(newOffsets);
+    if (!this.instanceMatrixBuffer) {
+      this.instanceMatrixBuffer = gl.createBuffer();
+    }
 
-    // Push new data to GPU buffer
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.instanceBuffer);
-    this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.instanceOffsets);
+    gl.bindVertexArray(this.VAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceMatrixBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, instanceMatrices, gl.DYNAMIC_DRAW);
+
+    const program = this.shaderProgram.program;
+    const baseAttribLocation = gl.getAttribLocation(program, 'a_instanceMatrix');
+
+    if (baseAttribLocation === -1) {
+      throw new Error(`Attribute 'a_instanceMatrix' not found in shader`);
+    }
+
+    // Set up 4 attribute locations for the 4 columns of mat4
+    for (let i = 0; i < 4; i++) {
+      const loc = baseAttribLocation + i;
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 64, i * 16);
+      gl.vertexAttribDivisor(loc, 1); // Advance per instance
+    }
+
+    gl.bindVertexArray(null);
   }
 
   public render(props: Render) {
@@ -171,8 +174,6 @@ export class InstancedMesh {
 
     this.shaderProgram.use();
     gl.bindVertexArray(this.VAO);
-
-    //
 
     this.modelMatrix.identity();
     this.modelMatrix.translate(this.position);
@@ -196,7 +197,6 @@ export class InstancedMesh {
     if (this.positionBuffer) gl.deleteBuffer(this.positionBuffer);
     if (this.normalBuffer) gl.deleteBuffer(this.normalBuffer);
     if (this.uvBuffer) gl.deleteBuffer(this.uvBuffer);
-    if (this.instanceBuffer) gl.deleteBuffer(this.instanceBuffer);
     if (this.VAO) gl.deleteVertexArray(this.VAO);
   }
 }

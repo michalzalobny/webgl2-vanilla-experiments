@@ -94,14 +94,17 @@ export class Mat4 extends Float32Array {
 
   rotateX(v: number, m = this) {
     Mat4Func.rotateX(this, m, v);
+    return this;
   }
 
   rotateY(v: number, m = this) {
     Mat4Func.rotateY(this, m, v);
+    return this;
   }
 
   rotateZ(v: number, m = this) {
     Mat4Func.rotateZ(this, m, v);
+    return this;
   }
 
   scale(v: Vec3 | number, m = this) {
