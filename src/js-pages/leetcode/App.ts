@@ -1246,4 +1246,37 @@ const fn = () => {
   }
 };
 
-fn();
+// fn();
+
+/**
+ * @param {number[][]} isConnected
+ * @return {number}
+ */
+
+var findCircleNum = function (isConnected) {
+  // build the graph
+  let n = isConnected.length;
+  let graph = new Map();
+  for (let i = 0; i < n; i++) {
+    graph.set(i, []);
+  }
+
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      if (isConnected[i][j]) {
+        graph.get(i).push(j);
+        graph.get(j).push(i);
+      }
+    }
+  }
+
+  return graph;
+};
+
+const input = [
+  [1, 1, 0],
+  [1, 1, 0],
+  [0, 0, 1],
+];
+
+console.log(findCircleNum(input));
