@@ -42,6 +42,7 @@ export class Scene {
   private async init() {
     // Plane made out of two triangles
     const planeVertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, -0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
+
     const planeTexcoords = [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1];
 
     this.geometriesManager.addGeometry({
@@ -49,9 +50,9 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    const width = 8;
-    const height = 8;
-    const spacing = 20;
+    const width = 30;
+    const height = 30;
+    const spacing = 30;
 
     this.cloth = new Cloth({
       camera: this.camera,

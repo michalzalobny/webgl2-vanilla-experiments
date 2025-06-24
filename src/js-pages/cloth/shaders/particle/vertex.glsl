@@ -16,24 +16,19 @@ out vec3 v_fragPosition;
 out vec3 v_instanceColor;
 
 void main() {
-    // vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0);
-    vec4 worldPosition = u_modelMatrix * vec4(a_position + a_instanceOffset, 1.0);
+    // Transform position
+    vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0) + vec4(a_instanceOffset, 0.0);
     vec4 viewPosition = u_viewMatrix * worldPosition;
-
     gl_Position = u_projectionMatrix * viewPosition;
-    // Used only in Point rendering mode
-    gl_PointSize = 8.0;
-    gl_PointSize = gl_PointSize / gl_Position.w;
 
-    // Transform normal to world space (using the inverse transpose for normals)
-    vec4 normal = vec4(a_normal, 0.0);
+    // Transform normal
     mat4 normalMatrix = transpose(inverse(u_modelMatrix));
-    normal = normalize(normalMatrix * normal);
-    // Transform normal to view space
-    normal = normalize(u_viewMatrix * normal);
+    vec4 normal = normalize(normalMatrix * vec4(a_normal, 0.0));
+    normal = normalize(u_viewMatrix * normal); // to view space
 
+    // Pass to fragment shader
     v_fragPosition = vec3(viewPosition);
     v_fragNormal = normal.xyz;
-    v_uv = a_uv; 
+    v_uv = a_uv;
     v_instanceColor = a_instanceColor;
 }

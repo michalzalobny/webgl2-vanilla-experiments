@@ -53,7 +53,7 @@ export class Background {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.setPosition(new Vec3(0, 0, -1)); // Put the background behind everything
+    this.mesh.setPosition(new Vec3(0, 0, -10)); // Put the background behind everything
   }
 
   public update() {}

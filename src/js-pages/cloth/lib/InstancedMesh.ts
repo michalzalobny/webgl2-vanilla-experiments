@@ -8,6 +8,7 @@ import { Mat4 } from './math/Mat4';
 interface Constructor {
   geometry: GeometryObject | null;
   shaderProgram: ShaderProgram;
+  instanceCount: number;
   gl: WebGL2RenderingContext;
 }
 
@@ -29,18 +30,18 @@ export class InstancedMesh {
   private instanceBuffer: WebGLBuffer | null = null;
   private instanceColorBuffer: WebGLBuffer | null = null;
 
-  private instanceCount: number = 1000000;
   private modelMatrix = new Mat4();
 
   public position = new Vec3(0);
   public scale = new Vec3(1);
   public rotation = new Vec3(0, 0, 0);
 
-  private instanceOffsets = new Float32Array(this.instanceCount * 3);
-  private instanceColors = new Float32Array(this.instanceCount * 3);
+  private instanceOffsets;
+  private instanceColors;
+  private instanceCount: number;
 
   constructor(props: Constructor) {
-    const { gl, shaderProgram, geometry } = props;
+    const { gl, shaderProgram, geometry, instanceCount } = props;
 
     if (!geometry) throw new Error('No geometry provided for the Mesh');
 
@@ -49,6 +50,11 @@ export class InstancedMesh {
     this.vertices = geometry.vertices;
     this.normals = geometry.normals;
     this.texcoords = geometry.texcoords;
+
+    this.instanceCount = instanceCount;
+
+    this.instanceOffsets = new Float32Array(this.instanceCount * 3);
+    this.instanceColors = new Float32Array(this.instanceCount * 3);
 
     this.init();
   }
@@ -144,23 +150,17 @@ export class InstancedMesh {
 
     // Unbind VAO to finalize setup
     gl.bindVertexArray(null);
-
-    // setInterval(() => {
-    //   this.updateInstances();
-    // }, 5000);
   }
 
-  public updateInstances() {
-    for (let i = 0; i < this.instanceCount; i++) {
-      const index = i * 3;
-
-      // Example: make them float up and down like sine waves
-      this.instanceOffsets[index + 2] = (window.performance.now() * 0.01 * index) / this.instanceCount;
-
-      // You can add more logic here to move them however you want
+  public updatePositions(newOffsets: Float32Array) {
+    if (newOffsets.length !== this.instanceOffsets.length) {
+      throw new Error('Invalid offset array length');
     }
 
-    // Efficiently update only the instance buffer with new data
+    // Update internal data
+    this.instanceOffsets.set(newOffsets);
+
+    // Push new data to GPU buffer
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.instanceBuffer);
     this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.instanceOffsets);
   }

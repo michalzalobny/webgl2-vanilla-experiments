@@ -17,7 +17,7 @@ out vec3 v_instanceColor;
 
 void main() {
     // vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0);
-    vec4 worldPosition = u_modelMatrix * vec4(a_position + a_instanceOffset, 1.0);
+    vec4 worldPosition = u_modelMatrix * vec4(a_position, 1.0) + vec4(a_instanceOffset, 0.0);
     vec4 viewPosition = u_viewMatrix * worldPosition;
 
     gl_Position = u_projectionMatrix * viewPosition;
