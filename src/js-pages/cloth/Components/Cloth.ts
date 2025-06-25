@@ -197,7 +197,6 @@ export class Cloth {
     }
 
     //Points
-
     this.createInstancePoints(pointsPositions);
 
     //Sticks
