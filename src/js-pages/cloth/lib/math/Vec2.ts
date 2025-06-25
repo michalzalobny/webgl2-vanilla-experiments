@@ -35,13 +35,13 @@ export class Vec2 extends Float32Array {
     return this;
   }
 
-  add(va: Vec2, vb: Vec2) {
+  add(va: Vec2, vb?: Vec2) {
     if (vb) Vec2Func.add(this, va, vb);
     else Vec2Func.add(this, this, va);
     return this;
   }
 
-  sub(va: Vec2, vb: Vec2) {
+  sub(va: Vec2, vb?: Vec2) {
     if (vb) Vec2Func.subtract(this, va, vb);
     else Vec2Func.subtract(this, this, va);
     return this;

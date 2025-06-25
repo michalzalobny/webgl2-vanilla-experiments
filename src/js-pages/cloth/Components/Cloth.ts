@@ -13,6 +13,9 @@ import vertexShaderLine from '../shaders/line/vertex.glsl';
 import { Vec3 } from '../lib/math/Vec3';
 import { Mat4 } from '../lib/math/Mat4';
 
+import { Point } from './Point';
+import { Stick } from './Stick';
+
 interface Props {
   gl: WebGL2RenderingContext;
   geometriesManager: GeometriesManager;
@@ -34,6 +37,9 @@ export class Cloth {
   private sticksProgram: ShaderProgram;
 
   private tempMatrix = new Mat4();
+
+  private points: Point[] = [];
+  private sticks: Stick[] = [];
 
   constructor(props: Props) {
     this.props = props;
@@ -63,16 +69,11 @@ export class Cloth {
     this.init();
   }
 
-  private createInstancePoints(positions: number[][]) {
-    const COUNT = positions.length;
-    const POINT_SIZE = 15;
+  private positionInstancePoints() {
+    const COUNT = this.points.length;
 
-    this.instancedPoints = new InstancedMesh({
-      gl: this.props.gl,
-      instanceCount: COUNT,
-      geometry: this.props.geometriesManager.getGeometry('plane'),
-      shaderProgram: this.pointsProgram,
-    });
+    const positions = this.points.map((point) => point.getPosition());
+    const POINT_SIZE = 15;
 
     // Compute new values per instance
     let newPositions: number[] = [];
@@ -101,28 +102,20 @@ export class Cloth {
         .scale(scale);
       instanceMatrices.set(modelMatrix, i * 16);
     }
-    this.instancedPoints.setInstanceMatrices(instanceMatrices);
+    this.instancedPoints?.setInstanceMatrices(instanceMatrices);
   }
 
-  private createInstanceSticks(positions: { p1: number; p2: number }[], pointsPositions: number[][]) {
-    const COUNT = positions.length;
-
+  private positionInstanceSticks() {
+    const COUNT = this.sticks.length;
     const LINE_WIDTH = 1.5;
-
-    this.instancedSticks = new InstancedMesh({
-      gl: this.props.gl,
-      instanceCount: COUNT,
-      geometry: this.props.geometriesManager.getGeometry('plane'),
-      shaderProgram: this.sticksProgram,
-    });
 
     // Compute new values per instance
     let newPositions: number[] = [];
     let newScales: number[] = [];
     let newRotations: number[] = [];
-    positions.forEach((v) => {
-      const A = new Vec3(...pointsPositions[v.p1]);
-      const B = new Vec3(...pointsPositions[v.p2]);
+    this.sticks.forEach((stick) => {
+      const A = stick.p1.getPosition();
+      const B = stick.p2.getPosition();
 
       const mid = A.clone().add(B).multiply(0.5);
 
@@ -137,7 +130,7 @@ export class Cloth {
     //Construct matrix
     const instanceMatrices = new Float32Array(COUNT * 16);
     for (let i = 0; i < COUNT; i++) {
-      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
+      const pos = new Vec3(newPositions[i * 2 + 0], newPositions[i * 2 + 1], 0); // Might need to change to * 3 etc. to support vec3s
       const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
       const rotX = newRotations[i * 3 + 0];
       const rotY = newRotations[i * 3 + 1];
@@ -151,7 +144,7 @@ export class Cloth {
         .scale(scale);
       instanceMatrices.set(modelMatrix, i * 16);
     }
-    this.instancedSticks.setInstanceMatrices(instanceMatrices);
+    this.instancedSticks?.setInstanceMatrices(instanceMatrices);
   }
 
   private init() {
@@ -161,56 +154,73 @@ export class Cloth {
     const startY = this.props.startY;
     const spacing = this.props.spacing;
 
-    const pointsPositions: number[][] = [];
-    const sticksPositions: { p1: number; p2: number }[] = [];
-
     for (let y = 0; y <= height; y++) {
       for (let x = 0; x <= width; x++) {
-        pointsPositions.push([startX + x * spacing, startY + y * spacing, 0]);
+        const point = new Point({
+          x: startX + x * spacing,
+          y: startY + y * spacing,
+          mass: 1,
+        });
 
         if (x !== 0) {
-          const currPoint = pointsPositions.length - 1;
-          const leftPoint = currPoint - 1;
+          const leftPoint = this.points[this.points.length - 1];
 
-          const stick = {
-            p1: currPoint,
+          const stick = new Stick({
+            p1: point,
             p2: leftPoint,
-          };
+            length: this.props.spacing,
+          });
 
-          // leftPoint.addStick(stick, 0);
-          // point.addStick(stick, 0);
-          sticksPositions.push(stick);
+          this.sticks.push(stick);
+
+          leftPoint.addStick(stick, 0);
+          point.addStick(stick, 0);
         }
 
         if (y !== 0) {
-          const currPoint = pointsPositions.length - 1;
-          const upPoint = x + (y - 1) * (width + 1);
+          const upPoint = this.points[x + (y - 1) * (width + 1)];
 
-          // upPoint.addStick(stick, 1);
-          // point.addStick(stick, 1);
-          // this.sticks.push(stick);
-          sticksPositions.push({
-            p1: currPoint,
+          const stick = new Stick({
+            p1: point,
             p2: upPoint,
+            length: this.props.spacing,
           });
+
+          this.sticks.push(stick);
+
+          upPoint.addStick(stick, 1);
+          point.addStick(stick, 1);
         }
 
         if (y === 0 && x % 2 === 0) {
-          // point.pin();
+          point.pin();
         }
 
-        // this.points.push(point);
+        this.points.push(point);
       }
     }
 
     //Points
-    this.createInstancePoints(pointsPositions);
+    this.instancedPoints = new InstancedMesh({
+      gl: this.props.gl,
+      instanceCount: this.points.length,
+      geometry: this.props.geometriesManager.getGeometry('plane'),
+      shaderProgram: this.pointsProgram,
+    });
 
     //Sticks
-    this.createInstanceSticks(sticksPositions, pointsPositions);
+    this.instancedSticks = new InstancedMesh({
+      gl: this.props.gl,
+      instanceCount: this.sticks.length,
+      geometry: this.props.geometriesManager.getGeometry('plane'),
+      shaderProgram: this.sticksProgram,
+    });
   }
 
-  public update() {}
+  public update() {
+    this.positionInstancePoints();
+    this.positionInstanceSticks();
+  }
 
   public render() {
     this.instancedPoints?.render({
