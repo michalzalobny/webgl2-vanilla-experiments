@@ -15,6 +15,6 @@ out vec4 outColor;
 void main() {
   vec2 uv = v_uv;
 
-  outColor = vec4(u_color, 1.0);
+  outColor = vec4(0.2,0.5,0.5, 1.0);
 }
     

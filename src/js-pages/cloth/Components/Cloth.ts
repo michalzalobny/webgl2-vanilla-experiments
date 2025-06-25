@@ -1,7 +1,6 @@
 import { GeometriesManager } from '../lib/GeometriesManager';
 import { Camera } from '../lib/Camera';
 import { InstancedMesh } from '../lib/InstancedMesh';
-import { Stick } from './Stick';
 import { ShaderProgram } from '../lib/ShaderProgram';
 import { globalState } from '../utils/globalState';
 
@@ -10,10 +9,11 @@ import vertexShaderParticle from '../shaders/particle/vertex.glsl';
 
 import fragmentShaderLine from '../shaders/line/fragment.glsl';
 import vertexShaderLine from '../shaders/line/vertex.glsl';
+
 import { Vec3 } from '../lib/math/Vec3';
 import { Mat4 } from '../lib/math/Mat4';
 
-interface Constructor {
+interface Props {
   gl: WebGL2RenderingContext;
   geometriesManager: GeometriesManager;
   camera: Camera;
@@ -25,14 +25,7 @@ interface Constructor {
 }
 
 export class Cloth {
-  private gl: WebGL2RenderingContext;
-  private geometriesManager: GeometriesManager;
-  private camera: Camera;
-  private width: number;
-  private height: number;
-  private startX: number;
-  private startY: number;
-  private spacing: number;
+  private props: Props;
 
   private instancedPoints: InstancedMesh | null = null;
   private pointsProgram: ShaderProgram;
@@ -40,20 +33,11 @@ export class Cloth {
   private instancedSticks: InstancedMesh | null = null;
   private sticksProgram: ShaderProgram;
 
-  constructor(props: Constructor) {
-    const { camera, geometriesManager, gl, height, spacing, startX, startY, width } = props;
-
-    this.gl = gl;
-    this.camera = camera;
-    this.geometriesManager = geometriesManager;
-    this.width = width;
-    this.height = height;
-    this.startX = startX;
-    this.startY = startY;
-    this.spacing = spacing;
+  constructor(props: Props) {
+    this.props = props;
 
     this.pointsProgram = new ShaderProgram({
-      gl: this.gl,
+      gl: this.props.gl,
       vertexCode: vertexShaderParticle,
       fragmentCode: fragmentShaderParticle,
       texturesManager: null,
@@ -64,7 +48,7 @@ export class Cloth {
     });
 
     this.sticksProgram = new ShaderProgram({
-      gl: this.gl,
+      gl: this.props.gl,
       vertexCode: vertexShaderLine,
       fragmentCode: fragmentShaderLine,
       texturesManager: null,
@@ -77,15 +61,98 @@ export class Cloth {
     this.init();
   }
 
+  private createInstancePoints(positions: number[][]) {
+    const COUNT = positions.length;
+    const POINT_SIZE = 5;
+
+    this.instancedPoints = new InstancedMesh({
+      gl: this.props.gl,
+      instanceCount: COUNT,
+      geometry: this.props.geometriesManager.getGeometry('plane'),
+      shaderProgram: this.pointsProgram,
+    });
+
+    // Compute new values per instance
+    let newPositions: number[] = [];
+    let newScales: number[] = [];
+    let newRotations: number[] = [];
+    positions.forEach((v, key) => {
+      const pos = new Vec3(positions[key][0], positions[key][1], 0);
+      newPositions.push(...pos);
+      newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
+      newRotations.push(0, 0, 0);
+    });
+
+    //Construct matrix
+    const instanceMatrices = new Float32Array(COUNT * 16);
+    for (let i = 0; i < COUNT; i++) {
+      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
+      const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
+      const rotX = newRotations[i * 3 + 0];
+      const rotY = newRotations[i * 3 + 1];
+      const rotZ = newRotations[i * 3 + 2];
+      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
+      instanceMatrices.set(modelMatrix, i * 16);
+    }
+    this.instancedPoints.setInstanceMatrices(instanceMatrices);
+  }
+
+  private createInstanceSticks(positions: { p1: number; p2: number }[], pointsPositions: number[][]) {
+    const COUNT = positions.length;
+
+    const LINE_WIDTH = 0.8;
+
+    this.instancedSticks = new InstancedMesh({
+      gl: this.props.gl,
+      instanceCount: COUNT,
+      geometry: this.props.geometriesManager.getGeometry('plane'),
+      shaderProgram: this.sticksProgram,
+    });
+
+    // Compute new values per instance
+    let newPositions: number[] = [];
+    let newScales: number[] = [];
+    let newRotations: number[] = [];
+    positions.forEach((v) => {
+      const p1 = pointsPositions[v.p1 - 1];
+      const p2 = pointsPositions[v.p2 - 1];
+
+      const A = new Vec3(...p1);
+      const B = new Vec3(...p2);
+
+      const mid = new Vec3().add(A).add(B).multiply(0.5);
+
+      newPositions.push(...mid);
+      newScales.push(A.distance(B), LINE_WIDTH, 1);
+
+      const tempVec = new Vec3().copy(B).sub(A);
+      const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points
+      newRotations.push(0, 0, angle);
+    });
+
+    //Construct matrix
+    const instanceMatrices = new Float32Array(COUNT * 16);
+    for (let i = 0; i < COUNT; i++) {
+      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
+      const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
+      const rotX = newRotations[i * 3 + 0];
+      const rotY = newRotations[i * 3 + 1];
+      const rotZ = newRotations[i * 3 + 2];
+      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
+      instanceMatrices.set(modelMatrix, i * 16);
+    }
+    this.instancedSticks.setInstanceMatrices(instanceMatrices);
+  }
+
   private init() {
-    const width = this.width;
-    const height = this.height;
-    const startX = this.startX;
-    const startY = this.startY;
-    const spacing = this.spacing;
+    const width = this.props.width;
+    const height = this.props.height;
+    const startX = this.props.startX;
+    const startY = this.props.startY;
+    const spacing = this.props.spacing;
 
     const pointsPositions: number[][] = [];
-    const sticksPositions = [];
+    const sticksPositions: { p1: number; p2: number }[] = [];
 
     for (let y = 0; y <= height; y++) {
       for (let x = 0; x <= width; x++) {
@@ -130,84 +197,22 @@ export class Cloth {
     }
 
     //Points
-    const instCount = pointsPositions.length;
 
-    this.instancedPoints = new InstancedMesh({
-      gl: this.gl,
-      instanceCount: instCount,
-      geometry: this.geometriesManager.getGeometry('plane'),
-      shaderProgram: this.pointsProgram,
-    });
-    // this.instancedPoints.scale.multiply(10);
-    // this.instancedPoints.updatePositions(new Float32Array(pointsPositions.flat()));
-
-    const instanceCountApple = instCount;
-    const instanceMatricesApple = new Float32Array(instanceCountApple * 16);
-
-    for (let i = 0; i < instCount; i++) {
-      const pos = new Vec3(pointsPositions[i][0], pointsPositions[i][1], 0);
-      const scale = new Vec3(4, 4, 4);
-      const rotX = 0;
-      const rotY = 0;
-      const rotZ = 0;
-      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
-      instanceMatricesApple.set(modelMatrix, i * 16);
-    }
-    this.instancedPoints.setInstanceMatrices(instanceMatricesApple);
+    this.createInstancePoints(pointsPositions);
 
     //Sticks
-    this.instancedSticks = new InstancedMesh({
-      gl: this.gl,
-      instanceCount: sticksPositions.length,
-      geometry: this.geometriesManager.getGeometry('plane'),
-      shaderProgram: this.pointsProgram,
-    });
-
-    let newPositions: number[] = [];
-    let newScales: number[] = [];
-    let newRotations: number[] = [];
-    sticksPositions.forEach((v, key) => {
-      const p1 = pointsPositions[v.p1 - 1];
-      const p2 = pointsPositions[v.p2 - 1];
-
-      const A = new Vec3(...p1);
-      const B = new Vec3(...p2);
-
-      const mid = new Vec3().add(A).add(B).multiply(0.5);
-
-      newPositions.push(mid[0], mid[1], mid[2]);
-      newScales.push(A.distance(B), Stick.LINE_WIDTH, 1);
-
-      const tempVec = new Vec3().copy(B).sub(A);
-      const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points
-      newRotations.push(0, 0, angle);
-    });
-
-    const instanceCount = newPositions.length / 3;
-    const instanceMatrices = new Float32Array(instanceCount * 16);
-
-    for (let i = 0; i < sticksPositions.length; i++) {
-      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
-      const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
-      const rotX = newRotations[i * 3 + 0];
-      const rotY = newRotations[i * 3 + 1];
-      const rotZ = newRotations[i * 3 + 2];
-      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
-      instanceMatrices.set(modelMatrix, i * 16);
-    }
-
-    this.instancedSticks.setInstanceMatrices(instanceMatrices);
+    this.createInstanceSticks(sticksPositions, pointsPositions);
   }
 
   public update() {}
 
   public render() {
     this.instancedPoints?.render({
-      camera: this.camera,
+      camera: this.props.camera,
     });
 
     this.instancedSticks?.render({
-      camera: this.camera,
+      camera: this.props.camera,
     });
   }
 
