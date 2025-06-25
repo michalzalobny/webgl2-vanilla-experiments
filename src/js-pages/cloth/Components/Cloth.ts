@@ -33,6 +33,8 @@ export class Cloth {
   private instancedSticks: InstancedMesh | null = null;
   private sticksProgram: ShaderProgram;
 
+  private tempMatrix = new Mat4();
+
   constructor(props: Props) {
     this.props = props;
 
@@ -77,8 +79,7 @@ export class Cloth {
     let newScales: number[] = [];
     let newRotations: number[] = [];
     positions.forEach((v, key) => {
-      const pos = new Vec3(positions[key][0], positions[key][1], 0);
-      newPositions.push(...pos);
+      newPositions.push(positions[key][0], positions[key][1], 0);
       newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
       newRotations.push(0, 0, 0);
     });
@@ -91,7 +92,13 @@ export class Cloth {
       const rotX = newRotations[i * 3 + 0];
       const rotY = newRotations[i * 3 + 1];
       const rotZ = newRotations[i * 3 + 2];
-      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
+      const modelMatrix = this.tempMatrix
+        .identity()
+        .translate(pos)
+        .rotateX(rotX)
+        .rotateY(rotY)
+        .rotateZ(rotZ)
+        .scale(scale);
       instanceMatrices.set(modelMatrix, i * 16);
     }
     this.instancedPoints.setInstanceMatrices(instanceMatrices);
@@ -114,18 +121,15 @@ export class Cloth {
     let newScales: number[] = [];
     let newRotations: number[] = [];
     positions.forEach((v) => {
-      const p1 = pointsPositions[v.p1];
-      const p2 = pointsPositions[v.p2];
+      const A = new Vec3(...pointsPositions[v.p1]);
+      const B = new Vec3(...pointsPositions[v.p2]);
 
-      const A = new Vec3(...p1);
-      const B = new Vec3(...p2);
-
-      const mid = new Vec3().add(A).add(B).multiply(0.5);
+      const mid = A.clone().add(B).multiply(0.5);
 
       newPositions.push(...mid);
       newScales.push(A.distance(B), LINE_WIDTH, 1);
 
-      const tempVec = new Vec3().copy(B).sub(A);
+      const tempVec = B.clone().sub(A);
       const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points
       newRotations.push(0, 0, angle);
     });
@@ -138,7 +142,13 @@ export class Cloth {
       const rotX = newRotations[i * 3 + 0];
       const rotY = newRotations[i * 3 + 1];
       const rotZ = newRotations[i * 3 + 2];
-      const modelMatrix = new Mat4().identity().translate(pos).rotateX(rotX).rotateY(rotY).rotateZ(rotZ).scale(scale);
+      const modelMatrix = this.tempMatrix
+        .identity()
+        .translate(pos)
+        .rotateX(rotX)
+        .rotateY(rotY)
+        .rotateZ(rotZ)
+        .scale(scale);
       instanceMatrices.set(modelMatrix, i * 16);
     }
     this.instancedSticks.setInstanceMatrices(instanceMatrices);
@@ -176,15 +186,13 @@ export class Cloth {
           const currPoint = pointsPositions.length - 1;
           const upPoint = x + (y - 1) * (width + 1);
 
-          const stick = {
-            p1: currPoint,
-            p2: upPoint,
-          };
-
           // upPoint.addStick(stick, 1);
           // point.addStick(stick, 1);
           // this.sticks.push(stick);
-          sticksPositions.push(stick);
+          sticksPositions.push({
+            p1: currPoint,
+            p2: upPoint,
+          });
         }
 
         if (y === 0 && x % 2 === 0) {
