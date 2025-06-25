@@ -63,7 +63,7 @@ export class Cloth {
 
   private createInstancePoints(positions: number[][]) {
     const COUNT = positions.length;
-    const POINT_SIZE = 5;
+    const POINT_SIZE = 15;
 
     this.instancedPoints = new InstancedMesh({
       gl: this.props.gl,
@@ -100,7 +100,7 @@ export class Cloth {
   private createInstanceSticks(positions: { p1: number; p2: number }[], pointsPositions: number[][]) {
     const COUNT = positions.length;
 
-    const LINE_WIDTH = 0.8;
+    const LINE_WIDTH = 1.5;
 
     this.instancedSticks = new InstancedMesh({
       gl: this.props.gl,
@@ -114,8 +114,8 @@ export class Cloth {
     let newScales: number[] = [];
     let newRotations: number[] = [];
     positions.forEach((v) => {
-      const p1 = pointsPositions[v.p1 - 1];
-      const p2 = pointsPositions[v.p2 - 1];
+      const p1 = pointsPositions[v.p1];
+      const p2 = pointsPositions[v.p2];
 
       const A = new Vec3(...p1);
       const B = new Vec3(...p2);
@@ -159,8 +159,8 @@ export class Cloth {
         pointsPositions.push([startX + x * spacing, startY + y * spacing, 0]);
 
         if (x !== 0) {
-          const leftPoint = pointsPositions.length - 1;
-          const currPoint = pointsPositions.length;
+          const currPoint = pointsPositions.length - 1;
+          const leftPoint = currPoint - 1;
 
           const stick = {
             p1: currPoint,
@@ -173,9 +173,8 @@ export class Cloth {
         }
 
         if (y !== 0) {
-          const upPoint = x + (y - 1) * (width + 1) + 1;
-
-          const currPoint = pointsPositions.length;
+          const currPoint = pointsPositions.length - 1;
+          const upPoint = x + (y - 1) * (width + 1);
 
           const stick = {
             p1: currPoint,
