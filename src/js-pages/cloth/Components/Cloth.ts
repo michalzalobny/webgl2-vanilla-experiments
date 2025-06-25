@@ -16,6 +16,12 @@ import { Mat4 } from '../lib/math/Mat4';
 import { Point } from './Point';
 import { Stick } from './Stick';
 
+import { Mouse } from './Mouse';
+
+import { UpdateEventProps } from '../utils/GlobalFrame';
+import { Vec2 } from '../lib/math/Vec2';
+import { GlobalResize } from '../utils/GlobalResize';
+
 interface Props {
   gl: WebGL2RenderingContext;
   geometriesManager: GeometriesManager;
@@ -28,6 +34,10 @@ interface Props {
 }
 
 export class Cloth {
+  static gravity = new Vec2(0.0, -9.81);
+  static drag = 0.01;
+  static elasticity = 10.0;
+
   private props: Props;
 
   private instancedPoints: InstancedMesh | null = null;
@@ -40,6 +50,8 @@ export class Cloth {
 
   private points: Point[] = [];
   private sticks: Stick[] = [];
+
+  private mouse: Mouse = new Mouse();
 
   constructor(props: Props) {
     this.props = props;
@@ -114,8 +126,8 @@ export class Cloth {
     let newScales: number[] = [];
     let newRotations: number[] = [];
     this.sticks.forEach((stick) => {
-      const A = stick.p1.getPosition();
-      const B = stick.p2.getPosition();
+      const A = stick.p0.getPosition();
+      const B = stick.p1.getPosition();
 
       const mid = A.clone().add(B).multiply(0.5);
 
@@ -166,8 +178,8 @@ export class Cloth {
           const leftPoint = this.points[this.points.length - 1];
 
           const stick = new Stick({
-            p1: point,
-            p2: leftPoint,
+            p0: point,
+            p1: leftPoint,
             length: this.props.spacing,
           });
 
@@ -181,8 +193,8 @@ export class Cloth {
           const upPoint = this.points[x + (y - 1) * (width + 1)];
 
           const stick = new Stick({
-            p1: point,
-            p2: upPoint,
+            p0: point,
+            p1: upPoint,
             length: this.props.spacing,
           });
 
@@ -217,12 +229,23 @@ export class Cloth {
     });
   }
 
-  public update() {
+  public update(e: UpdateEventProps) {
+    this.sticks.forEach((stick) => stick.update());
+
+    const w = GlobalResize.windowSize.value[0];
+    const h = GlobalResize.windowSize.value[1];
+
+    this.points.forEach((point, key) => {
+      // if (key !== 2) return;
+      point.update(e.dt, Cloth.drag, Cloth.gravity, Cloth.elasticity, this.mouse, w, h);
+      // points[i]->Update(deltaTime, drag, gravity, elasticity, mouse, renderer->GetWindowWidth(), renderer->GetWindowHeight());
+    });
+
     this.positionInstancePoints();
     this.positionInstanceSticks();
   }
 
-  public render() {
+  public render(e: UpdateEventProps) {
     this.instancedPoints?.render({
       camera: this.props.camera,
     });
@@ -237,5 +260,7 @@ export class Cloth {
   public destroy() {
     this.pointsProgram.destroy();
     this.sticksProgram.destroy();
+
+    this.mouse.destroy();
   }
 }

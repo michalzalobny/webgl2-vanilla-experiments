@@ -8,6 +8,7 @@ import { Background } from './Components/Background';
 import { Vec3 } from './lib/math/Vec3';
 import { Cloth } from './Components/Cloth';
 import { GlobalResize } from './utils/GlobalResize';
+import { UpdateEventProps } from './utils/GlobalFrame';
 
 export class Scene {
   private gl: WebGL2RenderingContext;
@@ -50,8 +51,8 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    const width = 2;
-    const height = 2;
+    const width = 4;
+    const height = 4;
     const spacing = 40;
 
     this.cloth = new Cloth({
@@ -78,16 +79,16 @@ export class Scene {
     ]);
   }
 
-  public update = () => {
+  public update = (event: any) => {
     // Update camera
-    this.camera.updateViewMatrix({
-      target: new Vec3(globalState.mouse2DCurrent.value[0] * 200, globalState.mouse2DCurrent.value[1] * 200, -1),
-    });
+    // this.camera.updateViewMatrix({
+    //   target: new Vec3(globalState.mouse2DCurrent.value[0] * 200, globalState.mouse2DCurrent.value[1] * 200, -1),
+    // });
 
-    this.render();
+    this.render(event.e);
   };
 
-  private render() {
+  private render(e: UpdateEventProps) {
     const gl = this.gl;
 
     gl.enable(gl.CULL_FACE);
@@ -107,8 +108,8 @@ export class Scene {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    this.cloth?.update();
-    this.cloth?.render();
+    this.cloth?.update(e);
+    this.cloth?.render(e);
   }
 
   // Partially based on: https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
