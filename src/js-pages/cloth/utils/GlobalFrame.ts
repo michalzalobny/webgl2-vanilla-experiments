@@ -74,6 +74,8 @@ export class GlobalFrame extends EventDispatcher {
     const rounded = Math.round(dt * 2) / 2;
     dt = rounded < 0.5 ? 0.5 : rounded;
 
+    dt = 0.5;
+
     GlobalFrame.dt.value = dt;
     GlobalFrame.uTime.value = time;
 

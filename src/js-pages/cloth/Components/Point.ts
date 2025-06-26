@@ -19,6 +19,9 @@ export class Point {
   private isPinned = false;
   private isSelected = false;
 
+  private tempVec2 = new Vec2();
+  private velocity = new Vec2();
+
   constructor(props: Props) {
     this.pos.setTo(props.x, props.y);
     this.prevPos.copy(this.pos);
@@ -41,6 +44,19 @@ export class Point {
   public pin(): void {
     this.isPinned = true;
   }
+
+  // Euler integration of the particle's position and velocity
+  private integrate = (dt: number, acceleration: Vec2) => {
+    // Update velocity: velocity += acceleration * dt
+    this.tempVec2.copy(acceleration).multiply(dt);
+    this.velocity.add(this.tempVec2);
+
+    // Update position: position += velocity * dt
+    this.tempVec2.copy(this.velocity).multiply(dt);
+
+    this.prevPos.copy(this.pos);
+    this.pos.copy(this.tempVec2);
+  };
 
   public update(
     deltaTime: number,
@@ -91,18 +107,31 @@ export class Point {
       return;
     }
 
+    // this.integrate(deltaTime, acceleration)
+
     // Verlet integration
     const velocity = this.pos
       .clone()
       .sub(this.prevPos)
       .scale(1 - drag);
-    const accelerationEffect = acceleration.clone().scale((1 - drag) * deltaTime * deltaTime);
+    const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
     const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
 
     this.prevPos.copy(this.pos);
     this.pos.copy(newPos);
 
-    // this.keepInsideView(windowWidth, windowHeight);
+    // // Verlet integration
+    // const velocity = this.pos
+    //   .clone()
+    //   .sub(this.prevPos)
+    //   .scale(1 - drag);
+    // const accelerationEffect = acceleration.clone().scale((1 - drag) * deltaTime * deltaTime);
+    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
+
+    // this.prevPos.copy(this.pos);
+    // this.pos.copy(newPos);
+
+    // // this.keepInsideView(windowWidth, windowHeight);
   }
 
   private keepInsideView(windowWidth: number, windowHeight: number): void {

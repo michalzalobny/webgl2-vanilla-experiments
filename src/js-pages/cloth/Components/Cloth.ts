@@ -34,7 +34,7 @@ interface Props {
 }
 
 export class Cloth {
-  static gravity = new Vec2(0.0, -9.81);
+  static gravity = new Vec2(0.0, -9.81 * 0.1);
   static drag = 0.01;
   static elasticity = 10.0;
 
@@ -85,7 +85,7 @@ export class Cloth {
     const COUNT = this.points.length;
 
     const positions = this.points.map((point) => point.getPosition());
-    const POINT_SIZE = 15;
+    const POINT_SIZE = 6;
 
     // Compute new values per instance
     let newPositions: number[] = [];
