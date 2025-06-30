@@ -35,7 +35,7 @@ interface Props {
 
 export class Cloth {
   static gravity = new Vec2(0.0, -9.81 * 0.1);
-  static drag = 0.01;
+  static drag = 0.02;
   static elasticity = 10.0;
 
   private props: Props;
@@ -166,12 +166,11 @@ export class Cloth {
     const startY = this.props.startY;
     const spacing = this.props.spacing;
 
-    for (let y = 0; y <= height; y++) {
-      for (let x = 0; x <= width; x++) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
         const point = new Point({
           x: startX + x * spacing,
           y: startY + y * spacing,
-          mass: 1,
         });
 
         if (x !== 0) {
@@ -190,7 +189,7 @@ export class Cloth {
         }
 
         if (y !== 0) {
-          const upPoint = this.points[x + (y - 1) * (width + 1)];
+          const upPoint = this.points[x + (y - 1) * width];
 
           const stick = new Stick({
             p0: point,
@@ -204,7 +203,7 @@ export class Cloth {
           point.addStick(stick, 1);
         }
 
-        if (y === 0 && x % 2 === 0) {
+        if (y === height - 1 && x % 2 === 0) {
           point.pin();
         }
 
@@ -230,8 +229,6 @@ export class Cloth {
   }
 
   public update(e: UpdateEventProps) {
-    this.sticks.forEach((stick) => stick.update());
-
     const w = GlobalResize.windowSize.value[0];
     const h = GlobalResize.windowSize.value[1];
 
@@ -240,6 +237,8 @@ export class Cloth {
       point.update(e.dt, Cloth.drag, Cloth.gravity, Cloth.elasticity, this.mouse, w, h);
       // points[i]->Update(deltaTime, drag, gravity, elasticity, mouse, renderer->GetWindowWidth(), renderer->GetWindowHeight());
     });
+
+    this.sticks.forEach((stick) => stick.update());
 
     this.positionInstancePoints();
     this.positionInstanceSticks();

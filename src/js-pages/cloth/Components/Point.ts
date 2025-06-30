@@ -1,12 +1,10 @@
 import { Vec2 } from '../lib/math/Vec2';
 import { Stick } from './Stick';
 import { Mouse } from './Mouse';
-import { updateDebug } from '../utils/updateDebug';
 
 type Props = {
   x: number;
   y: number;
-  mass: number;
 };
 
 export class Point {

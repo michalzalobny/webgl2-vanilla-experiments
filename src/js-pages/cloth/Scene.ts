@@ -51,9 +51,9 @@ export class Scene {
       geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
     });
 
-    const width = 80;
-    const height = 10;
-    const spacing = 10;
+    const width = 17;
+    const height = 4;
+    const spacing = 20;
 
     this.cloth = new Cloth({
       camera: this.camera,
@@ -61,8 +61,8 @@ export class Scene {
       gl: this.gl,
       width,
       height,
-      startX: -(width * spacing) / 2,
-      startY: -(height * spacing) / 2,
+      startX: -(width * spacing) / 2 + spacing / 2,
+      startY: -(height * spacing) / 2 + spacing / 2,
       spacing,
     });
 
