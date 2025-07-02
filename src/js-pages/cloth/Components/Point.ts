@@ -37,6 +37,7 @@ export class Point {
 
   public setPosition(x: number, y: number): void {
     this.pos.setTo(x, y);
+    // this.prevPos.setTo(x, y);
   }
 
   public pin(): void {
@@ -45,15 +46,29 @@ export class Point {
 
   // Euler integration of the particle's position and velocity
   private integrate = (dt: number, acceleration: Vec2) => {
+    const velocity = this.pos.clone().sub(this.prevPos);
+    const accelerationEff = acceleration.clone();
+    const newPos = this.pos.clone().add(velocity).add(accelerationEff);
+
     // Update velocity: velocity += acceleration * dt
-    this.tempVec2.copy(acceleration).multiply(dt);
-    this.velocity.add(this.tempVec2);
+    // this.tempVec2.copy(acceleration).multiply(dt);
+    // this.velocity.add(this.tempVec2);
 
     // Update position: position += velocity * dt
-    this.tempVec2.copy(this.velocity).multiply(dt);
+    this.tempVec2.copy(velocity).multiply(dt);
 
     this.prevPos.copy(this.pos);
-    this.pos.copy(this.tempVec2);
+    this.pos.copy(newPos);
+
+    //   const velocity = this.pos
+    //   .clone()
+    //   .sub(this.prevPos)
+    //   .scale(1 - drag);
+    // const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
+    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
+
+    // this.prevPos.copy(this.pos);
+    // this.pos.copy(newPos);
   };
 
   public update(
@@ -105,18 +120,18 @@ export class Point {
       return;
     }
 
-    // this.integrate(deltaTime, acceleration)
+    this.integrate(deltaTime, acceleration);
 
     // Verlet integration
-    const velocity = this.pos
-      .clone()
-      .sub(this.prevPos)
-      .scale(1 - drag);
-    const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
-    const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
+    // const velocity = this.pos
+    //   .clone()
+    //   .sub(this.prevPos)
+    //   .scale(1 - drag);
+    // const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
+    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
 
-    this.prevPos.copy(this.pos);
-    this.pos.copy(newPos);
+    // this.prevPos.copy(this.pos);
+    // this.pos.copy(newPos);
 
     // // Verlet integration
     // const velocity = this.pos

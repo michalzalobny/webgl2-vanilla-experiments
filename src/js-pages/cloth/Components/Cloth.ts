@@ -34,8 +34,8 @@ interface Props {
 }
 
 export class Cloth {
-  static gravity = new Vec2(0.0, -9.81 * 0.1);
-  static drag = 0.02;
+  static gravity = new Vec2(0.0, -981 * 0.0001);
+  static drag = 0.01;
   static elasticity = 10.0;
 
   private props: Props;
@@ -232,13 +232,13 @@ export class Cloth {
     const w = GlobalResize.windowSize.value[0];
     const h = GlobalResize.windowSize.value[1];
 
+    this.sticks.forEach((stick) => stick.update());
+
     this.points.forEach((point, key) => {
       // if (key !== 2) return;
       point.update(e.dt, Cloth.drag, Cloth.gravity, Cloth.elasticity, this.mouse, w, h);
       // points[i]->Update(deltaTime, drag, gravity, elasticity, mouse, renderer->GetWindowWidth(), renderer->GetWindowHeight());
     });
-
-    this.sticks.forEach((stick) => stick.update());
 
     this.positionInstancePoints();
     this.positionInstanceSticks();
