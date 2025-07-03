@@ -1,67 +1,29 @@
 import { Vec2 } from '../lib/math/Vec2';
-import { Vec3 } from '../lib/math/Vec3';
 import { Stick } from './Stick';
 import { Mouse } from './Mouse';
 
 type Props = {
   x: number;
   y: number;
-  z: number;
-  mass: number;
 };
 
-var DAMPING = 0.03;
-var DRAG = 1 - DAMPING;
-var MASS = 0.1;
-var restDistance = 25;
-var GRAVITY = 981 * 1.4;
-var gravity = new Vec3(0, -GRAVITY, 0).multiply(MASS);
-
-var TIMESTEP = 18 / 1000;
-var TIMESTEP_SQ = TIMESTEP * TIMESTEP;
-
-var tmpForce = new Vec3();
-
 export class Point {
-  // Other
-  position = new Vec3();
-  previous = new Vec3();
-  original = new Vec3();
-  a = new Vec3(0, 0, 0); // acceleration
-  mass;
-  invMass;
-  tmp = new Vec3();
-  tmp2 = new Vec3();
-
-  //My
   private sticks: (Stick | null)[] = [];
+
+  private pos = new Vec2();
+  private prevPos = new Vec2();
+  private initPos = new Vec2();
+
   private isPinned = false;
   private isSelected = false;
 
+  private tempVec2 = new Vec2();
+  private velocity = new Vec2();
+
   constructor(props: Props) {
-    this.mass = props.mass;
-    this.invMass = 1 / this.mass;
-    this.position.setTo(props.x, props.y, props.z);
-
-    this.position.setTo(props.x, props.y, props.z);
-    this.previous.copy(this.position);
-    this.original.copy(this.position);
-  }
-
-  public addForce(force: Vec3) {
-    this.a.add(this.tmp2.copy(force).multiply(this.invMass));
-  }
-
-  public integrate(timesq: number) {
-    const newPos = this.position.clone().sub(this.previous);
-    newPos.multiply(DRAG).add(this.position);
-    newPos.add(this.a.multiply(timesq));
-
-    this.tmp = this.previous;
-    this.previous = this.position;
-    this.position = newPos;
-
-    this.a.setTo(0, 0, 0);
+    this.pos.setTo(props.x, props.y);
+    this.prevPos.copy(this.pos);
+    this.initPos.copy(this.pos);
   }
 
   /** Stick registration (max 2) */
@@ -69,18 +31,45 @@ export class Point {
     this.sticks[index] = stick;
   }
 
-  public getPosition(): Vec3 {
-    return this.position;
+  public getPosition(): Vec2 {
+    return this.pos;
   }
 
-  public setPosition(x: number, y: number, z: number): void {
-    this.position.setTo(x, y, z);
+  public setPosition(x: number, y: number): void {
+    this.pos.setTo(x, y);
     // this.prevPos.setTo(x, y);
   }
 
   public pin(): void {
     this.isPinned = true;
   }
+
+  // Euler integration of the particle's position and velocity
+  private integrate = (dt: number, acceleration: Vec2) => {
+    const velocity = this.pos.clone().sub(this.prevPos);
+    const accelerationEff = acceleration.clone();
+    const newPos = this.pos.clone().add(velocity).add(accelerationEff);
+
+    // Update velocity: velocity += acceleration * dt
+    // this.tempVec2.copy(acceleration).multiply(dt);
+    // this.velocity.add(this.tempVec2);
+
+    // Update position: position += velocity * dt
+    this.tempVec2.copy(velocity).multiply(dt);
+
+    this.prevPos.copy(this.pos);
+    this.pos.copy(newPos);
+
+    //   const velocity = this.pos
+    //   .clone()
+    //   .sub(this.prevPos)
+    //   .scale(1 - drag);
+    // const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
+    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
+
+    // this.prevPos.copy(this.pos);
+    // this.pos.copy(newPos);
+  };
 
   public update(
     deltaTime: number,
@@ -92,7 +81,7 @@ export class Point {
     windowHeight: number,
   ): void {
     // Check if mouse is near this point
-    const mouseDir = this.position.clone().sub(new Vec3(...mouse.getPosition(), 0));
+    const mouseDir = this.pos.clone().sub(mouse.getPosition());
 
     // updateDebug(mouse.getPosition());
 
@@ -113,7 +102,7 @@ export class Point {
       diff.x = Math.max(-elasticity, Math.min(elasticity, diff.x));
       diff.y = Math.max(-elasticity, Math.min(elasticity, diff.y));
 
-      this.previous = this.position.clone().sub(new Vec3(...diff, 0));
+      this.prevPos = this.pos.clone().sub(diff);
     }
 
     // Right-click to break sticks
@@ -127,11 +116,12 @@ export class Point {
 
     // Pinned point stays fixed
     if (this.isPinned) {
-      this.position.copy(this.original);
+      this.pos.copy(this.initPos);
       return;
     }
 
-    this.integrate(deltaTime);
+    this.integrate(deltaTime, acceleration);
+
     // Verlet integration
     // const velocity = this.pos
     //   .clone()
@@ -155,5 +145,10 @@ export class Point {
     // this.pos.copy(newPos);
 
     // // this.keepInsideView(windowWidth, windowHeight);
+  }
+
+  private keepInsideView(windowWidth: number, windowHeight: number): void {
+    this.pos.x = Math.max(0, Math.min(windowWidth, this.pos.x));
+    this.pos.y = Math.max(0, Math.min(windowHeight, this.pos.y));
   }
 }
