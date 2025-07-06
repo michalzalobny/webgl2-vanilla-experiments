@@ -8,7 +8,7 @@ export class Mouse {
   private pos = new Vec2();
   private prevPos = new Vec2();
 
-  private cursorSize: number = 20;
+  private cursorSize: number = 40;
   private readonly maxCursorSize: number = 100;
   private readonly minCursorSize: number = 20;
 

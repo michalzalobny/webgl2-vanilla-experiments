@@ -55,7 +55,7 @@ export class Scene {
     // const height = 30;
     // const spacing = 16;
 
-    const factor = 2;
+    const factor = 1.2;
     const width = Math.round((60 - 1) * factor);
     const height = Math.round(30 * factor);
     const spacing = Math.round(16 / factor);
