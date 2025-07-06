@@ -24,7 +24,7 @@ var tmpForce = new Vec3();
 
 export class Point {
   // Other
-  position = new Vec3();
+  public position = new Vec3();
   previous = new Vec3();
   original = new Vec3();
   a = new Vec3(0, 0, 0); // acceleration
@@ -73,7 +73,7 @@ export class Point {
     return this.position;
   }
 
-  public setPosition(x: number, y: number, z: number): void {
+  public setPosition(x: number, y: number, z = 0): void {
     this.position.setTo(x, y, z);
     // this.prevPos.setTo(x, y);
   }

@@ -85,14 +85,15 @@ export class Cloth {
     const COUNT = this.points.length;
 
     const positions = this.points.map((point) => point.getPosition());
-    const POINT_SIZE = 6;
+
+    const POINT_SIZE = 3;
 
     // Compute new values per instance
     let newPositions: number[] = [];
     let newScales: number[] = [];
     let newRotations: number[] = [];
     positions.forEach((v, key) => {
-      newPositions.push(positions[key][0], positions[key][1], 0);
+      newPositions.push(positions[key][0], positions[key][1], positions[key][2]);
       newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
       newRotations.push(0, 0, 0);
     });
@@ -119,7 +120,7 @@ export class Cloth {
 
   private positionInstanceSticks() {
     const COUNT = this.sticks.length;
-    const LINE_WIDTH = 1.5;
+    const LINE_WIDTH = 0.5;
 
     // Compute new values per instance
     let newPositions: number[] = [];
@@ -142,7 +143,7 @@ export class Cloth {
     //Construct matrix
     const instanceMatrices = new Float32Array(COUNT * 16);
     for (let i = 0; i < COUNT; i++) {
-      const pos = new Vec3(newPositions[i * 2 + 0], newPositions[i * 2 + 1], 0); // Might need to change to * 3 etc. to support vec3s
+      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
       const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
       const rotX = newRotations[i * 3 + 0];
       const rotY = newRotations[i * 3 + 1];
@@ -171,6 +172,8 @@ export class Cloth {
         const point = new Point({
           x: startX + x * spacing,
           y: startY + y * spacing,
+          z: 0,
+          mass: 1,
         });
 
         if (x !== 0) {

@@ -76,7 +76,7 @@ export class Vec3 extends Float32Array {
     return Vec3Func.length(this);
   }
 
-  distance(v: Vec3) {
+  distance(v?: Vec3) {
     if (v) return Vec3Func.distance(this, v);
     else return Vec3Func.length(this);
   }
