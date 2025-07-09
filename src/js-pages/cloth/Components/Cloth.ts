@@ -11,6 +11,7 @@ import fragmentShaderLine from '../shaders/line/fragment.glsl';
 import vertexShaderLine from '../shaders/line/vertex.glsl';
 
 import { Vec3 } from '../lib/math/Vec3';
+import { Vec4 } from '../lib/math/Vec4';
 import { Mat4 } from '../lib/math/Mat4';
 
 import { Point } from './Point';
@@ -21,6 +22,47 @@ import { Mouse } from './Mouse';
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Vec2 } from '../lib/math/Vec2';
 import { GlobalResize } from '../utils/GlobalResize';
+import { makeLookAtMatrix } from '../lib/Camera';
+
+// Based on: https://github.com/michalzalobny/creative-experiments/blob/c23e8ed08257f709488f9052138e5d4cc67eb7f3/src/containers/projects/FboParticlesInstanced/classes/shaders/instanced/vertex.glsl#L8
+const lookAt = (direction: Vec3): Mat4 => {
+  const right = direction
+    .clone()
+    .cross(new Vec3(0, 0, 1))
+    .normalize();
+  const up = right.clone().cross(direction).normalize();
+  return new Mat4(
+    ...new Vec4(...right, 0.0),
+    ...new Vec4(...up, 0.0),
+    ...new Vec4(...direction.clone().multiply(-1), 0.0),
+    ...new Vec4(0.0, 0.0, 0.0, 1.0),
+  );
+};
+
+const angle = Math.PI / 2;
+const cosA = Math.cos(angle);
+const sinA = Math.sin(angle);
+
+const rotateZMatrix = new Mat4(
+  ...new Vec4(cosA, -sinA, 0, 0),
+  ...new Vec4(sinA, cosA, 0, 0),
+  ...new Vec4(0, 0, 1, 0),
+  ...new Vec4(0, 0, 0, 1),
+);
+
+const rotateXMatrix = new Mat4(
+  ...new Vec4(1, 0, 0, 0),
+  ...new Vec4(0, cosA, -sinA, 0),
+  ...new Vec4(0, sinA, cosA, 0),
+  ...new Vec4(0, 0, 0, 1),
+);
+
+const rotateYMatrix = new Mat4(
+  ...new Vec4(cosA, 0, sinA, 0),
+  ...new Vec4(0, 1, 0, 0),
+  ...new Vec4(-sinA, 0, cosA, 0),
+  ...new Vec4(0, 0, 0, 1),
+);
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -86,7 +128,7 @@ export class Cloth {
 
     const positions = this.points.map((point) => point.getPosition());
 
-    const POINT_SIZE = 3;
+    const POINT_SIZE = 8;
 
     // Compute new values per instance
     let newPositions: number[] = [];
@@ -120,41 +162,101 @@ export class Cloth {
 
   private positionInstanceSticks() {
     const COUNT = this.sticks.length;
-    const LINE_WIDTH = 0.5;
+    const LINE_WIDTH = 5;
 
     // Compute new values per instance
-    let newPositions: number[] = [];
-    let newScales: number[] = [];
-    let newRotations: number[] = [];
+    let newPositions: Mat4[] = [];
+    let newScales: Mat4[] = [];
+    let newRotations: Mat4[] = [];
+
     this.sticks.forEach((stick) => {
-      const A = stick.p0.getPosition();
-      const B = stick.p1.getPosition();
+      const A = stick.p0.getPosition().clone();
+
+      const B = stick.p1.getPosition().clone();
+
+      const length = A.distance(B);
+      const direction = A.clone().sub(B);
+
+      const scaleZ = length;
 
       const mid = A.clone().add(B).multiply(0.5);
 
-      newPositions.push(...mid);
-      newScales.push(A.distance(B), LINE_WIDTH, 1);
+      const isLeveled = stick.p0.original[1] === stick.p1.original[1];
 
-      const tempVec = B.clone().sub(A);
-      const angle = Math.atan2(tempVec.y, tempVec.x); // Used to calculate the angle between the two points
-      newRotations.push(0, 0, angle);
+      //Getting the matrix that scales the particle
+      let scaleMatrix = new Mat4(
+        ...new Vec4(LINE_WIDTH, 0, 0, 0),
+        ...new Vec4(0, LINE_WIDTH, 0, 0),
+        ...new Vec4(0, 0, scaleZ, 0),
+        ...new Vec4(0, 0, 0, 1),
+      );
+
+      // if (isLeveled) {
+      //   scaleMatrix = new Mat4(
+      //     ...new Vec4(0, 0, 0, 0),
+      //     ...new Vec4(0, 0, 0, 0),
+      //     ...new Vec4(0, 0, 0, 0),
+      //     ...new Vec4(0, 0, 0, 1),
+      //   );
+      // }
+
+      //Getting the matrix that translates the particle to the position of the velocity
+      const translationMatrix = new Mat4(
+        ...new Vec4(1, 0, 0, 0),
+        ...new Vec4(0, 1, 0, 0),
+        ...new Vec4(0, 0, 1, 0),
+        ...new Vec4(...mid, 1),
+      );
+
+      const eye = new Vec3(0, 0, 0); // camera at origin
+      const target = direction.normalize();
+
+      // const target = new Vec3(0, 0, -1);
+      const up = new Vec3(0, 1, 0); // standard up vector
+
+      // const matrix = lookAt({ eye, target, up });
+
+      //Getting the matrix that rotates the particle to the direction of the velocity
+
+      const rotationMatrix = new Mat4()
+        .identity()
+
+        // .multiply(rotateZMatrix)
+        //
+
+        // .multiply(rotateYMatrix)
+        .multiply(lookAt(direction));
+
+      newPositions.push(translationMatrix);
+      newScales.push(scaleMatrix);
+      newRotations.push(rotationMatrix);
     });
 
     //Construct matrix
     const instanceMatrices = new Float32Array(COUNT * 16);
     for (let i = 0; i < COUNT; i++) {
-      const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
-      const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
-      const rotX = newRotations[i * 3 + 0];
-      const rotY = newRotations[i * 3 + 1];
-      const rotZ = newRotations[i * 3 + 2];
+      const translationMatrix = newPositions[i];
+      const scaleMatrix = newScales[i];
+      const rotationMatrix = newRotations[i];
+
+      // const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
+      // const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
+      // const rotX = newRotations[i * 3 + 0];
+      // const rotY = newRotations[i * 3 + 1];
+      // const rotZ = newRotations[i * 3 + 2];
+      // const modelMatrix = this.tempMatrix.identity().multiplyMany(translationMatrix, rotationMatrix, scaleMatrix);
+      // const modelMatrix = this.tempMatrix
+      //   .identity()
+      //   .multiply(scaleMatrix)
+      //   .multiply(rotationMatrix)
+      //   .multiply(translationMatrix);
+
       const modelMatrix = this.tempMatrix
         .identity()
-        .translate(pos)
-        .rotateX(rotX)
-        .rotateY(rotY)
-        .rotateZ(rotZ)
-        .scale(scale);
+        .multiply(translationMatrix)
+        .multiply(rotationMatrix)
+        .multiply(scaleMatrix);
+
       instanceMatrices.set(modelMatrix, i * 16);
     }
     this.instancedSticks?.setInstanceMatrices(instanceMatrices);
@@ -218,7 +320,7 @@ export class Cloth {
     this.instancedPoints = new InstancedMesh({
       gl: this.props.gl,
       instanceCount: this.points.length,
-      geometry: this.props.geometriesManager.getGeometry('plane'),
+      geometry: this.props.geometriesManager.getGeometry('cube'),
       shaderProgram: this.pointsProgram,
     });
 
@@ -226,7 +328,7 @@ export class Cloth {
     this.instancedSticks = new InstancedMesh({
       gl: this.props.gl,
       instanceCount: this.sticks.length,
-      geometry: this.props.geometriesManager.getGeometry('plane'),
+      geometry: this.props.geometriesManager.getGeometry('cube'),
       shaderProgram: this.sticksProgram,
     });
   }

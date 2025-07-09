@@ -75,7 +75,7 @@ export class Point {
 
   public setPosition(x: number, y: number, z = 0): void {
     this.position.setTo(x, y, z);
-    // this.prevPos.setTo(x, y);
+    // this.previous.setTo(x, y, z);
   }
 
   public pin(): void {

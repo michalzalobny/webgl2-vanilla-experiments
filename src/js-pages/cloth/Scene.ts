@@ -10,6 +10,8 @@ import { Cloth } from './Components/Cloth';
 import { GlobalResize } from './utils/GlobalResize';
 import { UpdateEventProps } from './utils/GlobalFrame';
 
+import { cubeObject, planeObject } from './utils/geometries';
+
 export class Scene {
   private gl: WebGL2RenderingContext;
   private camera = new Camera();
@@ -41,28 +43,28 @@ export class Scene {
   }
 
   private async init() {
-    // Plane made out of two triangles
-    const planeVertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, -0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
-
-    const planeTexcoords = [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1];
-
     this.geometriesManager.addGeometry({
       geometryUrl: 'plane',
-      geometryObject: { vertices: planeVertices, texcoords: planeTexcoords, normals: [] },
+      geometryObject: planeObject,
+    });
+
+    this.geometriesManager.addGeometry({
+      geometryUrl: 'cube',
+      geometryObject: cubeObject,
     });
 
     // const width = 60 - 1;
     // const height = 30;
     // const spacing = 16;
 
-    const factor = 1.2;
+    const factor = 0.7;
     const width = Math.round((60 - 1) * factor);
     const height = Math.round(30 * factor);
     const spacing = Math.round(16 / factor);
 
     // const width = 2;
     // const height = 2;
-    // const spacing = 50;
+    // const spacing = 100;
 
     this.cloth = new Cloth({
       camera: this.camera,
