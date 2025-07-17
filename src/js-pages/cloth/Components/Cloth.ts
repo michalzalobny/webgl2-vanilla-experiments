@@ -1,3 +1,5 @@
+import { vec3, quat, mat4 } from 'gl-matrix';
+
 import { GeometriesManager } from '../lib/GeometriesManager';
 import { Camera } from '../lib/Camera';
 import { InstancedMesh } from '../lib/InstancedMesh';
@@ -22,47 +24,6 @@ import { Mouse } from './Mouse';
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Vec2 } from '../lib/math/Vec2';
 import { GlobalResize } from '../utils/GlobalResize';
-import { makeLookAtMatrix } from '../lib/Camera';
-
-// Based on: https://github.com/michalzalobny/creative-experiments/blob/c23e8ed08257f709488f9052138e5d4cc67eb7f3/src/containers/projects/FboParticlesInstanced/classes/shaders/instanced/vertex.glsl#L8
-const lookAt = (direction: Vec3): Mat4 => {
-  const right = direction
-    .clone()
-    .cross(new Vec3(0, 0, 1))
-    .normalize();
-  const up = right.clone().cross(direction).normalize();
-  return new Mat4(
-    ...new Vec4(...right, 0.0),
-    ...new Vec4(...up, 0.0),
-    ...new Vec4(...direction.clone().multiply(-1), 0.0),
-    ...new Vec4(0.0, 0.0, 0.0, 1.0),
-  );
-};
-
-const angle = Math.PI / 2;
-const cosA = Math.cos(angle);
-const sinA = Math.sin(angle);
-
-const rotateZMatrix = new Mat4(
-  ...new Vec4(cosA, -sinA, 0, 0),
-  ...new Vec4(sinA, cosA, 0, 0),
-  ...new Vec4(0, 0, 1, 0),
-  ...new Vec4(0, 0, 0, 1),
-);
-
-const rotateXMatrix = new Mat4(
-  ...new Vec4(1, 0, 0, 0),
-  ...new Vec4(0, cosA, -sinA, 0),
-  ...new Vec4(0, sinA, cosA, 0),
-  ...new Vec4(0, 0, 0, 1),
-);
-
-const rotateYMatrix = new Mat4(
-  ...new Vec4(cosA, 0, sinA, 0),
-  ...new Vec4(0, 1, 0, 0),
-  ...new Vec4(-sinA, 0, cosA, 0),
-  ...new Vec4(0, 0, 0, 1),
-);
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -171,61 +132,44 @@ export class Cloth {
 
     this.sticks.forEach((stick) => {
       const A = stick.p0.getPosition().clone();
-
       const B = stick.p1.getPosition().clone();
 
-      const length = A.distance(B);
-      const direction = A.clone().sub(B);
+      // Input points
+      const P1 = vec3.fromValues(A[0], A[1], A[2]);
+      const P2 = vec3.fromValues(B[0], B[1], B[2]);
 
-      const scaleZ = length;
+      // 1. Compute direction vector (normalize)
+      const direction = vec3.create();
+      vec3.subtract(direction, P2, P1);
+      vec3.normalize(direction, direction);
 
-      const mid = A.clone().add(B).multiply(0.5);
+      // Rotation to align (1, 0, 0) with `direction`
+      const from = vec3.fromValues(1, 0, 0);
+      const q = quat.create();
+      quat.rotationTo(q, from, direction);
 
-      const isLeveled = stick.p0.original[1] === stick.p1.original[1];
+      // Create rotation matrix from quaternion
+      const rotationMatrix = mat4.create();
+      mat4.fromQuat(rotationMatrix, q);
+
+      // 4. Scale (stretch along X by distance)
+      const length = vec3.distance(P1, P2);
 
       //Getting the matrix that scales the particle
       let scaleMatrix = new Mat4(
-        ...new Vec4(LINE_WIDTH, 0, 0, 0),
+        ...new Vec4(length, 0, 0, 0),
         ...new Vec4(0, LINE_WIDTH, 0, 0),
-        ...new Vec4(0, 0, scaleZ, 0),
+        ...new Vec4(0, 0, LINE_WIDTH, 0),
         ...new Vec4(0, 0, 0, 1),
       );
-
-      // if (isLeveled) {
-      //   scaleMatrix = new Mat4(
-      //     ...new Vec4(0, 0, 0, 0),
-      //     ...new Vec4(0, 0, 0, 0),
-      //     ...new Vec4(0, 0, 0, 0),
-      //     ...new Vec4(0, 0, 0, 1),
-      //   );
-      // }
 
       //Getting the matrix that translates the particle to the position of the velocity
       const translationMatrix = new Mat4(
         ...new Vec4(1, 0, 0, 0),
         ...new Vec4(0, 1, 0, 0),
         ...new Vec4(0, 0, 1, 0),
-        ...new Vec4(...mid, 1),
+        ...new Vec4(...A.clone().add(B).multiply(0.5), 1),
       );
-
-      const eye = new Vec3(0, 0, 0); // camera at origin
-      const target = direction.normalize();
-
-      // const target = new Vec3(0, 0, -1);
-      const up = new Vec3(0, 1, 0); // standard up vector
-
-      // const matrix = lookAt({ eye, target, up });
-
-      //Getting the matrix that rotates the particle to the direction of the velocity
-
-      const rotationMatrix = new Mat4()
-        .identity()
-
-        // .multiply(rotateZMatrix)
-        //
-
-        // .multiply(rotateYMatrix)
-        .multiply(lookAt(direction));
 
       newPositions.push(translationMatrix);
       newScales.push(scaleMatrix);
@@ -238,18 +182,6 @@ export class Cloth {
       const translationMatrix = newPositions[i];
       const scaleMatrix = newScales[i];
       const rotationMatrix = newRotations[i];
-
-      // const pos = new Vec3(newPositions[i * 3 + 0], newPositions[i * 3 + 1], newPositions[i * 3 + 2]);
-      // const scale = new Vec3(newScales[i * 3 + 0], newScales[i * 3 + 1], newScales[i * 3 + 2]);
-      // const rotX = newRotations[i * 3 + 0];
-      // const rotY = newRotations[i * 3 + 1];
-      // const rotZ = newRotations[i * 3 + 2];
-      // const modelMatrix = this.tempMatrix.identity().multiplyMany(translationMatrix, rotationMatrix, scaleMatrix);
-      // const modelMatrix = this.tempMatrix
-      //   .identity()
-      //   .multiply(scaleMatrix)
-      //   .multiply(rotationMatrix)
-      //   .multiply(translationMatrix);
 
       const modelMatrix = this.tempMatrix
         .identity()
