@@ -36,10 +36,6 @@ interface Props {
 }
 
 export class Cloth {
-  static gravity = new Vec2(0.0, -981 * 0.0001);
-  static drag = 0.01;
-  static elasticity = 10.0;
-
   private props: Props;
 
   private instancedPoints: InstancedMesh | null = null;
@@ -239,6 +235,10 @@ export class Cloth {
           point.pin();
         }
 
+        // if ((y === 5 && x === 20) || (y === 5 && x === 21) || (y === 5 && x === 22)) {
+        //   point.isSelected = true;
+        // }
+
         this.points.push(point);
       }
     }
@@ -261,15 +261,10 @@ export class Cloth {
   }
 
   public update(e: UpdateEventProps) {
-    const w = GlobalResize.windowSize.value[0];
-    const h = GlobalResize.windowSize.value[1];
-
     this.sticks.forEach((stick) => stick.update());
 
     this.points.forEach((point, key) => {
-      // if (key !== 2) return;
-      point.update(e.dt, Cloth.drag, Cloth.gravity, Cloth.elasticity, this.mouse, w, h);
-      // points[i]->Update(deltaTime, drag, gravity, elasticity, mouse, renderer->GetWindowWidth(), renderer->GetWindowHeight());
+      point.update(e.dt, this.mouse);
     });
 
     this.positionInstancePoints();

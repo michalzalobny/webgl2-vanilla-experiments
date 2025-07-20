@@ -59,7 +59,7 @@ export class Background {
   public update() {}
 
   public render() {
-    this.mesh?.render({ camera: this.camera });
+    // this.mesh?.render({ camera: this.camera });
   }
 
   public onResize() {

@@ -1,7 +1,7 @@
-import { Vec2 } from '../lib/math/Vec2';
 import { Vec3 } from '../lib/math/Vec3';
 import { Stick } from './Stick';
 import { Mouse } from './Mouse';
+import { GlobalFrame } from '../utils/GlobalFrame';
 
 type Props = {
   x: number;
@@ -13,14 +13,9 @@ type Props = {
 var DAMPING = 0.03;
 var DRAG = 1 - DAMPING;
 var MASS = 0.1;
-var restDistance = 25;
-var GRAVITY = 981 * 1.4;
+var GRAVITY = 9.81 * 0.5;
 var gravity = new Vec3(0, -GRAVITY, 0).multiply(MASS);
-
-var TIMESTEP = 18 / 1000;
-var TIMESTEP_SQ = TIMESTEP * TIMESTEP;
-
-var tmpForce = new Vec3();
+var elasticity = 10;
 
 export class Point {
   // Other
@@ -38,6 +33,9 @@ export class Point {
   private isPinned = false;
   private isSelected = false;
 
+  private isDragged = false;
+  private dragTarget: Vec3 | null = null;
+
   constructor(props: Props) {
     this.mass = props.mass;
     this.invMass = 1 / this.mass;
@@ -52,6 +50,7 @@ export class Point {
     this.a.add(this.tmp2.copy(force).multiply(this.invMass));
   }
 
+  // Verlet integration
   public integrate(timesq: number) {
     const newPos = this.position.clone().sub(this.previous);
     newPos.multiply(DRAG).add(this.position);
@@ -62,6 +61,15 @@ export class Point {
     this.position = newPos;
 
     this.a.setTo(0, 0, 0);
+  }
+
+  private integrate2(deltaTime: number, drag: number, acceleration: Vec3) {
+    const temp1 = this.position.clone().sub(this.previous);
+    temp1.scale(1.0 - drag);
+    const temp2 = acceleration.clone().scale((1.0 - drag) * deltaTime * deltaTime);
+    const newPos = this.position.clone().add(temp1).add(temp2);
+    this.previous = this.position;
+    this.position = newPos;
   }
 
   /** Stick registration (max 2) */
@@ -82,15 +90,7 @@ export class Point {
     this.isPinned = true;
   }
 
-  public update(
-    deltaTime: number,
-    drag: number,
-    acceleration: Vec2,
-    elasticity: number,
-    mouse: Mouse,
-    windowWidth: number,
-    windowHeight: number,
-  ): void {
+  public update(deltaTime: number, mouse: Mouse): void {
     // Check if mouse is near this point
     const mouseDir = this.position.clone().sub(new Vec3(...mouse.getPosition(), 0));
 
@@ -106,14 +106,36 @@ export class Point {
       }
     }
 
-    // Left-click drag interaction
+    // // Left-click drag interaction
+    // if (mouse.getLeftButtonDown() && this.isSelected) {
+    //   const diff = mouse.getPosition().clone().sub(mouse.getPreviousPosition());
+
+    //   diff.x = Math.max(-elasticity, Math.min(elasticity, diff.x));
+    //   diff.y = Math.max(-elasticity, Math.min(elasticity, diff.y));
+
+    //   this.previous = this.position.clone().sub(new Vec3(...diff, 0));
+    // }
+
     if (mouse.getLeftButtonDown() && this.isSelected) {
-      const diff = mouse.getPosition().clone().sub(mouse.getPreviousPosition());
+      this.isDragged = true;
+      this.dragTarget = new Vec3(...mouse.getPosition(), Math.sin(GlobalFrame.uTime.value * 0.005) * 300 * 0);
+    } else {
+      this.isDragged = false;
+      this.dragTarget = null;
+    }
 
-      diff.x = Math.max(-elasticity, Math.min(elasticity, diff.x));
-      diff.y = Math.max(-elasticity, Math.min(elasticity, diff.y));
+    if (this.isDragged && this.dragTarget) {
+      const toMouse = this.dragTarget.clone().sub(this.position);
+      const strength = 1; // spring constant
+      const damping = 0.1; // between 0 (no motion) and 1 (no damping)
 
-      this.previous = this.position.clone().sub(new Vec3(...diff, 0));
+      // Simulate elastic force pulling to mouse
+      const force = toMouse.scale(strength);
+      this.addForce(force);
+
+      // Optional: slightly damp the Verlet velocity
+      const velocity = this.position.clone().sub(this.previous).scale(damping);
+      this.previous = this.position.clone().sub(velocity);
     }
 
     // Right-click to break sticks
@@ -131,29 +153,8 @@ export class Point {
       return;
     }
 
+    this.addForce(gravity);
     this.integrate(deltaTime);
-    // Verlet integration
-    // const velocity = this.pos
-    //   .clone()
-    //   .sub(this.prevPos)
-    //   .scale(1 - drag);
-    // const accelerationEffect = acceleration.clone().scale(deltaTime * deltaTime);
-    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
-
-    // this.prevPos.copy(this.pos);
-    // this.pos.copy(newPos);
-
-    // // Verlet integration
-    // const velocity = this.pos
-    //   .clone()
-    //   .sub(this.prevPos)
-    //   .scale(1 - drag);
-    // const accelerationEffect = acceleration.clone().scale((1 - drag) * deltaTime * deltaTime);
-    // const newPos = this.pos.clone().add(velocity).add(accelerationEffect);
-
-    // this.prevPos.copy(this.pos);
-    // this.pos.copy(newPos);
-
-    // // this.keepInsideView(windowWidth, windowHeight);
+    // this.integrate2(deltaTime, drag, acceleration);
   }
 }

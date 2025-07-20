@@ -8,35 +8,54 @@ export class Mouse {
   private pos = new Vec2();
   private prevPos = new Vec2();
 
-  private cursorSize: number = 40;
-  private readonly maxCursorSize: number = 100;
-  private readonly minCursorSize: number = 20;
+  private cursorSize = 40;
 
-  private leftButtonDown: boolean = false;
-  private rightButtonDown: boolean = false;
+  private leftButtonDown = false;
+  private rightButtonDown = false;
 
   constructor() {
+    // Mouse move (desktop)
     this.mouseMove.addEventListener('mousemove', this.onMouseMove);
 
+    // Mouse down
     window.addEventListener('mousedown', (e: MouseEvent) => {
       if (e.button === 0) this.setLeftMouseButton(true); // Left click
       if (e.button === 2) this.setRightMouseButton(true); // Right click
     });
 
+    // Mouse up
     window.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) this.setLeftMouseButton(false);
       if (e.button === 2) this.setRightMouseButton(false);
     });
 
-    // Optional: disable context menu on right-click if using canvas
+    // Disable context menu
     window.addEventListener('contextmenu', (e: MouseEvent) => {
       e.preventDefault();
     });
 
-    // Optional: scroll wheel to zoom cursor size
-    window.addEventListener('wheel', (e: WheelEvent) => {
-      const increment = e.deltaY < 0 ? 5 : -5;
-      this.increaseCursorSize(increment);
+    // ---- MOBILE TOUCH SUPPORT ----
+
+    // Touch start
+    window.addEventListener('touchstart', (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        this.setLeftMouseButton(true);
+      } else if (e.touches.length === 2) {
+        this.setRightMouseButton(true);
+      }
+    });
+
+    // Touch end
+    window.addEventListener('touchend', (e: TouchEvent) => {
+      // All touches lifted: reset both
+      if (e.touches.length === 0) {
+        this.setLeftMouseButton(false);
+        this.setRightMouseButton(false);
+      } else if (e.touches.length === 1) {
+        // If one finger remains, assume it's still left click
+        this.setLeftMouseButton(true);
+        this.setRightMouseButton(false);
+      }
     });
   }
 
@@ -81,10 +100,6 @@ export class Mouse {
 
   public setRightMouseButton(state: boolean): void {
     this.rightButtonDown = state;
-  }
-
-  public increaseCursorSize(increment: number): void {
-    this.cursorSize = Math.min(this.maxCursorSize, Math.max(this.minCursorSize, this.cursorSize + increment));
   }
 
   public getCursorSize(): number {

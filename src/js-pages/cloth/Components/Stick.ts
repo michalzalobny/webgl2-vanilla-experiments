@@ -24,25 +24,25 @@ export class Stick {
   public setIsSelected(value: boolean): void {
     this.isSelected = value;
   }
-
   public update(): void {
     if (!this.isActive) return;
 
     const p0Pos = this.p0.getPosition();
     const p1Pos = this.p1.getPosition();
 
-    const diffX = p0Pos.x - p1Pos.x;
-    const diffY = p0Pos.y - p1Pos.y;
-
-    const dist = Math.sqrt(diffX * diffX + diffY * diffY);
+    const delta = p0Pos.clone().sub(p1Pos); // Vector from p1 to p0
+    const dist = delta.len();
     if (dist === 0) return;
 
     const diffFactor = (this.length - dist) / dist;
-    const offsetX = diffX * diffFactor * 0.5;
-    const offsetY = diffY * diffFactor * 0.5;
 
-    this.p0.setPosition(p0Pos.x + offsetX, p0Pos.y + offsetY);
-    this.p1.setPosition(p1Pos.x - offsetX, p1Pos.y - offsetY);
+    // offset = delta * diffFactor * 0.5
+    const offset = delta.scale(diffFactor * 0.5);
+
+    // Apply offset to both points
+    this.p0.setPosition(p0Pos.x + offset.x, p0Pos.y + offset.y, p0Pos.z + offset.z);
+
+    this.p1.setPosition(p1Pos.x - offset.x, p1Pos.y - offset.y, p1Pos.z - offset.z);
   }
 
   public break(): void {
