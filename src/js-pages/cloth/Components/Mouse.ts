@@ -1,6 +1,5 @@
 import { Vec2 } from '../lib/math/Vec2';
 import { GlobalResize } from '../utils/GlobalResize';
-
 import { MouseMove } from '../utils/MouseMove';
 
 export class Mouse {
@@ -59,10 +58,6 @@ export class Mouse {
     });
   }
 
-  public destroy() {
-    this.mouseMove.removeEventListener('mousemove', this.onMouseMove);
-  }
-
   private onMouseMove = (e: any) => {
     const mouseX = (e.target as MouseMove).mouse.x;
     const mouseY = (e.target as MouseMove).mouse.y;
@@ -73,36 +68,40 @@ export class Mouse {
     this.updatePosition(mouseX - stageX / 2, -mouseY + stageY / 2);
   };
 
-  public updatePosition(x: number, y: number): void {
+  private updatePosition(x: number, y: number): void {
     this.prevPos.copy(this.pos);
     this.pos.setTo(x, y);
   }
 
-  public getPosition() {
-    return this.pos;
-  }
-
-  public getPreviousPosition() {
+  private getPreviousPosition() {
     return this.prevPos;
   }
 
-  public getLeftButtonDown(): boolean {
-    return this.leftButtonDown;
+  private setLeftMouseButton(state: boolean): void {
+    this.leftButtonDown = state;
   }
 
-  public setLeftMouseButton(state: boolean): void {
-    this.leftButtonDown = state;
+  private setRightMouseButton(state: boolean): void {
+    this.rightButtonDown = state;
   }
 
   public getRightMouseButton(): boolean {
     return this.rightButtonDown;
   }
 
-  public setRightMouseButton(state: boolean): void {
-    this.rightButtonDown = state;
+  public getLeftButtonDown(): boolean {
+    return this.leftButtonDown;
+  }
+
+  public getPosition() {
+    return this.pos;
   }
 
   public getCursorSize(): number {
     return this.cursorSize;
+  }
+
+  public destroy() {
+    this.mouseMove.removeEventListener('mousemove', this.onMouseMove);
   }
 }
