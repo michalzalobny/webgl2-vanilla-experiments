@@ -1,5 +1,3 @@
-import { vec3, quat, mat4 } from 'gl-matrix';
-
 import { GeometriesManager } from '../lib/GeometriesManager';
 import { Camera } from '../lib/Camera';
 import { InstancedMesh } from '../lib/InstancedMesh';
@@ -24,6 +22,7 @@ import { Mouse } from './Mouse';
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Vec2 } from '../lib/math/Vec2';
 import { GlobalResize } from '../utils/GlobalResize';
+import { Quat } from '../lib/math/Quat';
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -131,29 +130,24 @@ export class Cloth {
     let newRotations: Mat4[] = [];
 
     this.sticks.forEach((stick) => {
-      const A = stick.p0.getPosition().clone();
-      const B = stick.p1.getPosition().clone();
-
       // Input points
-      const P1 = vec3.fromValues(A[0], A[1], A[2]);
-      const P2 = vec3.fromValues(B[0], B[1], B[2]);
+      const P1 = stick.p0.getPosition().clone();
+      const P2 = stick.p1.getPosition().clone();
 
       // 1. Compute direction vector (normalize)
-      const direction = vec3.create();
-      vec3.subtract(direction, P2, P1);
-      vec3.normalize(direction, direction);
+      const direction = P1.clone().sub(P2).normalize();
 
       // Rotation to align (1, 0, 0) with `direction`
-      const from = vec3.fromValues(1, 0, 0);
-      const q = quat.create();
-      quat.rotationTo(q, from, direction);
+      const from = new Vec3(1, 0, 0);
+      const q = Quat.create();
+      q.rotationTo(from, direction);
 
       // Create rotation matrix from quaternion
-      const rotationMatrix = mat4.create();
-      mat4.fromQuat(rotationMatrix, q);
+      const rotationMatrix = new Mat4();
+      rotationMatrix.fromQuat(q);
 
       // 4. Scale (stretch along X by distance)
-      const length = vec3.distance(P1, P2);
+      const length = P1.distance(P2);
 
       //Getting the matrix that scales the particle
       let scaleMatrix = new Mat4(
@@ -164,11 +158,12 @@ export class Cloth {
       );
 
       //Getting the matrix that translates the particle to the position of the velocity
+      const mid = P1.clone().add(P2).multiply(0.5);
       const translationMatrix = new Mat4(
         ...new Vec4(1, 0, 0, 0),
         ...new Vec4(0, 1, 0, 0),
         ...new Vec4(0, 0, 1, 0),
-        ...new Vec4(...A.clone().add(B).multiply(0.5), 1),
+        ...new Vec4(...mid, 1),
       );
 
       newPositions.push(translationMatrix);

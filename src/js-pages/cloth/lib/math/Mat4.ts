@@ -1,5 +1,6 @@
 import * as Mat4Func from './utils/Mat4Func';
 import { Vec3 } from './Vec3';
+import { Quat } from './Quat';
 
 export class Mat4 extends Float32Array {
   constructor(
@@ -161,6 +162,11 @@ export class Mat4 extends Float32Array {
 
   inverse(m = this) {
     Mat4Func.invert(this, m);
+    return this;
+  }
+
+  fromQuat(q: Quat) {
+    Mat4Func.fromQuat(this, q);
     return this;
   }
 }
