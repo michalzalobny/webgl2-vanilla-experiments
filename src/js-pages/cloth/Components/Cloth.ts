@@ -22,7 +22,6 @@ import { MouseMove } from '../utils/MouseMove';
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Quat } from '../lib/math/Quat';
 import { GlobalResize } from '../utils/GlobalResize';
-import { updateDebug } from '../utils/updateDebug';
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -156,7 +155,7 @@ export class Cloth {
 
   private positionInstanceSticks() {
     const COUNT = this.sticks.length;
-    const LINE_WIDTH = 5;
+    const LINE_WIDTH = 3;
 
     // Compute new values per instance
     let newPositions: Mat4[] = [];
