@@ -6,108 +6,146 @@ interface Mouse {
 }
 
 export class MouseMove extends EventDispatcher {
-  _mouseLast: Mouse = { x: 0, y: 0 };
-  _isTouching = false;
-  _clickStart: Mouse = { x: 0, y: 0 };
-  mouse: Mouse = { x: 0, y: 0 };
-  strength = 0;
-  _isInit = false;
+  private mouseLast: Mouse = { x: 0, y: 0 };
+  private isTouching = false;
+  private clickStart: Mouse = { x: 0, y: 0 };
+  public mouse: Mouse = { x: 0, y: 0 };
+  public strength = 0;
+  private isInit = false;
 
-  static _instance: MouseMove | null;
-  static _canCreate = false;
-  static getInstance() {
-    if (!MouseMove._instance) {
-      MouseMove._canCreate = true;
-      MouseMove._instance = new MouseMove();
-      MouseMove._canCreate = false;
+  public leftButtonDown = false;
+  public rightButtonDown = false;
+
+  private static instance: MouseMove | null = null;
+  private static canCreate = false;
+
+  public static getInstance(): MouseMove {
+    if (!MouseMove.instance) {
+      MouseMove.canCreate = true;
+      MouseMove.instance = new MouseMove();
+      MouseMove.canCreate = false;
     }
 
-    return MouseMove._instance;
+    return MouseMove.instance;
   }
 
-  constructor() {
+  private constructor() {
     super();
 
-    if (MouseMove._instance || !MouseMove._canCreate) {
+    if (MouseMove.instance || !MouseMove.canCreate) {
       throw new Error('Use MouseMove.getInstance()');
     }
 
-    this._addEvents();
-
-    MouseMove._instance = this;
+    this.addEvents();
+    MouseMove.instance = this;
   }
 
-  _onTouchDown = (event: TouchEvent | MouseEvent) => {
-    this._isInit = true;
-    this._isTouching = true;
-    this._mouseLast.x = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    this._mouseLast.y = 'touches' in event ? event.touches[0].clientY : event.clientY;
+  private onPointerDown = (event: MouseEvent | TouchEvent): void => {
+    this.isInit = true;
+    this.isTouching = true;
 
-    this.mouse.x = this._mouseLast.x;
-    this.mouse.y = this._mouseLast.y;
+    if (event instanceof TouchEvent) {
+      const touches = event.touches;
+      const touch = touches[0];
+      this.mouseLast.x = touch.clientX;
+      this.mouseLast.y = touch.clientY;
+      this.mouse.x = touch.clientX;
+      this.mouse.y = touch.clientY;
+      this.clickStart = { ...this.mouse };
 
-    this._clickStart.x = this.mouse.x;
-    this._clickStart.y = this.mouse.y;
-    this.dispatchEvent({ type: 'down' });
-    this.dispatchEvent({ type: 'mousemove' });
+      // Update button states
+      this.leftButtonDown = true;
+      this.rightButtonDown = touches.length === 2;
+
+      if (touches.length === 2) {
+        this.dispatchEvent({ type: 'rightclick' });
+      } else {
+        this.dispatchEvent({ type: 'leftclick' });
+      }
+
+      this.dispatchEvent({ type: 'down' });
+      this.dispatchEvent({ type: 'mousemove' });
+    } else {
+      this.mouseLast.x = event.clientX;
+      this.mouseLast.y = event.clientY;
+      this.mouse.x = event.clientX;
+      this.mouse.y = event.clientY;
+      this.clickStart = { ...this.mouse };
+
+      // Update button states
+      if (event.button === 2) {
+        this.rightButtonDown = true;
+        this.dispatchEvent({ type: 'rightclick' });
+      } else if (event.button === 0) {
+        this.leftButtonDown = true;
+        this.dispatchEvent({ type: 'leftclick' });
+      }
+
+      this.dispatchEvent({ type: 'down' });
+      this.dispatchEvent({ type: 'mousemove' });
+    }
   };
 
-  _onTouchMove = (event: TouchEvent | MouseEvent) => {
-    this._isInit = true;
+  private onPointerMove = (event: TouchEvent | MouseEvent): void => {
+    this.isInit = true;
+
     const touchX = 'touches' in event ? event.touches[0].clientX : event.clientX;
     const touchY = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
-    const deltaX = touchX - this._mouseLast.x;
-    const deltaY = touchY - this._mouseLast.y;
+    const deltaX = touchX - this.mouseLast.x;
+    const deltaY = touchY - this.mouseLast.y;
 
     this.strength = deltaX * deltaX + deltaY * deltaY;
 
-    this._mouseLast.x = touchX;
-    this._mouseLast.y = touchY;
-
+    this.mouseLast = { x: touchX, y: touchY };
     this.mouse.x += deltaX;
     this.mouse.y += deltaY;
 
     this.dispatchEvent({ type: 'mousemove' });
-    this._mouseLast.x = this.mouse.x;
-    this._mouseLast.y = this.mouse.y;
+    this.mouseLast = { ...this.mouse };
   };
 
-  _onTouchUp = () => {
-    this._isTouching = false;
+  private onPointerUp = (event: TouchEvent | MouseEvent): void => {
+    this.isTouching = false;
+
+    // Reset button states
+    this.leftButtonDown = false;
+    this.rightButtonDown = false;
+
     this.dispatchEvent({ type: 'up' });
   };
 
-  _onMouseLeave = () => {
+  private onMouseLeave = (): void => {
     this.dispatchEvent({ type: 'left' });
   };
 
-  _onClick = (e: any) => {
-    // Dont react if the user clicked on a button or a link
-    if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement) {
-      // console.warn("The clicked element is not a canvas");
-      return;
-    }
-    this._isInit = true;
-    const clickBounds = 10;
-    const xDiff = Math.abs(this._clickStart.x - this.mouse.x);
-    const yDiff = Math.abs(this._clickStart.y - this.mouse.y);
+  private onClick = (e: MouseEvent): void => {
+    if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement) return;
 
-    //Make sure that the user's click is held between certain boundaries
+    this.isInit = true;
+
+    const clickBounds = 10;
+    const xDiff = Math.abs(this.clickStart.x - this.mouse.x);
+    const yDiff = Math.abs(this.clickStart.y - this.mouse.y);
+
     if (xDiff <= clickBounds && yDiff <= clickBounds) {
       this.dispatchEvent({ type: 'click' });
     }
   };
 
-  _addEvents() {
-    window.addEventListener('pointerdown', this._onTouchDown);
+  private addEvents(): void {
+    window.addEventListener('pointerdown', this.onPointerDown);
+    window.addEventListener('touchstart', this.onPointerDown, { passive: true });
 
-    window.addEventListener('mousemove', this._onTouchMove, { passive: true });
-    window.addEventListener('touchmove', this._onTouchMove, { passive: true });
+    window.addEventListener('mousemove', this.onPointerMove, { passive: true });
+    window.addEventListener('touchmove', this.onPointerMove, { passive: true });
 
-    window.addEventListener('pointerup', this._onTouchUp);
+    window.addEventListener('pointerup', this.onPointerUp);
+    window.addEventListener('touchend', this.onPointerUp);
 
-    window.addEventListener('click', this._onClick);
-    window.addEventListener('mouseout', this._onMouseLeave);
+    window.addEventListener('click', this.onClick);
+    window.addEventListener('mouseout', this.onMouseLeave);
+
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 }

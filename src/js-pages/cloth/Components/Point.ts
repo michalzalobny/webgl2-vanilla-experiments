@@ -97,7 +97,7 @@ export class Point {
     // updateDebug(mouse.getPosition());
 
     const mouseDist = mouseDir.len();
-    this.isSelected = mouseDist < mouse.getCursorSize();
+    this.isSelected = mouseDist < 40;
 
     // Propagate selection to sticks
     for (const stick of this.sticks) {
@@ -139,7 +139,7 @@ export class Point {
     }
 
     // Right-click to break sticks
-    if (mouse.getRightMouseButton() && this.isSelected) {
+    if (mouse.getRightButtonDown() && this.isSelected) {
       for (const stick of this.sticks) {
         if (stick) {
           stick.break();

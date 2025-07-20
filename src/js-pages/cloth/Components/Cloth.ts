@@ -20,8 +20,6 @@ import { Stick } from './Stick';
 import { Mouse } from './Mouse';
 
 import { UpdateEventProps } from '../utils/GlobalFrame';
-import { Vec2 } from '../lib/math/Vec2';
-import { GlobalResize } from '../utils/GlobalResize';
 import { Quat } from '../lib/math/Quat';
 
 interface Props {
