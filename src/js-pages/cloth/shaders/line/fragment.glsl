@@ -19,7 +19,7 @@ void main() {
   circle = 1.0 - step(0.5, circle);
 
 
-  vec4 color = vec4(v_uv,0.0, 1.0);
+  vec4 color = vec4(v_uv,0.8, 1.0);
 
   outColor = color;
 }
