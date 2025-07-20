@@ -17,10 +17,12 @@ import { Mat4 } from '../lib/math/Mat4';
 import { Point } from './Point';
 import { Stick } from './Stick';
 
-import { Mouse } from './Mouse';
+import { MouseMove } from '../utils/MouseMove';
 
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Quat } from '../lib/math/Quat';
+import { GlobalResize } from '../utils/GlobalResize';
+import { updateDebug } from '../utils/updateDebug';
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -47,7 +49,10 @@ export class Cloth {
   private points: Point[] = [];
   private sticks: Stick[] = [];
 
-  private mouse: Mouse = new Mouse();
+  private mouseMove = MouseMove.getInstance();
+  private mousePosition = new Vec3();
+
+  private closestPointToMouse = [0, Infinity]; //[index, distance]
 
   constructor(props: Props) {
     this.props = props;
@@ -75,7 +80,19 @@ export class Cloth {
     });
 
     this.init();
+
+    this.mouseMove.addEventListener('mousemove', this.onMouseMove);
   }
+
+  private onMouseMove = (e: any) => {
+    const mouseX = (e.target as MouseMove).mouse.x;
+    const mouseY = (e.target as MouseMove).mouse.y;
+
+    const stageX = GlobalResize.windowSize.value[0];
+    const stageY = GlobalResize.windowSize.value[1];
+
+    this.mousePosition.setTo(mouseX - stageX / 2, -mouseY + stageY / 2, 0);
+  };
 
   private positionInstancePoints() {
     const COUNT = this.points.length;
@@ -88,10 +105,25 @@ export class Cloth {
     let newPositions: number[] = [];
     let newScales: number[] = [];
     let newRotations: number[] = [];
+
+    //Reset closest point
+    if (!this.mouseMove.leftButtonDown) {
+      this.closestPointToMouse = [0, Infinity];
+    }
+
     positions.forEach((v, key) => {
+      this.points[key].isSelected = false;
       newPositions.push(positions[key][0], positions[key][1], positions[key][2]);
       newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
       newRotations.push(0, 0, 0);
+
+      if (this.mouseMove.leftButtonDown) return;
+      const distanceToMouse = v.distance(this.mousePosition);
+
+      if (distanceToMouse < this.closestPointToMouse[1]) {
+        this.closestPointToMouse[0] = key;
+        this.closestPointToMouse[1] = distanceToMouse;
+      }
     });
 
     //Construct matrix
@@ -112,6 +144,14 @@ export class Cloth {
       instanceMatrices.set(modelMatrix, i * 16);
     }
     this.instancedPoints?.setInstanceMatrices(instanceMatrices);
+
+    const newColors = new Float32Array(COUNT * 3).fill(0);
+    newColors[this.closestPointToMouse[0] * 3 + 0] = 1;
+    newColors[this.closestPointToMouse[0] * 3 + 1] = 0.5;
+    newColors[this.closestPointToMouse[0] * 3 + 2] = 1;
+    this.instancedPoints?.setInstanceColors(newColors);
+
+    this.points[this.closestPointToMouse[0]].isSelected = true;
   }
 
   private positionInstanceSticks() {
@@ -262,7 +302,7 @@ export class Cloth {
     this.sticks.forEach((stick) => stick.update());
 
     this.points.forEach((point, key) => {
-      point.update(e.dt, this.mouse);
+      point.update(e.dt, this.mouseMove, this.mousePosition);
     });
 
     this.positionInstancePoints();
@@ -285,6 +325,6 @@ export class Cloth {
     this.pointsProgram.destroy();
     this.sticksProgram.destroy();
 
-    this.mouse.destroy();
+    this.mouseMove.removeEventListener('mousemove', this.onMouseMove);
   }
 }

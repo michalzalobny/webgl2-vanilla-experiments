@@ -123,7 +123,7 @@ export class InstancedMesh {
 
     this.instanceColorBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.instanceColorBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.instanceColors, this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.instanceColors, this.gl.DYNAMIC_DRAW);
 
     // Setup attribute
     const a_instanceColor = this.gl.getAttribLocation(this.shaderProgram.program, 'a_instanceColor');
@@ -166,6 +166,17 @@ export class InstancedMesh {
     }
 
     gl.bindVertexArray(null);
+  }
+
+  public setInstanceColors(colors: Float32Array) {
+    if (colors.length !== this.instanceCount * 3) {
+      throw new Error(`Expected ${this.instanceCount * 3} color components, got ${colors.length}`);
+    }
+
+    this.instanceColors.set(colors);
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.instanceColorBuffer);
+    this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.instanceColors);
   }
 
   public render(props: Render) {

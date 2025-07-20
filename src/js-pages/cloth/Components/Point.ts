@@ -1,7 +1,6 @@
 import { Vec3 } from '../lib/math/Vec3';
 import { Stick } from './Stick';
-import { Mouse } from './Mouse';
-import { GlobalFrame } from '../utils/GlobalFrame';
+import { MouseMove } from '../utils/MouseMove';
 
 type Props = {
   x: number;
@@ -15,7 +14,6 @@ var DRAG = 1 - DAMPING;
 var MASS = 0.1;
 var GRAVITY = 9.81 * 0.5;
 var gravity = new Vec3(0, -GRAVITY, 0).multiply(MASS);
-var elasticity = 10;
 
 export class Point {
   // Other
@@ -31,7 +29,7 @@ export class Point {
   //My
   private sticks: (Stick | null)[] = [];
   private isPinned = false;
-  private isSelected = false;
+  public isSelected = false;
 
   private isDragged = false;
   private dragTarget: Vec3 | null = null;
@@ -63,15 +61,6 @@ export class Point {
     this.a.setTo(0, 0, 0);
   }
 
-  private integrate2(deltaTime: number, drag: number, acceleration: Vec3) {
-    const temp1 = this.position.clone().sub(this.previous);
-    temp1.scale(1.0 - drag);
-    const temp2 = acceleration.clone().scale((1.0 - drag) * deltaTime * deltaTime);
-    const newPos = this.position.clone().add(temp1).add(temp2);
-    this.previous = this.position;
-    this.position = newPos;
-  }
-
   /** Stick registration (max 2) */
   public addStick(stick: Stick, index: 0 | 1): void {
     this.sticks[index] = stick;
@@ -90,14 +79,14 @@ export class Point {
     this.isPinned = true;
   }
 
-  public update(deltaTime: number, mouse: Mouse): void {
+  public update(deltaTime: number, mouseMove: MouseMove, mousePosition: Vec3): void {
     // Check if mouse is near this point
-    const mouseDir = this.position.clone().sub(new Vec3(...mouse.getPosition(), 0));
+    const mouseDir = this.position.clone().sub(mousePosition);
 
     // updateDebug(mouse.getPosition());
 
     const mouseDist = mouseDir.len();
-    this.isSelected = mouseDist < 40;
+    // this.isSelected = mouseDist < 40;
 
     // Propagate selection to sticks
     for (const stick of this.sticks) {
@@ -116,9 +105,9 @@ export class Point {
     //   this.previous = this.position.clone().sub(new Vec3(...diff, 0));
     // }
 
-    if (mouse.getLeftButtonDown() && this.isSelected) {
+    if (mouseMove.leftButtonDown && this.isSelected) {
       this.isDragged = true;
-      this.dragTarget = new Vec3(...mouse.getPosition(), Math.sin(GlobalFrame.uTime.value * 0.005) * 300 * 0);
+      this.dragTarget = mousePosition;
     } else {
       this.isDragged = false;
       this.dragTarget = null;
@@ -139,7 +128,7 @@ export class Point {
     }
 
     // Right-click to break sticks
-    if (mouse.getRightButtonDown() && this.isSelected) {
+    if (mouseMove.rightButtonDown && this.isSelected) {
       for (const stick of this.sticks) {
         if (stick) {
           stick.break();
@@ -155,6 +144,5 @@ export class Point {
 
     this.addForce(gravity);
     this.integrate(deltaTime);
-    // this.integrate2(deltaTime, drag, acceleration);
   }
 }
