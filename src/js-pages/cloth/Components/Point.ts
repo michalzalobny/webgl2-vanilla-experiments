@@ -7,6 +7,7 @@ type Props = {
   y: number;
   z: number;
   mass: number;
+  onStickBreak: () => void;
 };
 
 var DAMPING = 0.03;
@@ -34,7 +35,12 @@ export class Point {
   private isDragged = false;
   private dragTarget: Vec3 | null = null;
 
+  public isActive: boolean = true;
+
+  private onStickBreak: () => void;
+
   constructor(props: Props) {
+    this.onStickBreak = props.onStickBreak;
     this.mass = props.mass;
     this.invMass = 1 / this.mass;
     this.position.setTo(props.x, props.y, props.z);
@@ -132,6 +138,8 @@ export class Point {
       for (const stick of this.sticks) {
         if (stick) {
           stick.break();
+          this.onStickBreak();
+          this.isActive = false;
         }
       }
     }

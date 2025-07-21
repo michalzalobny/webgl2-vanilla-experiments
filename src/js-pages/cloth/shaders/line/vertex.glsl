@@ -16,6 +16,10 @@ out vec3 v_fragNormal;
 out vec3 v_fragPosition;
 out vec3 v_instanceColor;
 
+in float a_visibility;
+out float v_visibility;
+
+
 
 void main() {
     // Transform position
@@ -34,4 +38,5 @@ void main() {
     v_fragNormal = normal.xyz;
     v_uv = a_uv;
     v_instanceColor = a_instanceColor;
+    v_visibility = a_visibility;
 }

@@ -236,6 +236,7 @@ export class Cloth {
           y: startY + y * spacing,
           z: 0,
           mass: 1,
+          onStickBreak: this.onStickBreak,
         });
 
         if (x !== 0) {
@@ -296,6 +297,15 @@ export class Cloth {
       shaderProgram: this.sticksProgram,
     });
   }
+
+  private onStickBreak = () => {
+    const visibilityMap = this.sticks.map((el) => (el.isActive ? 1 : 0));
+    this.instancedSticks?.setInstanceVisibility(new Float32Array(visibilityMap));
+
+    // Hide inactive points (currently still showing them)
+    // const visibilityMapPoints = this.points.map((el) => (el.isActive ? 1 : 0));
+    // this.instancedPoints?.setInstanceVisibility(new Float32Array(visibilityMapPoints));
+  };
 
   public update(e: UpdateEventProps) {
     this.sticks.forEach((stick) => stick.update());

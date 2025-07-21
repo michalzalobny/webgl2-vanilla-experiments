@@ -19,10 +19,27 @@ interface SetupVertexAttribute {
   buffer: WebGLBuffer | null;
   size: number;
   gl: WebGL2RenderingContext;
+  type?: number;
+  normalized?: boolean;
+  stride?: number;
+  offset?: number;
+  divisor?: number;
 }
 
 export const setupVertexAttribute = (props: SetupVertexAttribute) => {
-  const { name, program, buffer, size, gl } = props;
+  const {
+    name,
+    program,
+    buffer,
+    size,
+    gl,
+    type = gl.FLOAT,
+    normalized = false,
+    stride = 0,
+    offset = 0,
+    divisor = 0,
+  } = props;
+
   if (!program) throw new Error('Could not create VAO, no program');
   const location = gl.getAttribLocation(program, name);
   if (location === -1) {
@@ -31,9 +48,13 @@ export const setupVertexAttribute = (props: SetupVertexAttribute) => {
     );
     return null;
   }
+
   gl.enableVertexAttribArray(location);
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
+  if (divisor > 0) {
+    gl.vertexAttribDivisor(location, divisor);
+  }
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   return location;
 };

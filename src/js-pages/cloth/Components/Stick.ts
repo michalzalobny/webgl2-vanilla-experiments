@@ -11,7 +11,7 @@ export class Stick {
   public p1: Point;
   private length: number;
 
-  private isActive: boolean = true;
+  public isActive: boolean = true;
   private isSelected: boolean = false;
 
   constructor(props: Props) {
