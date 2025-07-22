@@ -31,6 +31,7 @@ export class Point {
   private sticks: (Stick | null)[] = [];
   private isPinned = false;
   public isSelected = false;
+  private isHovered = false;
 
   private isDragged = false;
   private dragTarget: Vec3 | null = null;
@@ -92,7 +93,7 @@ export class Point {
     // updateDebug(mouse.getPosition());
 
     const mouseDist = mouseDir.len();
-    // this.isSelected = mouseDist < 40;
+    this.isHovered = mouseDist < 40;
 
     // Propagate selection to sticks
     for (const stick of this.sticks) {
@@ -119,7 +120,7 @@ export class Point {
       this.dragTarget = null;
     }
 
-    if (this.isDragged && this.dragTarget) {
+    if (this.isDragged && this.dragTarget && this.isActive) {
       const toMouse = this.dragTarget.clone().sub(this.position);
       const strength = 1; // spring constant
       const damping = 0.1; // between 0 (no motion) and 1 (no damping)
@@ -134,7 +135,7 @@ export class Point {
     }
 
     // Right-click to break sticks
-    if (mouseMove.rightButtonDown && this.isSelected) {
+    if (mouseMove.rightButtonDown && this.isHovered) {
       for (const stick of this.sticks) {
         if (stick) {
           stick.break();
