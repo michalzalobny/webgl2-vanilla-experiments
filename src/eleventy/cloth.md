@@ -7,8 +7,7 @@ layout: 'layouts/base.njk'
 <canvas id="canvas"></canvas>
 
 <div class="enter-info-icon">
-<img src="/public/assets/wasd.svg" alt="wasd" class="info-icon bounceIn" />
+<img src="/public/assets/touch.svg" alt="touch" class="info-icon bounceIn" />
 </div>
-
 <!-- Scripts -->
 <script type="module" defer src="/js/cloth/App.js"></script>

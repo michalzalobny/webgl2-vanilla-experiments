@@ -23,6 +23,7 @@ void main() {
 
 
   vec4 color = vec4(v_instanceColor, 1.0);
+  color = vec4(vec3(0.0), 1.0);
 
   outColor = color;
 }

@@ -90,8 +90,6 @@ export class Point {
     // Check if mouse is near this point
     const mouseDir = this.position.clone().sub(mousePosition);
 
-    // updateDebug(mouse.getPosition());
-
     const mouseDist = mouseDir.len();
     this.isHovered = mouseDist < 40;
 
@@ -101,16 +99,6 @@ export class Point {
         stick.setIsSelected(this.isSelected);
       }
     }
-
-    // // Left-click drag interaction
-    // if (mouse.getLeftButtonDown() && this.isSelected) {
-    //   const diff = mouse.getPosition().clone().sub(mouse.getPreviousPosition());
-
-    //   diff.x = Math.max(-elasticity, Math.min(elasticity, diff.x));
-    //   diff.y = Math.max(-elasticity, Math.min(elasticity, diff.y));
-
-    //   this.previous = this.position.clone().sub(new Vec3(...diff, 0));
-    // }
 
     if (this.isSelected) {
       this.isDragged = true;

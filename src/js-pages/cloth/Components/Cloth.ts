@@ -120,31 +120,17 @@ export class Cloth {
 
     const positions = this.points.map((point) => point.getPosition());
 
-    const POINT_SIZE = 8;
+    const POINT_SIZE = 9;
 
     // Compute new values per instance
     let newPositions: number[] = [];
     let newScales: number[] = [];
     let newRotations: number[] = [];
 
-    // //Reset closest point
-    // if (!this.mouseMove.leftButtonDown) {
-    //   this.closestPointToMouse = [0, Infinity];
-    // }
-
     positions.forEach((v, key) => {
-      // this.points[key].isSelected = false;
       newPositions.push(positions[key][0], positions[key][1], positions[key][2]);
       newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
       newRotations.push(0, 0, 0);
-
-      // if (this.mouseMove.leftButtonDown) return;
-      // const distanceToMouse = v.distance(this.mousePosition);
-
-      // if (distanceToMouse < this.closestPointToMouse[1]) {
-      //   this.closestPointToMouse[0] = key;
-      //   this.closestPointToMouse[1] = distanceToMouse;
-      // }
     });
 
     //Construct matrix
@@ -169,7 +155,7 @@ export class Cloth {
 
   private positionInstanceSticks() {
     const COUNT = this.sticks.length;
-    const LINE_WIDTH = 3;
+    const LINE_WIDTH = 4;
 
     // Compute new values per instance
     let newPositions: Mat4[] = [];
@@ -286,10 +272,6 @@ export class Cloth {
         if (y === height - 1 && x % 2 === 0) {
           point.pin();
         }
-
-        // if ((y === 5 && x === 20) || (y === 5 && x === 21) || (y === 5 && x === 22)) {
-        //   point.isSelected = true;
-        // }
 
         this.points.push(point);
       }
