@@ -103,14 +103,6 @@ export class Cloth {
       }
     });
     this.points[closestPointToMouse[0]].isSelected = true;
-
-    const COUNT = this.points.length;
-    const newColors = new Float32Array(COUNT * 3).fill(0);
-
-    newColors[closestPointToMouse[0] * 3 + 0] = 1;
-    newColors[closestPointToMouse[0] * 3 + 1] = 0.5;
-    newColors[closestPointToMouse[0] * 3 + 2] = 1;
-    this.instancedPoints?.setInstanceColors(newColors);
   };
 
   private onMouseMove = (e: any) => {
