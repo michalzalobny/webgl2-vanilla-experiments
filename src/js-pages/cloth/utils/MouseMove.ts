@@ -43,7 +43,7 @@ export class MouseMove extends EventDispatcher {
     this.isInit = true;
     this.isTouching = true;
 
-    if (event instanceof TouchEvent) {
+    if ('touches' in event) {
       const touches = event.touches;
       const touch = touches[0];
       this.mouseLast.x = touch.clientX;
