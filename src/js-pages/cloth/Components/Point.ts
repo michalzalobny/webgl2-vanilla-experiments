@@ -111,7 +111,7 @@ export class Point {
     //   this.previous = this.position.clone().sub(new Vec3(...diff, 0));
     // }
 
-    if (mouseMove.leftButtonDown && this.isSelected) {
+    if (this.isSelected) {
       this.isDragged = true;
       this.dragTarget = mousePosition;
     } else {

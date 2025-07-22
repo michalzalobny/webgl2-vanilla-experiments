@@ -13,7 +13,6 @@ export class MouseMove extends EventDispatcher {
   public strength = 0;
   private isInit = false;
 
-  public leftButtonDown = false;
   public rightButtonDown = false;
 
   private static instance: MouseMove | null = null;
@@ -53,16 +52,6 @@ export class MouseMove extends EventDispatcher {
       this.mouse.y = touch.clientY;
       this.clickStart = { ...this.mouse };
 
-      // Update button states
-      this.leftButtonDown = true;
-      this.rightButtonDown = touches.length === 2;
-
-      if (touches.length === 2) {
-        this.dispatchEvent({ type: 'rightclick' });
-      } else {
-        this.dispatchEvent({ type: 'leftclick' });
-      }
-
       this.dispatchEvent({ type: 'down' });
       this.dispatchEvent({ type: 'mousemove' });
     } else {
@@ -76,9 +65,6 @@ export class MouseMove extends EventDispatcher {
       if (event.button === 2) {
         this.rightButtonDown = true;
         this.dispatchEvent({ type: 'rightclick' });
-      } else if (event.button === 0) {
-        this.leftButtonDown = true;
-        this.dispatchEvent({ type: 'leftclick' });
       }
 
       this.dispatchEvent({ type: 'down' });
@@ -109,7 +95,6 @@ export class MouseMove extends EventDispatcher {
     this.isTouching = false;
 
     // Reset button states
-    this.leftButtonDown = false;
     this.rightButtonDown = false;
 
     this.dispatchEvent({ type: 'up' });

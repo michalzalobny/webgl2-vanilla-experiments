@@ -51,8 +51,6 @@ export class Cloth {
   private mouseMove = MouseMove.getInstance();
   private mousePosition = new Vec3();
 
-  private closestPointToMouse = [0, Infinity]; //[index, distance]
-
   constructor(props: Props) {
     this.props = props;
 
@@ -81,7 +79,39 @@ export class Cloth {
     this.init();
 
     this.mouseMove.addEventListener('mousemove', this.onMouseMove);
+    this.mouseMove.addEventListener('down', this.onMouseDown);
+    this.mouseMove.addEventListener('up', this.onMouseUp);
   }
+
+  private onMouseUp = (e: any) => {
+    const positions = this.points.map((point) => point.getPosition());
+    positions.forEach((v, key) => {
+      this.points[key].isSelected = false;
+    });
+  };
+
+  private onMouseDown = (e: any) => {
+    const closestPointToMouse = [0, Infinity];
+    const positions = this.points.map((point) => point.getPosition());
+
+    positions.forEach((v, key) => {
+      this.points[key].isSelected = false;
+      const distanceToMouse = v.distance(this.mousePosition);
+      if (distanceToMouse < closestPointToMouse[1]) {
+        closestPointToMouse[0] = key;
+        closestPointToMouse[1] = distanceToMouse;
+      }
+    });
+    this.points[closestPointToMouse[0]].isSelected = true;
+
+    const COUNT = this.points.length;
+    const newColors = new Float32Array(COUNT * 3).fill(0);
+
+    newColors[closestPointToMouse[0] * 3 + 0] = 1;
+    newColors[closestPointToMouse[0] * 3 + 1] = 0.5;
+    newColors[closestPointToMouse[0] * 3 + 2] = 1;
+    this.instancedPoints?.setInstanceColors(newColors);
+  };
 
   private onMouseMove = (e: any) => {
     const mouseX = (e.target as MouseMove).mouse.x;
@@ -105,24 +135,24 @@ export class Cloth {
     let newScales: number[] = [];
     let newRotations: number[] = [];
 
-    //Reset closest point
-    if (!this.mouseMove.leftButtonDown) {
-      this.closestPointToMouse = [0, Infinity];
-    }
+    // //Reset closest point
+    // if (!this.mouseMove.leftButtonDown) {
+    //   this.closestPointToMouse = [0, Infinity];
+    // }
 
     positions.forEach((v, key) => {
-      this.points[key].isSelected = false;
+      // this.points[key].isSelected = false;
       newPositions.push(positions[key][0], positions[key][1], positions[key][2]);
       newScales.push(POINT_SIZE, POINT_SIZE, POINT_SIZE);
       newRotations.push(0, 0, 0);
 
-      if (this.mouseMove.leftButtonDown) return;
-      const distanceToMouse = v.distance(this.mousePosition);
+      // if (this.mouseMove.leftButtonDown) return;
+      // const distanceToMouse = v.distance(this.mousePosition);
 
-      if (distanceToMouse < this.closestPointToMouse[1]) {
-        this.closestPointToMouse[0] = key;
-        this.closestPointToMouse[1] = distanceToMouse;
-      }
+      // if (distanceToMouse < this.closestPointToMouse[1]) {
+      //   this.closestPointToMouse[0] = key;
+      //   this.closestPointToMouse[1] = distanceToMouse;
+      // }
     });
 
     //Construct matrix
@@ -143,14 +173,6 @@ export class Cloth {
       instanceMatrices.set(modelMatrix, i * 16);
     }
     this.instancedPoints?.setInstanceMatrices(instanceMatrices);
-
-    const newColors = new Float32Array(COUNT * 3).fill(0);
-    newColors[this.closestPointToMouse[0] * 3 + 0] = 1;
-    newColors[this.closestPointToMouse[0] * 3 + 1] = 0.5;
-    newColors[this.closestPointToMouse[0] * 3 + 2] = 1;
-    this.instancedPoints?.setInstanceColors(newColors);
-
-    this.points[this.closestPointToMouse[0]].isSelected = true;
   }
 
   private positionInstanceSticks() {
