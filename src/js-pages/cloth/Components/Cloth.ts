@@ -22,6 +22,7 @@ import { MouseMove } from '../utils/MouseMove';
 import { UpdateEventProps } from '../utils/GlobalFrame';
 import { Quat } from '../lib/math/Quat';
 import { GlobalResize } from '../utils/GlobalResize';
+import { Vec2 } from '../lib/math/Vec2';
 
 interface Props {
   gl: WebGL2RenderingContext;
@@ -96,7 +97,9 @@ export class Cloth {
 
     positions.forEach((v, key) => {
       this.points[key].isSelected = false;
-      const distanceToMouse = v.distance(this.mousePosition);
+      const vNew = new Vec2(v[0], v[1]); // Use 2D since Z axis is minimal and it interacts better when comparing in 2D.
+      const mousePositionNew = new Vec2(this.mousePosition[0], this.mousePosition[1]);
+      const distanceToMouse = vNew.distance(mousePositionNew);
       if (distanceToMouse < closestPointToMouse[1]) {
         closestPointToMouse[0] = key;
         closestPointToMouse[1] = distanceToMouse;
