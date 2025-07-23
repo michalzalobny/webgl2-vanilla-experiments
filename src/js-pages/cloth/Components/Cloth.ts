@@ -45,7 +45,7 @@ export class Cloth {
 
   private tempMatrix = new Mat4();
 
-  private points: Point[] = [];
+  public points: Point[] = [];
   private sticks: Stick[] = [];
 
   private mouseMove = MouseMove.getInstance();

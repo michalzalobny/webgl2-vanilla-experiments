@@ -96,6 +96,8 @@ export class Scene {
     //   target: new Vec3(globalState.mouse2DCurrent.value[0] * 200, globalState.mouse2DCurrent.value[1] * 200, -1),
     // });
 
+    this.cloth?.points.forEach((p) => p.addForce(this.pushForce));
+
     this.render(event.e);
   };
 
@@ -158,15 +160,15 @@ export class Scene {
   };
 
   private onKeyDownWSAD = (e: KeyboardEvent) => {
-    const strength = 2500;
+    const strength = 0.8;
     switch (e.key) {
       case 'w':
       case 'ArrowUp':
-        this.pushForce[1] = strength;
+        this.pushForce[2] = -strength;
         break;
       case 's':
       case 'ArrowDown':
-        this.pushForce[1] = -strength;
+        this.pushForce[2] = strength;
         break;
       case 'a':
       case 'ArrowLeft':
@@ -187,7 +189,7 @@ export class Scene {
       case 's':
       case 'ArrowUp':
       case 'ArrowDown':
-        this.pushForce[1] = 0;
+        this.pushForce[2] = 0;
         break;
       case 'a':
       case 'd':
