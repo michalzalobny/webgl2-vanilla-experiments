@@ -141,6 +141,6 @@ export class Point {
     }
 
     this.addForce(gravity);
-    this.integrate(deltaTime);
+    this.integrate(deltaTime * deltaTime);
   }
 }
