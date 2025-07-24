@@ -197,7 +197,7 @@
   }
   to {
     left: 50%;
-    bottom: var(--space-1);
+    bottom: calc(var(--space-1) + 20px);
   }
 }
 
@@ -210,4 +210,13 @@
   position: fixed;
   transform: translateX(-50%);
   z-index: 10;
+}
+
+.extra-info {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-1));
+  transform: translateX(-50%);
+  z-index: 10;
+  color: white;
 }
