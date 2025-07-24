@@ -133,8 +133,6 @@ function measureFPS(duration: number = 1000): Promise<FPSResult> {
 
 // Usage:
 measureFPS(200).then(({ fps, closest }) => {
-  console.log(`Estimated FPS: ${fps}`);
-  console.log(`Closest standard FPS: ${closest}`);
   globalState.fps = closest;
   new App();
 });
