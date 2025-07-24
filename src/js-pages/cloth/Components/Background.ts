@@ -53,20 +53,20 @@ export class Background {
       geometry: this.geometriesManager.getGeometry('plane'),
     });
 
-    this.mesh.setPosition(new Vec3(0, 0, -10)); // Put the background behind everything
+    this.mesh.setPosition(new Vec3(0, 0, -800)); // Put the background behind everything
   }
 
   public update() {}
 
   public render() {
-    // this.mesh?.render({ camera: this.camera });
+    this.mesh?.render({ camera: this.camera });
   }
 
   public onResize() {
     const w = GlobalResize.windowSize.value[0];
     const h = GlobalResize.windowSize.value[1];
     if (this.mesh) {
-      this.mesh.setScale(new Vec3(w * 0.4, h * 0.4, 1));
+      this.mesh.setScale(new Vec3(w * 2, h * 2, 1));
     }
   }
 
