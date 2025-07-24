@@ -14,6 +14,7 @@ export const globalState = {
   uTime: {
     value: 0,
   },
+  fps: 120,
   mouse2DTarget: {
     value: [0, 0],
   },

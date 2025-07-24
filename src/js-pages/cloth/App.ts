@@ -103,4 +103,38 @@ document.addEventListener(
 
 globalState.canvasEl = document.getElementById('canvas') as HTMLCanvasElement;
 
-new App();
+type FPSResult = {
+  fps: number;
+  closest: number;
+};
+
+function measureFPS(duration: number = 1000): Promise<FPSResult> {
+  return new Promise((resolve) => {
+    let frameCount = 0;
+    const startTime = performance.now();
+
+    function countFrames(now: number): void {
+      frameCount++;
+      if (now - startTime < duration) {
+        requestAnimationFrame(countFrames);
+      } else {
+        const fps = Math.round((frameCount * 1000) / (now - startTime));
+
+        const targets: [30, 60, 120] = [30, 60, 120];
+        const closest = targets.reduce((a, b) => (Math.abs(b - fps) < Math.abs(a - fps) ? b : a)) as 30 | 60 | 120;
+
+        resolve({ fps, closest });
+      }
+    }
+
+    requestAnimationFrame(countFrames);
+  });
+}
+
+// Usage:
+measureFPS(200).then(({ fps, closest }) => {
+  console.log(`Estimated FPS: ${fps}`);
+  console.log(`Closest standard FPS: ${closest}`);
+  globalState.fps = closest;
+  new App();
+});

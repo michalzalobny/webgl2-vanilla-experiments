@@ -2,6 +2,7 @@ const DEFAULT_FPS = 60;
 const DT_FPS = 1000 / DEFAULT_FPS;
 
 import { EventDispatcher } from './EventDispatcher';
+import { globalState } from './globalState';
 
 export type UpdateEventProps = {
   type: string;
@@ -74,7 +75,7 @@ export class GlobalFrame extends EventDispatcher {
     const rounded = Math.round(dt * 2) / 2;
     dt = rounded < 0.5 ? 0.5 : rounded;
 
-    dt = 0.5;
+    dt = globalState.fps < 120 ? 1 : 0.5;
 
     GlobalFrame.dt.value = dt;
     GlobalFrame.uTime.value = time;

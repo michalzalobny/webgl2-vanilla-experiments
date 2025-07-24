@@ -1,6 +1,7 @@
 import { Vec3 } from '../lib/math/Vec3';
 import { Stick } from './Stick';
 import { MouseMove } from '../utils/MouseMove';
+import { globalState } from '../utils/globalState';
 
 type Props = {
   x: number;
@@ -13,7 +14,7 @@ type Props = {
 var DAMPING = 0.03;
 var DRAG = 1 - DAMPING;
 var MASS = 0.1;
-var GRAVITY = 9.81 * 0.5;
+var GRAVITY = 9.81 * 0.5 * (globalState.fps < 120 ? 0.4 : 1);
 var gravity = new Vec3(0, -GRAVITY, 0).multiply(MASS);
 
 export class Point {
