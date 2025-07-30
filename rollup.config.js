@@ -14,7 +14,6 @@ const FILE_NAMES = [
   'attraction',
   'spring',
   'chain',
-  'cloth',
   'tutorial',
   'leetcode',
   'instanced-points',
