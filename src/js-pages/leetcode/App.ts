@@ -1328,21 +1328,21 @@ var validPath = function (n: number, edges: [number, number][], source: number, 
   return checkRoute(source, destination);
 };
 
-console.log(
-  'valid path',
-  validPath(
-    6,
-    [
-      [0, 1],
-      [0, 2],
-      [3, 5],
-      [5, 4],
-      [4, 3],
-    ],
-    0,
-    5,
-  ),
-);
+// console.log(
+//   'valid path',
+//   validPath(
+//     6,
+//     [
+//       [0, 1],
+//       [0, 2],
+//       [3, 5],
+//       [5, 4],
+//       [4, 3],
+//     ],
+//     0,
+//     5,
+//   ),
+// );
 
 // console.log(
 //   'valid path',
@@ -1357,3 +1357,90 @@ console.log(
 //     2,
 //   ),
 // );
+
+function validPathBFS(n, edges, source, destination) {
+  // Step 1: Build adjacency list
+  const graph = Array.from({ length: n }, () => []); //[[1,2],[0,2],[1,0]]
+  for (const [u, v] of edges) {
+    graph[u].push(v);
+    graph[v].push(u); // since the graph is bidirectional
+  }
+
+  // Step 2: BFS initialization
+  const visited = new Array(n).fill(false);
+  const queue = [source];
+  visited[source] = true;
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+
+    if (node === destination) return true; // path found
+
+    for (const neighbor of graph[node]) {
+      if (!visited[neighbor]) {
+        visited[neighbor] = true;
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return false; // path not found
+}
+
+// Example usage
+// console.log(
+//   validPathBFS(
+//     3,
+//     [
+//       [0, 1],
+//       [1, 2],
+//       [2, 0],
+//     ],
+//     0,
+//     2,
+//   ),
+// ); // true
+
+function validPathDFS(n, edges, source, destination) {
+  // Step 1: Build adjacency list
+  const graph = Array.from({ length: n }, () => []);
+  for (const [u, v] of edges) {
+    graph[u].push(v);
+    graph[v].push(u);
+  }
+
+  // Step 2: DFS initialization
+  const visited = new Array(n).fill(false);
+  const stack = [source];
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+
+    if (node === destination) return true; // path found
+    if (visited[node]) continue;
+
+    visited[node] = true;
+
+    for (const neighbor of graph[node]) {
+      if (!visited[neighbor]) {
+        stack.push(neighbor);
+      }
+    }
+  }
+
+  return false; // path not found
+}
+
+// Example usage
+// console.log(
+//   validPathDFS(
+//     3,
+//     [
+//       [0, 1],
+//       [1, 2],
+//       [2, 0],
+//     ],
+//     0,
+//     2,
+//   ),
+// ); // true
