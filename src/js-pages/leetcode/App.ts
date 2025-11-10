@@ -1279,4 +1279,81 @@ const input = [
   [0, 0, 1],
 ];
 
-console.log(findCircleNum(input));
+// console.log(findCircleNum(input));
+
+//Find if path exists in graph:
+
+/**
+ * @param {number} n
+ * @param {number[][]} edges
+ * @param {number} source
+ * @param {number} destination
+ * @return {boolean}
+ */
+var validPath = function (n: number, edges: [number, number][], source: number, destination: number) {
+  const map = new Map<number, Set<number>>();
+  const visited = new Set<number>();
+
+  const assignToMap = (key: number, newRoute: number) => {
+    if (map.has(key)) {
+      map.get(key)!.add(newRoute);
+    } else {
+      map.set(key, new Set([newRoute]));
+    }
+  };
+
+  for (let i = 0; i < edges.length; i++) {
+    const edge = edges[i];
+    assignToMap(edge[0], edge[1]);
+    assignToMap(edge[1], edge[0]);
+  }
+
+  const checkRoute = (startNode: number, endNode: number): boolean => {
+    if (startNode === endNode) return true;
+    visited.add(startNode);
+
+    const nodesToCheck = map.get(startNode);
+    if (!nodesToCheck) return false;
+
+    const nodesArray = Array.from(nodesToCheck);
+    for (let i = 0; i < nodesArray.length; i++) {
+      const el = nodesArray[i];
+      if (!visited.has(el)) {
+        if (checkRoute(el, endNode)) return true;
+      }
+    }
+    return false;
+  };
+
+  return checkRoute(source, destination);
+};
+
+console.log(
+  'valid path',
+  validPath(
+    6,
+    [
+      [0, 1],
+      [0, 2],
+      [3, 5],
+      [5, 4],
+      [4, 3],
+    ],
+    0,
+    5,
+  ),
+);
+
+// console.log(
+//   'valid path',
+//   validPath(
+//     3,
+//     [
+//       [0, 1],
+//       [1, 2],
+//       [2, 0],
+//     ],
+//     0,
+//     2,
+//   ),
+// );
