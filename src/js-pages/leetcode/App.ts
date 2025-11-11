@@ -1444,3 +1444,37 @@ function validPathDFS(n, edges, source, destination) {
 //     2,
 //   ),
 // ); // true
+
+/**
+ * @param {number} n
+ * @param {number[][]} edges
+ * @return {number}
+ */
+var countComponents = function (n, edges) {
+  //Build adjacency list
+  const aList = Array.from({ length: n }, () => []);
+  for (const [u, v] of edges) {
+    aList[u].push(v);
+    aList[v].push(u); // graph is bi-directional
+  }
+
+  return aList;
+};
+
+console.log(
+  'countComponents',
+  countComponents(5, [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 4],
+  ]),
+);
+console.log(
+  'countComponents',
+  countComponents(5, [
+    [0, 1],
+    [1, 2],
+    [3, 4],
+  ]),
+);
