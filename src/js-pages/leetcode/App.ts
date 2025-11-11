@@ -1445,6 +1445,61 @@ function validPathDFS(n, edges, source, destination) {
 //   ),
 // ); // true
 
+// BFS (Breadth first search)
+function bfs(graph, start) {
+  const visited = new Set();
+  const queue = [start];
+
+  while (queue.length > 0) {
+    const node = queue.shift(); // dequeue
+
+    if (!visited.has(node)) {
+      console.log(node); // visit
+      visited.add(node);
+
+      for (const neighbor of graph[node]) {
+        if (!visited.has(neighbor)) {
+          queue.push(neighbor); // enqueue neighbors
+        }
+      }
+    }
+  }
+}
+
+// DFS (Depth first search)
+function dfs(graph, start) {
+  const visited = new Set();
+  const stack = [start];
+
+  while (stack.length > 0) {
+    const node = stack.pop(); // LIFO
+
+    if (!visited.has(node)) {
+      console.log(node); // visit
+      visited.add(node);
+
+      // Push neighbors in reverse so the leftmost is processed first
+      for (const neighbor of [...graph[node]].reverse()) {
+        if (!visited.has(neighbor)) {
+          stack.push(neighbor);
+        }
+      }
+    }
+  }
+}
+
+// DFS Recursive (Depth first search recursive)
+function dfsRecursive(graph, node, visited = new Set()) {
+  if (visited.has(node)) return;
+
+  console.log(node); // visit
+  visited.add(node);
+
+  for (const neighbor of graph[node]) {
+    dfsRecursive(graph, neighbor, visited);
+  }
+}
+
 /**
  * @param {number} n
  * @param {number[][]} edges
@@ -1458,23 +1513,42 @@ var countComponents = function (n, edges) {
     aList[v].push(u); // graph is bi-directional
   }
 
-  return aList;
+  const visited = Array.from({ length: n }, () => false);
+
+  const dfs = (graph, node, visited) => {
+    if (visited[node] === true) return;
+
+    visited[node] = true;
+    for (const neighbour of graph[node]) {
+      dfs(graph, neighbour, visited);
+    }
+  };
+
+  let components = 0;
+  for (let i = 0; i < n; i++) {
+    if (!visited[i]) {
+      dfs(aList, i, visited);
+      components++;
+    }
+  }
+
+  return components;
 };
 
-console.log(
-  'countComponents',
-  countComponents(5, [
-    [0, 1],
-    [1, 2],
-    [2, 3],
-    [3, 4],
-  ]),
-);
-console.log(
-  'countComponents',
-  countComponents(5, [
-    [0, 1],
-    [1, 2],
-    [3, 4],
-  ]),
-);
+// console.log(
+//   'countComponents',
+//   countComponents(5, [
+//     [0, 1],
+//     [1, 2],
+//     [2, 3],
+//     [3, 4],
+//   ]),
+// );
+// console.log(
+//   'countComponents',
+//   countComponents(5, [
+//     [0, 1],
+//     [1, 2],
+//     [3, 4],
+//   ]),
+// );
