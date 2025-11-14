@@ -1552,3 +1552,48 @@ var countComponents = function (n, edges) {
 //     [3, 4],
 //   ]),
 // );
+
+var maxAreaOfIsland = function (grid) {
+  let maxArea = 0;
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  const visited = new Set();
+  // We store positions as "r,c"
+
+  function dfs(r, c) {
+    const key = `${r},${c}`;
+
+    // If out of bounds, water, or already visited
+    if (r < 0 || c < 0 || r >= rows || c >= cols || grid[r][c] === 0 || visited.has(key)) {
+      return 0;
+    }
+
+    visited.add(key);
+
+    return 1 + dfs(r + 1, c) + dfs(r - 1, c) + dfs(r, c + 1) + dfs(r, c - 1);
+  }
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === 1 && !visited.has(`${r},${c}`)) {
+        maxArea = Math.max(maxArea, dfs(r, c));
+      }
+    }
+  }
+
+  return maxArea;
+};
+
+const grid = [
+  [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+  [0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
+  [0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+];
+
+console.log('maoi', maxAreaOfIsland(grid));
