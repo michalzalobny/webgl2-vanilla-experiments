@@ -1596,4 +1596,53 @@ const grid = [
   [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
 ];
 
-console.log('maoi', maxAreaOfIsland(grid));
+// console.log('maoi', maxAreaOfIsland(grid));
+
+/**
+ * @param {number} n
+ * @param {number[][]} edges
+ * @param {number[]} restricted
+ * @return {number}
+ */
+var reachableNodes = function (n, edges, restricted) {
+  const restrictedSet = new Set(restricted);
+  const graph = Array.from({ length: n }, () => []);
+
+  for (const [u, v] of edges) {
+    graph[u].push(v);
+    graph[v].push(u);
+  }
+
+  const visited = new Set();
+  let count = 0;
+
+  const dfs = (node) => {
+    if (restrictedSet.has(node) || visited.has(node)) return;
+    visited.add(node);
+    count++;
+
+    for (const nei of graph[node]) {
+      dfs(nei);
+    }
+  };
+
+  dfs(0);
+  return count;
+};
+
+//n = 7, edges = [[0,1],[1,2],[3,1],[4,0],[0,5],[5,6]], restricted = [4,5]
+console.log(
+  'reachableNodes',
+  reachableNodes(
+    7,
+    [
+      [0, 1],
+      [1, 2],
+      [3, 1],
+      [4, 0],
+      [0, 5],
+      [5, 6],
+    ],
+    [4, 5],
+  ),
+);
