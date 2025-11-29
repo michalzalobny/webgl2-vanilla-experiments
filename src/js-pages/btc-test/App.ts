@@ -1,7 +1,4 @@
-// To run this file:
-// 1. Ensure you have Node.js and TypeScript installed.
-// 2. Install ts-node: npm install -g ts-node
-// 3. Run the script: ts-node btc_dca_simulator.ts
+import { realBtcPrices } from './realBtcPrices';
 
 /**
  * CONFIGURATION VARIABLES
@@ -26,29 +23,6 @@ const DROP_MULTIPLIER: number = 4; // Multiplier for the extra buy amount on dip
  * This mock data covers a year, with prices simulating volatility (in USD).
  * Format: { date: string, price: number }
  */
-const mockBtcPrices: { date: string; price: number }[] = [
-  { date: '2023-01-01', price: 16500.0 }, // Start
-  { date: '2023-01-31', price: 23000.0 }, // +39.4% (Initial surge)
-  { date: '2023-03-02', price: 22500.0 }, // -2.2% (Small drop)
-  { date: '2023-04-01', price: 28000.0 }, // +24.4% (Strong rally)
-  { date: '2023-05-01', price: 26000.0 }, // -7.1% (Dip)
-  { date: '2023-05-31', price: 25500.0 }, // -1.9% (Minor dip)
-  { date: '2023-06-30', price: 30500.0 }, // +19.6% (New high)
-  { date: '2023-07-30', price: 29000.0 }, // -4.9% (Dip)
-  { date: '2023-08-29', price: 27000.0 }, // -6.9% (Deeper dip)
-  { date: '2023-09-28', price: 28500.0 }, // +5.6% (Recovery)
-  { date: '2023-10-28', price: 34000.0 }, // +19.3% (Major rally)
-  { date: '2023-11-27', price: 42000.0 }, // +23.5% (Breakout)
-  { date: '2024-01-01', price: 45000.0 }, // Final price (End of scenario)
-];
-
-interface SimulationResult {
-  totalFiatInvested: number;
-  totalBtcAcquired: number;
-  finalPortfolioValue: number;
-  profitLoss: number;
-  percentageReturn: number;
-}
 
 interface Transaction {
   date: string;
@@ -61,19 +35,18 @@ interface Transaction {
 /**
  * Runs the conditional DCA simulation based on the configured parameters.
  */
-function runSimulation(): void {
+function runSimulation() {
   console.log('====================================================');
   console.log('🚀 Conditional BTC DCA Simulation Initiated');
   console.log('====================================================');
 
-  // 1. Initial Setup and Validation
-  if (mockBtcPrices.length < 2) {
+  if (realBtcPrices.length < 2) {
     console.error('Error: Mock data must contain at least two data points (start and end).');
     return;
   }
 
-  const startPrice: number = mockBtcPrices[0].price;
-  const finalPrice: number = mockBtcPrices[mockBtcPrices.length - 1].price;
+  const startPrice: number = realBtcPrices[0].price;
+  const finalPrice: number = realBtcPrices[realBtcPrices.length - 1].price;
 
   let totalFiatInvested: number = 0;
   let totalBtcAcquired: number = 0;
@@ -90,7 +63,7 @@ function runSimulation(): void {
   console.log('====================================================');
 
   // 2. Simulation Loop (using the mock data points as buy opportunities)
-  mockBtcPrices.forEach((currentPoint, index) => {
+  realBtcPrices.forEach((currentPoint, index) => {
     if (index === 0) {
       // First transaction (initial buy)
       const fiatInvested = BASE_FIAT_BUY_AMOUNT;
@@ -172,7 +145,7 @@ function runSimulation(): void {
   console.log('====================================================');
 
   // Optional: Log all detailed transactions
-  // console.log("\n--- DETAILED TRANSACTION LOG ---");
+  // console.log('\n--- DETAILED TRANSACTION LOG ---');
   // console.log(transactions);
 }
 
