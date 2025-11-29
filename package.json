@@ -33,12 +33,12 @@
     "html-minifier": "4.0.0",
     "isomorphic-fetch": "3.0.0",
     "lil-gui": "0.17.0",
-    "node-sass": "9.0.0",
     "nodemon": "3.0.1",
     "postcss": "8.4.26",
     "rollup": "3.28.1",
     "rollup-plugin-glslify": "1.3.1",
-    "rollup-plugin-swc": "0.2.1"
+    "rollup-plugin-swc": "0.2.1",
+    "sass": "^1.94.2"
   },
   "devDependencies": {
     "prettier": "^3.5.1",

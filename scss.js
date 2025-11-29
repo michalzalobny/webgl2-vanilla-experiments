@@ -1,4 +1,4 @@
-const sass = require('node-sass');
+const sass = require('sass');
 const postcss = require('postcss');
 const autoprefixer = require('autoprefixer');
 const CleanCSS = require('clean-css');
