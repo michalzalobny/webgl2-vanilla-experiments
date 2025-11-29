@@ -18,6 +18,7 @@ const FILE_NAMES = [
   'leetcode',
   'instanced-points',
   'instanced-objects',
+  'btc-test',
 ];
 
 const commonPlugins = [
