@@ -1,121 +1,118 @@
-import { realBtcPrices } from './realBtcPrices';
+import { worstPeriods, bestPeriods, averagePeriods } from './realBtcPrices';
+import { runSimulation, Period } from './simulation';
 
-/**
- * CONFIGURATION VARIABLES
- */
-const START_DATE_STR: string = '2022-11-06';
-const END_DATE_STR: string = '2023-04-03';
+const periods: Period[][] = [worstPeriods, bestPeriods, averagePeriods];
 
-const BUY_INTERVAL_DAYS: number = 30; // Buy every 30 days
-const BASE_FIAT_BUY_AMOUNT: number = 500; // USD
-const DROP_MULTIPLIER: number = 4; // Extra buy multiplier on dips
-
-/**
- * Transaction interface
- */
-interface Transaction {
-  date: string;
-  btcPrice: number;
-  fiatInvested: number;
-  btcAcquired: number;
-  buyLogic: string;
+interface SimulationParams {
+  period: { start: string; end: string };
+  baseBuyAmount?: number;
+  buyIntervalDays?: number;
+  lookBackMonths?: number;
+  dipMultiplier?: number;
+  riseMultiplier?: number;
+  dipThresholdPercent?: number;
+  dipExtraMultiple?: number;
+  allowSelling?: boolean;
+  sellMaximumPortfolioPercent?: number;
 }
 
-/**
- * Run the conditional DCA simulation
- */
-function runSimulation() {
-  console.log('====================================================');
-  console.log('🚀 Conditional BTC DCA Simulation Initiated');
-  console.log('====================================================');
+const baseBuyAmounts = [100];
+const buyIntervals = [30, 60];
+const lookBackMonthsList = [2];
+const dipMultipliers = [4];
+const riseMultipliers = [0, 2, 4];
+const dipThresholdPercents = [20];
+const dipExtraMultiples = [4, 2];
+const allowSeelings = [true];
+const sellMaximumPortfolioPercents = [0, 1, 0.3, 0.7];
 
-  // Filter prices within the scenario period
-  const filteredPrices = realBtcPrices.filter((p) => p.date >= START_DATE_STR && p.date <= END_DATE_STR);
+function optimizeParameters(period: { start: string; end: string }) {
+  let bestProfit = -Infinity;
+  let bestParams: SimulationParams | null = null;
 
-  if (filteredPrices.length < 2) {
-    console.error('Error: Not enough data points for simulation.');
-    return;
+  for (const baseBuyAmount of baseBuyAmounts) {
+    for (const buyIntervalDays of buyIntervals) {
+      for (const lookBackMonths of lookBackMonthsList) {
+        for (const dipMultiplier of dipMultipliers) {
+          for (const riseMultiplier of riseMultipliers) {
+            for (const dipThresholdPercent of dipThresholdPercents) {
+              for (const dipExtraMultiple of dipExtraMultiples) {
+                for (const allowSelling of allowSeelings) {
+                  for (const sellMaximumPortfolioPercent of sellMaximumPortfolioPercents) {
+                    const profitPercent = runSimulation({
+                      period,
+                      baseBuyAmount,
+                      buyIntervalDays,
+                      lookBackMonths,
+                      dipMultiplier,
+                      riseMultiplier,
+                      dipThresholdPercent,
+                      dipExtraMultiple,
+                      allowSelling,
+                      sellMaximumPortfolioPercent,
+                    });
+
+                    if (profitPercent > bestProfit) {
+                      bestProfit = profitPercent;
+                      bestParams = {
+                        period,
+                        baseBuyAmount,
+                        buyIntervalDays,
+                        lookBackMonths,
+                        dipMultiplier,
+                        riseMultiplier,
+                        dipThresholdPercent,
+                        dipExtraMultiple,
+                        allowSelling,
+                        sellMaximumPortfolioPercent,
+                      };
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
-  const startPrice = filteredPrices[0].price;
-  const finalPrice = filteredPrices[filteredPrices.length - 1].price;
-
-  let totalFiatInvested = 0;
-  let totalBtcAcquired = 0;
-  let previousBtcPrice = startPrice;
-  const transactions: Transaction[] = [];
-
-  console.log(`SCENARIO PERIOD: ${START_DATE_STR} to ${END_DATE_STR}`);
-  console.log(`BASE BTC START PRICE: $${startPrice.toFixed(2)}`);
-  console.log(`BASE BTC END PRICE: $${finalPrice.toFixed(2)}`);
-  console.log('---');
-  console.log(`Buy Interval: ${BUY_INTERVAL_DAYS} days`);
-  console.log(`Base Buy: $${BASE_FIAT_BUY_AMOUNT}`);
-  console.log(`Dip Multiplier (x): ${DROP_MULTIPLIER}`);
-  console.log('====================================================');
-
-  filteredPrices.forEach((currentPoint, index) => {
-    // Enforce buy interval
-    if (index % BUY_INTERVAL_DAYS !== 0 && index !== 0) return;
-
-    let fiatInvested = BASE_FIAT_BUY_AMOUNT;
-    let buyLogic: string;
-
-    if (index === 0) {
-      buyLogic = `INITIAL BUY (Base $${BASE_FIAT_BUY_AMOUNT})`;
-    } else if (currentPoint.price < previousBtcPrice) {
-      const priceDropPercentage = (previousBtcPrice - currentPoint.price) / previousBtcPrice;
-      const extraBuyAmount = BASE_FIAT_BUY_AMOUNT * priceDropPercentage * DROP_MULTIPLIER;
-      fiatInvested += extraBuyAmount;
-      buyLogic = `DIP BUY (+${(priceDropPercentage * 100).toFixed(1)}% drop, extra $${extraBuyAmount.toFixed(2)})`;
-    } else {
-      buyLogic = 'STANDARD DCA (Price Increased)';
-    }
-
-    const btcAcquired = fiatInvested / currentPoint.price;
-
-    totalFiatInvested += fiatInvested;
-    totalBtcAcquired += btcAcquired;
-    previousBtcPrice = currentPoint.price;
-
-    transactions.push({
-      date: currentPoint.date,
-      btcPrice: currentPoint.price,
-      fiatInvested,
-      btcAcquired,
-      buyLogic,
-    });
-
-    console.log(
-      `[${currentPoint.date}] - Price: $${currentPoint.price.toFixed(2)} | Buy: $${fiatInvested.toFixed(2)} (${buyLogic}) | BTC Acquired: ${btcAcquired.toFixed(8)}`,
-    );
-  });
-
-  // Summary
-  console.log('\n====================================================');
-  console.log('📊 SIMULATION SUMMARY');
-  console.log('====================================================');
-
-  const finalPortfolioValue = totalBtcAcquired * finalPrice;
-  const profitLoss = finalPortfolioValue - totalFiatInvested;
-  const percentageReturn = (profitLoss / totalFiatInvested) * 100;
-  const averageCostPerBtc = totalFiatInvested / totalBtcAcquired;
-
-  console.log(`Total Fiat Invested:    $${totalFiatInvested.toFixed(2)}`);
-  // console.log(`Total BTC Acquired:     ${totalBtcAcquired.toFixed(8)} BTC`);
-  // console.log(`Average Cost Per BTC:   $${averageCostPerBtc.toFixed(2)}`);
-  // console.log('---');
-  // console.log(`Final BTC Price:        $${finalPrice.toFixed(2)}`);
-  console.log(`Final Portfolio Value:  $${finalPortfolioValue.toFixed(2)}`);
-  console.log('---');
-  console.log(`Total Profit / (Loss):  $${profitLoss.toFixed(2)}`);
-  console.log(`Percentage Return (ROI): ${percentageReturn.toFixed(2)}%`);
-  console.log('====================================================');
-
-  // Optional: Log all detailed transactions
-  // console.log('\n--- DETAILED TRANSACTION LOG ---');
-  // console.log(transactions);
+  console.log('Best Parameters:');
+  console.log(bestParams);
+  console.log(`Profit Percent: ${bestProfit.toFixed(2)}%`);
+  return bestParams;
 }
 
-// Execute simulation
-runSimulation();
+let selectedPeriod = {
+  start: '2020-01-01',
+  end: '2025-01-10',
+  reason: '',
+};
+
+// selectedPeriod = averagePeriods[3];
+
+// optimizeParameters(selectedPeriod);
+
+// runSimulation({
+//   period: selectedPeriod,
+//   baseBuyAmount: 400,
+//   buyIntervalDays: 30,
+//   lookBackMonths: 2,
+//   dipMultiplier: 0,
+//   riseMultiplier: 3,
+//   dipThresholdPercent: 20,
+//   dipExtraMultiple: 8,
+//   allowSelling: true,
+//   sellMaximumPortfolioPercent: 1,
+// });
+
+runSimulation({
+  period: {
+    start: Date.parse('2020-01-01'),
+    end: Date.parse('2024-01-01'),
+  },
+  prices: [
+    { timestamp: 1609459200000, price: 730 },
+    { timestamp: 1609545600000, price: 740 },
+  ],
+});
