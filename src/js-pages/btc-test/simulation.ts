@@ -10,15 +10,7 @@ export interface Period {
   end: number; // ms
 }
 
-export interface Transaction {
-  timestamp: number;
-  price: number;
-  fiatInvested: number;
-  assetAcquired: number;
-  buyLogic: string;
-}
-
-export interface SimulationParams {
+type SimulationParams = {
   prices: PricePoint[];
   period: Period;
 
@@ -33,7 +25,7 @@ export interface SimulationParams {
 
   allowSelling?: boolean;
   sellMaximumPortfolioPercent?: number;
-}
+};
 
 export function runSimulation({
   prices,
@@ -54,57 +46,56 @@ export function runSimulation({
   const END = period.end;
   const LB_EARLIEST = START - lookBackMs;
 
-  // Filter + sort
+  // Filter + sort -> Optimize prices, so we only iterate through the ones in selected period including the maximum lookback
   const all = prices
     .filter((p) => p.timestamp >= LB_EARLIEST && p.timestamp <= END)
     .sort((a, b) => a.timestamp - b.timestamp);
 
   if (all.length < 2) {
-    console.log('No price points to run the strategy.');
+    console.log('Not enough price points to run the strategy.');
     return 0;
   }
 
+  // Include timestamps from Start to End only in the simulation
   const sim = all.filter((p) => p.timestamp >= START);
 
   let totalFiat = 0;
   let totalAsset = 0;
   let lastBuyTs = START;
 
-  const transactions: Transaction[] = [];
-
+  // Running the simulation
   for (const p of sim) {
     const sinceLastBuy = p.timestamp - lastBuyTs;
-    if (sinceLastBuy < buyIntervalMs && transactions.length > 0) continue;
+    if (sinceLastBuy < buyIntervalMs) continue;
+    lastBuyTs = p.timestamp;
 
     let fiatToSpend = baseBuyAmount;
-    let buyLogic = transactions.length === 0 ? '🚀 INITIAL BUY' : 'STANDARD DCA';
+    let buyLogic = '';
 
-    // --------------- LOOKBACK ----------------
+    // Get average price from lookback window
     const lbStart = p.timestamp - lookBackMs;
     const lbPrices = all.filter((h) => h.timestamp >= lbStart && h.timestamp <= p.timestamp);
-
     const avgPrice = lbPrices.length > 0 ? avg(lbPrices.map((x) => x.price)) : p.price;
-
     const deviation = (p.price - avgPrice) / avgPrice;
 
-    // --------------- BUY LOGIC ---------------
-    if (transactions.length > 0) {
-      if (deviation < 0) {
-        // DIP BUY
-        fiatToSpend += baseBuyAmount * Math.abs(deviation) * dipMultiplier;
+    // == BUY LOGIC ==
+    if (deviation < 0) {
+      // DIP BUY
+      fiatToSpend += baseBuyAmount * Math.abs(deviation) * dipMultiplier;
 
-        if (Math.abs(deviation) * 100 > dipThresholdPercent) {
-          fiatToSpend += baseBuyAmount * dipExtraMultiple;
-        }
+      //Buy even more if dip threshold is big enough
+      if (Math.abs(deviation) * 100 > dipThresholdPercent) {
+        fiatToSpend += baseBuyAmount * dipExtraMultiple;
+      }
+      buyLogic = '📉 DIP BUY';
+    } else if (deviation > 0) {
+      // RISE BUY: spend less
+      fiatToSpend -= baseBuyAmount * deviation * riseMultiplier;
+      buyLogic = '📈 RISE BUY';
 
-        buyLogic = '📉 DIP BUY';
-      } else if (deviation > 0) {
-        // RISE BUY: spend less
-        fiatToSpend -= baseBuyAmount * deviation * riseMultiplier;
-        buyLogic = '📈 RISE BUY';
-
-        // Selling logic
-        if (fiatToSpend < 0 && allowSelling) {
+      // Selling logic
+      if (fiatToSpend < 0) {
+        if (allowSelling) {
           const maxSell = totalAsset * p.price * sellMaximumPortfolioPercent;
           const sellValue = Math.min(Math.abs(fiatToSpend), maxSell);
 
@@ -113,36 +104,29 @@ export function runSimulation({
 
           fiatToSpend = -sellValue;
           buyLogic = '📈✂️ SELL';
+        } else {
+          fiatToSpend = 0;
         }
       }
     }
 
-    // If no selling allowed, prevent negative buy
-    if (!allowSelling) {
-      fiatToSpend = Math.max(0, fiatToSpend);
-    }
+    // // If no selling allowed, prevent negative buy
+    // if (!allowSelling) {
+    //   fiatToSpend = Math.max(0, fiatToSpend);
+    // }
 
     const acquired = fiatToSpend / p.price;
 
     if (fiatToSpend > 0) totalFiat += fiatToSpend;
     totalAsset += acquired;
-    lastBuyTs = p.timestamp;
 
     console.log(
       `${buyLogic} | ${deviation >= 0 ? '+' : '-'}${(Math.abs(deviation) * 100).toFixed(
         2,
       )}% | ${fiatToSpend >= 0 ? '+' : '-'}$${Math.abs(fiatToSpend).toFixed(
         2,
-      )} | ${formatTimestamp(p.timestamp)} | PRICE: ${p.price.toFixed(2)} | ASSET: ${totalAsset.toFixed(4)}`,
+      )} | ASSET: ${totalAsset.toFixed(4)} | ${formatTimestamp(p.timestamp)}`,
     );
-
-    transactions.push({
-      timestamp: p.timestamp,
-      price: p.price,
-      fiatInvested: fiatToSpend,
-      assetAcquired: acquired,
-      buyLogic,
-    });
   }
 
   const lastPrice = sim[sim.length - 1].price;
