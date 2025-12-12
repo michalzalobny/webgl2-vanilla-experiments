@@ -1,24 +1,15 @@
-import { worstPeriods, bestPeriods, averagePeriods } from './realBtcPrices';
-import { runSimulation, Period } from './simulation';
+import { runSimulation, Period, PricePoint } from './simulation';
 
-const periods: Period[][] = [worstPeriods, bestPeriods, averagePeriods];
+import { data } from './data/btc/daily/data';
 
-interface SimulationParams {
-  period: { start: string; end: string };
-  baseBuyAmount?: number;
-  buyIntervalDays?: number;
-  lookBackMonths?: number;
-  dipMultiplier?: number;
-  riseMultiplier?: number;
-  dipThresholdPercent?: number;
-  dipExtraMultiple?: number;
-  allowSelling?: boolean;
-  sellMaximumPortfolioPercent?: number;
-}
+// Helpers
+const oneDay = () => 24 * 60 * 60 * 1000;
+const oneMonth = () => 30 * oneDay();
+const oneHour = () => 1000 * 60 * 60;
 
-const baseBuyAmounts = [100];
-const buyIntervals = [30, 60];
-const lookBackMonthsList = [2];
+// Keep your parameter search grids:
+const buyIntervalsMs = [30 * oneDay(), 60 * oneDay()];
+const lookBacksMs = [2 * oneMonth()];
 const dipMultipliers = [4];
 const riseMultipliers = [0, 2, 4];
 const dipThresholdPercents = [20];
@@ -26,47 +17,45 @@ const dipExtraMultiples = [4, 2];
 const allowSeelings = [true];
 const sellMaximumPortfolioPercents = [0, 1, 0.3, 0.7];
 
-function optimizeParameters(period: { start: string; end: string }) {
+function optimizeParameters(period: Period, prices: PricePoint[]) {
   let bestProfit = -Infinity;
-  let bestParams: SimulationParams | null = null;
+  let bestParams;
 
-  for (const baseBuyAmount of baseBuyAmounts) {
-    for (const buyIntervalDays of buyIntervals) {
-      for (const lookBackMonths of lookBackMonthsList) {
-        for (const dipMultiplier of dipMultipliers) {
-          for (const riseMultiplier of riseMultipliers) {
-            for (const dipThresholdPercent of dipThresholdPercents) {
-              for (const dipExtraMultiple of dipExtraMultiples) {
-                for (const allowSelling of allowSeelings) {
-                  for (const sellMaximumPortfolioPercent of sellMaximumPortfolioPercents) {
-                    const profitPercent = runSimulation({
+  for (const buyIntervalMs of buyIntervalsMs) {
+    for (const lookBackMs of lookBacksMs) {
+      for (const dipMultiplier of dipMultipliers) {
+        for (const riseMultiplier of riseMultipliers) {
+          for (const dipThresholdPercent of dipThresholdPercents) {
+            for (const dipExtraMultiple of dipExtraMultiples) {
+              for (const allowSelling of allowSeelings) {
+                for (const sellMaximumPortfolioPercent of sellMaximumPortfolioPercents) {
+                  const profitPercent = runSimulation({
+                    period,
+                    prices,
+                    buyIntervalMs: buyIntervalMs,
+                    lookBackMs: lookBackMs,
+                    dipMultiplier,
+                    riseMultiplier,
+                    dipThresholdPercent,
+                    dipExtraMultiple,
+                    allowSelling,
+                    sellMaximumPortfolioPercent,
+                  });
+
+                  if (profitPercent > bestProfit) {
+                    bestProfit = profitPercent;
+
+                    bestParams = {
                       period,
-                      baseBuyAmount,
-                      buyIntervalDays,
-                      lookBackMonths,
+                      buyIntervalMs: buyIntervalMs * oneDay(),
+                      lookBackMs: lookBackMs * oneMonth(),
                       dipMultiplier,
                       riseMultiplier,
                       dipThresholdPercent,
                       dipExtraMultiple,
                       allowSelling,
                       sellMaximumPortfolioPercent,
-                    });
-
-                    if (profitPercent > bestProfit) {
-                      bestProfit = profitPercent;
-                      bestParams = {
-                        period,
-                        baseBuyAmount,
-                        buyIntervalDays,
-                        lookBackMonths,
-                        dipMultiplier,
-                        riseMultiplier,
-                        dipThresholdPercent,
-                        dipExtraMultiple,
-                        allowSelling,
-                        sellMaximumPortfolioPercent,
-                      };
-                    }
+                    };
                   }
                 }
               }
@@ -77,42 +66,38 @@ function optimizeParameters(period: { start: string; end: string }) {
     }
   }
 
-  console.log('Best Parameters:');
-  console.log(bestParams);
-  console.log(`Profit Percent: ${bestProfit.toFixed(2)}%`);
+  console.log('Best Parameters:', bestParams);
+  console.log(`Best Profit: ${bestProfit.toFixed(2)}%`);
   return bestParams;
 }
 
 let selectedPeriod = {
-  start: '2020-01-01',
-  end: '2025-01-10',
-  reason: '',
+  start: Date.parse('2020-01-01'),
+  end: Date.parse('2025-01-10'),
 };
 
 // selectedPeriod = averagePeriods[3];
-
-// optimizeParameters(selectedPeriod);
-
-// runSimulation({
-//   period: selectedPeriod,
-//   baseBuyAmount: 400,
-//   buyIntervalDays: 30,
-//   lookBackMonths: 2,
-//   dipMultiplier: 0,
-//   riseMultiplier: 3,
-//   dipThresholdPercent: 20,
-//   dipExtraMultiple: 8,
-//   allowSelling: true,
-//   sellMaximumPortfolioPercent: 1,
-// });
+// optimizeParameters(selectedPeriod, data);
 
 runSimulation({
   period: {
+    // start: Date.parse('2025-10-24'), //y-m-d
+    // end: Date.parse('2025-11-31'), // //y-m-d
+    // start: 1763938800000,
+    // end: 1764374220000,
     start: Date.parse('2020-01-01'),
-    end: Date.parse('2024-01-01'),
+    end: Date.parse('2025-01-10'),
   },
-  prices: [
-    { timestamp: 1609459200000, price: 730 },
-    { timestamp: 1609545600000, price: 740 },
-  ],
+  prices: data,
+  buyIntervalMs: oneMonth(),
+  lookBackMs: oneMonth(),
+
+  dipMultiplier: 100,
+  riseMultiplier: 2,
+
+  dipThresholdPercent: 10,
+  dipExtraMultiple: 200,
+
+  allowSelling: true,
+  sellMaximumPortfolioPercent: 0.5,
 });

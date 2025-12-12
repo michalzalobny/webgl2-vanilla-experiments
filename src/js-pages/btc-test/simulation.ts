@@ -1,3 +1,5 @@
+import { avg, formatTimestamp } from './utils';
+
 export interface PricePoint {
   timestamp: number; // ms
   price: number;
@@ -33,18 +35,6 @@ export interface SimulationParams {
   sellMaximumPortfolioPercent?: number;
 }
 
-/** ——————————————————————————————————————— */
-/** ------------------- HELPERS -------------- */
-/** ——————————————————————————————————————— */
-
-function avg(arr: number[]) {
-  return arr.reduce((s, v) => s + v, 0) / arr.length;
-}
-
-/** ——————————————————————————————————————— */
-/** ----------------- SIMULATOR -------------- */
-/** ——————————————————————————————————————— */
-
 export function runSimulation({
   prices,
   period,
@@ -69,7 +59,10 @@ export function runSimulation({
     .filter((p) => p.timestamp >= LB_EARLIEST && p.timestamp <= END)
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  if (all.length < 2) return 0;
+  if (all.length < 2) {
+    console.log('No price points to run the strategy.');
+    return 0;
+  }
 
   const sim = all.filter((p) => p.timestamp >= START);
 
@@ -84,7 +77,7 @@ export function runSimulation({
     if (sinceLastBuy < buyIntervalMs && transactions.length > 0) continue;
 
     let fiatToSpend = baseBuyAmount;
-    let buyLogic = transactions.length === 0 ? 'INITIAL BUY' : 'STANDARD DCA';
+    let buyLogic = transactions.length === 0 ? '🚀 INITIAL BUY' : 'STANDARD DCA';
 
     // --------------- LOOKBACK ----------------
     const lbStart = p.timestamp - lookBackMs;
@@ -140,7 +133,7 @@ export function runSimulation({
         2,
       )}% | ${fiatToSpend >= 0 ? '+' : '-'}$${Math.abs(fiatToSpend).toFixed(
         2,
-      )} | ${new Date(p.timestamp).toISOString()} | ASSET: ${totalAsset.toFixed(4)}`,
+      )} | ${formatTimestamp(p.timestamp)} | PRICE: ${p.price.toFixed(2)} | ASSET: ${totalAsset.toFixed(4)}`,
     );
 
     transactions.push({
@@ -157,6 +150,6 @@ export function runSimulation({
   const profit = portfolioValue - totalFiat;
   const profitPercent = (profit / totalFiat) * 100;
 
-  console.log(`Profit: ${profitPercent.toFixed(2)}%`);
+  console.log(`💰 Profit: ${profitPercent.toFixed(2)}%`);
   return profitPercent;
 }
