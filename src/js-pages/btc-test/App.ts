@@ -77,15 +77,10 @@ function optimizeParameters(period: Period, prices: PricePoint[]) {
 //   end: Date.parse('2025-01-10'),
 // };
 
-const selectedPeriod = worstPeriods[3];
-// optimizeParameters(selectedPeriod, data);
+const selectedPeriod = bestPeriods[3];
 
 runSimulation({
   period: {
-    // start: Date.parse('2025-10-24'), //y-m-d
-    // end: Date.parse('2025-11-31'), // //y-m-d
-    // start: 1763938800000,
-    // end: 1764374220000,
     // start: Date.parse('2024-01-01'),
     // end: Date.parse('2025-01-10'),
     start: Date.parse(selectedPeriod.start),
@@ -96,7 +91,7 @@ runSimulation({
   lookBackMs: oneMonth(),
 
   dipMultiplier: 2,
-  riseMultiplier: 2,
+  riseMultiplier: 4,
 
   dipThresholdPercent: 20,
   dipExtraMultiple: 4,

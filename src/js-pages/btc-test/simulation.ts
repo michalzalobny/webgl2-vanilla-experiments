@@ -110,11 +110,6 @@ export function runSimulation({
       }
     }
 
-    // // If no selling allowed, prevent negative buy
-    // if (!allowSelling) {
-    //   fiatToSpend = Math.max(0, fiatToSpend);
-    // }
-
     const acquired = fiatToSpend / p.price;
 
     if (fiatToSpend > 0) totalFiat += fiatToSpend;
