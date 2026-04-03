@@ -1445,21 +1445,35 @@ function validPathDFS(n, edges, source, destination) {
 //   ),
 // ); // true
 
+// Creating Adjacency list
+const getAdjacencyListFromGraph = (graph: number) => {
+  const graph = Array.from({ length: n }, () => []);
+  for (const [u, v] of edges) {
+    graph[u].push(v);
+    graph[v].push(u);
+  }
+};
+
+// Adjecency list
+type Graph = {
+  [key: number]: number[];
+};
+
 // BFS (Breadth first search)
-function bfs(graph, start) {
-  const visited = new Set();
-  const queue = [start];
+function bfs(graph: Graph, start: number) {
+  const visited = new Set<number>();
+  const queue: number[] = [start];
 
   while (queue.length > 0) {
-    const node = queue.shift(); // dequeue
+    const node = queue.shift()!;
 
     if (!visited.has(node)) {
-      console.log(node); // visit
+      console.log(node);
       visited.add(node);
 
       for (const neighbor of graph[node]) {
         if (!visited.has(neighbor)) {
-          queue.push(neighbor); // enqueue neighbors
+          queue.push(neighbor);
         }
       }
     }
@@ -1467,14 +1481,14 @@ function bfs(graph, start) {
 }
 
 // DFS (Depth first search)
-function dfs(graph, start) {
+function dfs(graph: Graph, start: number) {
   const visited = new Set();
   const stack = [start];
 
   while (stack.length > 0) {
     const node = stack.pop(); // LIFO
 
-    if (!visited.has(node)) {
+    if (!visited.has(node) && node) {
       console.log(node); // visit
       visited.add(node);
 
@@ -1489,7 +1503,7 @@ function dfs(graph, start) {
 }
 
 // DFS Recursive (Depth first search recursive)
-function dfsRecursive(graph, node, visited = new Set()) {
+function dfsRecursive(graph: Graph, node: number, visited = new Set()) {
   if (visited.has(node)) return;
 
   console.log(node); // visit
